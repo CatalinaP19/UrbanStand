@@ -1,0 +1,21 @@
+{
+  "name": "urbanstand",
+  "version": "1.0.0",
+  "description": "Este repositorio contiene la estructura general del proyecto, incluyendo el backend, frontend, base de datos y documentación del análisis y diseño.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CatalinaP19/UrbanStand.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/CatalinaP19/UrbanStand/issues"
+  },
+  "homepage": "https://github.com/CatalinaP19/UrbanStand#readme"
+}
