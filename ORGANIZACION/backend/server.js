@@ -29,7 +29,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 
 // Rutas
 const authRoutes = require('./routes/auth');
-const vendedorRoutes = require('./routes/vendedores');
+const vendedorRoutes = require('./routes/auth');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/vendedores', vendedorRoutes);

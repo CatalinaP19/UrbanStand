@@ -325,4 +325,4 @@ router.put('/profile', authenticateToken, [
 });
 
 // Exportar router y middleware
-module.exports = { router, authenticateToken };
+module.exports = router;
