@@ -17,5 +17,8 @@
   "bugs": {
     "url": "https://github.com/CatalinaP19/UrbanStand/issues"
   },
-  "homepage": "https://github.com/CatalinaP19/UrbanStand#readme"
+  "homepage": "https://github.com/CatalinaP19/UrbanStand#readme",
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
 }
