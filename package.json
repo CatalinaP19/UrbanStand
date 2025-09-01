@@ -17,5 +17,11 @@
   "bugs": {
     "url": "https://github.com/CatalinaP19/UrbanStand/issues"
   },
-  "homepage": "https://github.com/CatalinaP19/UrbanStand#readme"
+  "homepage": "https://github.com/CatalinaP19/UrbanStand#readme",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.12",
+    "@tailwindcss/postcss": "^4.1.12",
+    "nodemon": "^3.1.10",
+    "tailwindcss": "^4.1.12"
+  }
 }
