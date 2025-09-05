@@ -291,12 +291,12 @@ export default function Login() {
           padding: 1.5rem;
         }
         
-        .logo img {
-          height: 40px;
+        .logo-img {
+          height: 5rem;
           width: auto;
         }
         
-         .logo {
+        .logo {
         font-size: 28px;
         font-weight: bold;
         color: var(--primary);
@@ -367,7 +367,7 @@ export default function Login() {
       <header className="login-header">
         <div className="login-header-content">
           <div className="logo">
-            <img src="../img/logo.png" alt="logo" />
+            <img className="logo-img" src="../img/logo.png" alt="logo" />
             UrbanStand
           </div>
           <button
