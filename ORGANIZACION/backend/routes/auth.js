@@ -18,7 +18,7 @@ const handleValidationErrors = (req, res, next) => {
   next();
 };
 
-// Middleware de autenticación JWT
+// Middleware de autenticación JWT(JSON Web Tokens)
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
@@ -48,14 +48,14 @@ router.post('/register', [
   body('nombre')
     .notEmpty()
     .withMessage('El nombre es requerido')
-    .isLength({ min: 2, max: 100 })
-    .withMessage('El nombre debe tener entre 2 y 100 caracteres'),
+    .isLength({ min: 3, max: 10 })
+    .withMessage('El nombre debe tener entre 3 y 10 caracteres'),
   
   body('apellido')
     .notEmpty()
     .withMessage('El apellido es requerido')
-    .isLength({ min: 2, max: 100 })
-    .withMessage('El apellido debe tener entre 2 y 100 caracteres'),
+    .isLength({ min: 3, max: 15 })
+    .withMessage('El apellido debe tener entre 3 y 15 caracteres'),
     
   body('correo')
     .isEmail()
@@ -63,8 +63,8 @@ router.post('/register', [
     .normalizeEmail(),
     
   body('contrasenia')
-    .isLength({ min: 6 })
-    .withMessage('La contraseña debe tener al menos 6 caracteres'),
+    .isLength({ min: 8 })
+    .withMessage('La contraseña debe tener al menos 8 caracteres'),
     
   body('numero_documento')
     .notEmpty()

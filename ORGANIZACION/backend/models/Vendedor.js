@@ -153,7 +153,7 @@ VendedorSchema.pre('save', async function(next) {
   if (!this.isModified('contrasenia')) return next();
   
   try {
-    // Hash de la contraseña
+    // Hash de la contraseña(representa la contraseña como unica pasandola de un texto plano a una cadena alfa numerica)
     const salt = await bcrypt.genSalt(12);
     this.contrasenia = await bcrypt.hash(this.contrasenia, salt);
     next();
