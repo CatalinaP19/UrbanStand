@@ -5,6 +5,7 @@ import GlobalStylesProvider from './GlobalStylesProvider';
 import UrbanStand from './Componentes/UrbanStand';
 import ChatTemplate from './Componentes/ChatTemplate';
 import Login from './Login/Login';
+import Register from './Login/Register';
 
 function App() {
   // Aquí puedes controlar qué componente renderizar
@@ -18,6 +19,8 @@ function App() {
         return <ChatTemplate />;
       case 'login':
         return <Login />;
+      case 'register':
+        return <Register />;
       default:
         return <UrbanStand />;
     }
@@ -48,6 +51,13 @@ function App() {
             style={{ fontSize: '12px', padding: '5px 10px' }}
           >
             Login
+          </button>
+          <button 
+            onClick={() => setCurrentView('register')}
+            className={`btn ${currentView === 'register' ? 'btn-primary' : 'btn-secondary'}`}
+            style={{ fontSize: '12px', padding: '5px 10px' }}
+          >
+            Registro
           </button>
         </div>
 
