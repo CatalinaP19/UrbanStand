@@ -42,10 +42,6 @@ export default function Login() {
     setIsPasswordVisible(!isPasswordVisible);
   };
 
-  const goHome = () => {
-    alert('Redirigiendo al inicio...');
-    // Aquí puedes agregar la lógica para redirigir al usuario
-  };
 
   return (
     <div className="login-container">
@@ -56,12 +52,6 @@ export default function Login() {
             <img className="logo-img" src="../img/logo.png" alt="logo" />
             UrbanStand
           </div>
-          <button
-            onClick={goHome}
-            className="login-home-button"
-          >
-            Volver al inicio
-          </button>
         </div>
       </header>
 

@@ -9,7 +9,8 @@ export default function Register() {
   const [numDoc, setNumDoc] = useState("");
   const [TypeDoc, setTypeDoc] = useState("CC");
   const [rivi, setRivi] = useState("");
-  const [vigencia, setVigencia] = useState(""); // Cambiado a un solo estado
+  const [vigencia, setVigencia] = useState(""); 
+  const [products, setProducts] = useState(""); 
   const [terms, setTerms] = useState(false);
   const [message, setMessage] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -199,7 +200,7 @@ export default function Register() {
         width: 1.2rem;
         height: 1.2rem;
         cursor: pointer;
-        accent-color: #f97316;
+        accent-color: #d37b3cff;
       }
 
       .register-checkbox-container {
@@ -356,10 +357,10 @@ export default function Register() {
     if (!firstName.trim()) errors += "El nombre es obligatorio. ";
     if (!lastName.trim()) errors += "El apellido es obligatorio. ";
     if (numDoc.length < 6 || numDoc.length > 10) errors += "El número de documento debe tener entre 6 y 10 dígitos. ";
-     if (!rivi) errors += "La imagén es requerida. ";
-     if (!vigencia) errors += "Seleccione alguna de las dos opciones en vigencia. ";
+    if (!rivi) errors += "La imagén es requerida. ";
     if (!emailRegex.test(email)) errors += "El email no es válido. ";
     if (!vigencia) errors += "Debes elegir una opción de vigencia. ";
+    if (!products) errors += "Debes elegir por lo menos una opción. ";
     if (password.length < 8) errors += "La contraseña debe tener al menos 8 caracteres. ";
     if (password !== confirmPassword) errors += "Las contraseñas no coinciden. ";
     if (!terms) errors += "Debes aceptar los términos y condiciones. ";
@@ -414,7 +415,7 @@ export default function Register() {
       <header className="register-header">
         <div className="register-header-content">
           <div className="logo">
-            <span>🏪</span>
+            <img className="logo-img" src="../img/logo.png" alt="logo" />
             UrbanStand
           </div>
           <button onClick={goHome} className="register-home-button">
@@ -525,6 +526,71 @@ export default function Register() {
                 </label>
               </div>
             </div>
+
+
+            {/* Products Input */}
+
+<div className="register-input-group">
+              <label className="register-label">Productos que ofrece</label>
+              <div className="register-radio-group">
+                <label className="register-radio-label">
+                  <input
+                    type="checkbox"
+                    value={comidaspreparadas}
+                    onChange={(e) => setProducts(e.target.value)}
+                    className="register-radio"
+                  />
+                  <span>Comidas preparadas</span>
+                </label>
+
+
+                <label className="register-radio-label">
+                  <input
+                    type="checkbox"
+                    value={bebidas}
+                    onChange={(e) => setProducts(e.target.value)}
+                    className="register-radio"
+                  />
+                  <span>Bebidas</span>
+                </label>
+
+                <label className="register-radio-label">
+                  <input
+                    type="checkbox"
+                    value={confitería}
+                    onChange={(e) => setProducts(e.target.value)}
+                    className="register-radio"
+                  />
+                  <span>Confitería</span>
+                </label>
+
+
+                <label className="register-radio-label">
+                  <input
+                    type="checkbox"
+                    value={fruyver}
+                    onChange={(e) => setProducts(e.target.value)}
+                    className="register-radio"
+                  />
+                  <span>Frutas y verdiras</span>
+                </label>
+              </div>
+            </div>
+
+
+            {/* Phone Number Input */}
+            <div className="register-input-group">
+              <label className="register-label">Correo electrónico</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className="register-input"
+                required
+              />
+            </div>
+
 
             {/* Email Input */}
             <div className="register-input-group">
