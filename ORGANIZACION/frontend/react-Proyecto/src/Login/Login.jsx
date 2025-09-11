@@ -20,10 +20,6 @@ export default function Login() {
       errors += "La contraseña debe tener al menos 8 caracteres. ";
     }
 
-    if (!terms) {
-      errors += "Debes aceptar los términos y condiciones. ";
-    }
-
     if (errors !== "") {
       setMessage(errors);
     } else {

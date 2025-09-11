@@ -356,6 +356,8 @@ export default function Register() {
     if (!firstName.trim()) errors += "El nombre es obligatorio. ";
     if (!lastName.trim()) errors += "El apellido es obligatorio. ";
     if (numDoc.length < 6 || numDoc.length > 10) errors += "El número de documento debe tener entre 6 y 10 dígitos. ";
+     if (!rivi) errors += "La imagén es requerida. ";
+     if (!vigencia) errors += "Seleccione alguna de las dos opciones en vigencia. ";
     if (!emailRegex.test(email)) errors += "El email no es válido. ";
     if (!vigencia) errors += "Debes elegir una opción de vigencia. ";
     if (password.length < 8) errors += "La contraseña debe tener al menos 8 caracteres. ";
@@ -487,7 +489,8 @@ export default function Register() {
               <label className="register-label">Adjunte la captura del RIVI Y HEMI</label>
               <input
                 type="file"
-                onChange={handleFileChange}
+                value={rivi}
+                onChange={(e) => setRivi(e.target.value)}
                 className="register-input"
                 accept="image/*,.pdf"
                 required
@@ -611,7 +614,8 @@ export default function Register() {
                   required
                 />
                 <p className="register-checkbox-text">
-                  <a href="#">Acepto los términos y condiciones</a>
+                  Acepto los 
+                  <a href="#"> términos y condiciones</a>
                 </p>
               </label>
             </div>
