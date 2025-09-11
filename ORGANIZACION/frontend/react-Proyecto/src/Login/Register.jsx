@@ -7,6 +7,9 @@ export default function Register() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [numDoc, setNumDoc] = useState("");
+  const [TypeDoc, setTypeDoc] = useState("CC");
+  const [rivi, setRivi] = useState("");
+  const [vigencia, setVigencia] = useState(""); // Cambiado a un solo estado
   const [terms, setTerms] = useState(false);
   const [message, setMessage] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -179,6 +182,26 @@ export default function Register() {
         color: #f97316;
       }
 
+      .register-radio-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 0.5rem;
+      }
+
+      .register-radio-label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        gap: 0.5rem;
+      }
+
+      .register-radio {
+        width: 1.2rem;
+        height: 1.2rem;
+        cursor: pointer;
+        accent-color: #f97316;
+      }
+
       .register-checkbox-container {
         display: flex;
         align-items: flex-start;
@@ -313,6 +336,11 @@ export default function Register() {
           flex-direction: column;
           gap: 1.5rem;
         }
+
+        .register-radio-group {
+          flex-direction: column;
+          gap: 0.8rem;
+        }
       }
     `;
     document.head.appendChild(style);
@@ -327,22 +355,39 @@ export default function Register() {
 
     if (!firstName.trim()) errors += "El nombre es obligatorio. ";
     if (!lastName.trim()) errors += "El apellido es obligatorio. ";
-    if (numDoc.length < 8 || numDoc.length > 10) errors += "El número de documento debe tener entre 8 y 10 dígitos. ";
+    if (numDoc.length < 6 || numDoc.length > 10) errors += "El número de documento debe tener entre 6 y 10 dígitos. ";
     if (!emailRegex.test(email)) errors += "El email no es válido. ";
+    if (!vigencia) errors += "Debes elegir una opción de vigencia. ";
     if (password.length < 8) errors += "La contraseña debe tener al menos 8 caracteres. ";
     if (password !== confirmPassword) errors += "Las contraseñas no coinciden. ";
     if (!terms) errors += "Debes aceptar los términos y condiciones. ";
-    
+
     if (errors) {
       setMessage(errors);
     } else {
-      setMessage("Registro exitoso! Bienvenido a UrbanStand.");
-      // Here you would typically send the data to your backend
+      setMessage("¡Registro exitoso! Bienvenido a UrbanStand.");
+      // Aquí normalmente enviarías los datos a tu backend
+      console.log("Datos del registro:", {
+        firstName,
+        lastName,
+        TypeDoc,
+        numDoc,
+        email,
+        vigencia,
+        rivi
+      });
     }
   };
 
   const handleKeyPress = (e) => {
     if (e.key === "Enter") handleSubmit();
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setRivi(file.name); // O podrías manejar el archivo de otra manera
+    }
   };
 
   const togglePassword = () => {
@@ -408,22 +453,23 @@ export default function Register() {
               </div>
             </div>
 
-
-            {/* Num-Doc Input */} 
+            {/* Type-Doc select */}
             <div className="register-input-group">
               <label className="register-label">Tipo de documento</label>
-              <input
-                type="text"
-                value={numDoc}
-                onChange={(e) => setNumDoc(e.target.value)}
+              <select 
+                value={TypeDoc}
+                onChange={(e) => setTypeDoc(e.target.value)}
                 onKeyPress={handleKeyPress}
                 className="register-input"
                 required
-              />
+              >
+                <option value="CC">Cédula de ciudadanía</option>
+                <option value="CE">Cédula de extranjería</option>
+                <option value="PA">Pasaporte</option>
+              </select>
             </div>
 
-
-            {/* Num-Doc Input */} 
+            {/* Num-Doc Input */}
             <div className="register-input-group">
               <label className="register-label">Número de documento</label>
               <input
@@ -434,6 +480,47 @@ export default function Register() {
                 className="register-input"
                 required
               />
+            </div>
+
+            {/* File-(RIVI) Input */}
+            <div className="register-input-group">
+              <label className="register-label">Adjunte la captura del RIVI Y HEMI</label>
+              <input
+                type="file"
+                onChange={handleFileChange}
+                className="register-input"
+                accept="image/*,.pdf"
+                required
+              />
+            </div>
+
+            {/* Validity Input */}
+            <div className="register-input-group">
+              <label className="register-label">Vigencia</label>
+              <div className="register-radio-group">
+                <label className="register-radio-label">
+                  <input
+                    type="radio"
+                    name="vigencia"
+                    value="vigente"
+                    checked={vigencia === "vigente"}
+                    onChange={(e) => setVigencia(e.target.value)}
+                    className="register-radio"
+                  />
+                  <span>Vigente</span>
+                </label>
+                <label className="register-radio-label">
+                  <input
+                    type="radio"
+                    name="vigencia"
+                    value="vencido"
+                    checked={vigencia === "vencido"}
+                    onChange={(e) => setVigencia(e.target.value)}
+                    className="register-radio"
+                  />
+                  <span>Vencido</span>
+                </label>
+              </div>
             </div>
 
             {/* Email Input */}
@@ -544,11 +631,10 @@ export default function Register() {
             {/* Message */}
             {message && (
               <div
-                className={`register-message ${
-                  message.includes("exitoso")
+                className={`register-message ${message.includes("exitoso")
                     ? "register-message-success"
                     : "register-message-error"
-                }`}
+                  }`}
               >
                 {message}
               </div>
