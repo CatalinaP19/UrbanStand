@@ -1,23 +1,47 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react'
 
 export default function Register() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [numDoc, setNumDoc] = useState("");
-  const [TypeDoc, setTypeDoc] = useState("CC");
-  const [rivi, setRivi] = useState("");
-  const [vigencia, setVigencia] = useState(""); 
-  const [products, setProducts] = useState(""); 
-  const [terms, setTerms] = useState(false);
-  const [message, setMessage] = useState("");
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [numDoc, setNumDoc] = useState('')
+  const [TypeDoc, setTypeDoc] = useState('CC')
+  const [rivi, setRivi] = useState(null) // Cambiar a null para archivos
+  const [vigencia, setVigencia] = useState('')
+  const [NumTel, setNumTel] = useState('')
+  const [terms, setTerms] = useState(false)
+  const [message, setMessage] = useState('')
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false)
+  
+  // Estado para manejar los productos seleccionados
+  const [selectedProducts, setSelectedProducts] = useState([])
+
+  const productsList = [
+    'Comidas preparadas',
+    'Bebidas',
+    'Confitería',
+    'Frutas y verduras',
+    'Productos textiles',
+    'Calzado',
+    'Bisutería y accesorios',
+    'Juguetería',
+    'Artículos de temporada',
+    'Cigarrillos y tabaco',
+    'Electrónicos y accesorios',
+    'Arreglos florales',
+    'Papelería y útiles escolares',
+    'Productos varios (Para el hogar)',
+    'S. Lustrado de calzado',
+    'S. Reparación de calzado',
+    'S. Reparación de celulares y electrónicos',
+    'S. Ambulantes de aseo y apoyo',
+  ]
 
   useEffect(() => {
-    const style = document.createElement("style");
+    const style = document.createElement('style')
     style.textContent = `
       .register-container {
         width: 100vw;
@@ -28,6 +52,7 @@ export default function Register() {
         margin: 0;
         padding: 0;
       }
+      
       .register-header {
         background: #faf3e0;
         backdrop-filter: blur(10px);
@@ -200,7 +225,7 @@ export default function Register() {
         width: 1.2rem;
         height: 1.2rem;
         cursor: pointer;
-        accent-color: #d37b3cff;
+        accent-color: #ea580c;
       }
 
       .register-checkbox-container {
@@ -315,6 +340,67 @@ export default function Register() {
         gap: 8px;
       }
 
+      /* ===== ESTILOS PARA PRODUCTOS ===== */
+      .register-products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+        max-height: 300px;
+        overflow-y: auto;
+        padding: 1rem;
+        border: 2px solid #ea580c;
+        border-radius: 0.5rem;
+        background: #fef7f0;
+      }
+
+      .register-product-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background: white;
+        border-radius: 0.375rem;
+        border: 1px solid #fed7aa;
+        transition: all 0.2s ease;
+      }
+
+      .register-product-item:hover {
+        background: #fff7ed;
+        border-color: #ea580c;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+
+      .register-product-checkbox {
+        width: 1.125rem;
+        height: 1.125rem;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        accent-color: #ea580c;
+        flex-shrink: 0;
+      }
+
+      .register-product-label {
+        cursor: pointer;
+        font-size: 0.875rem;
+        color: #374151;
+        line-height: 1.3;
+        user-select: none;
+      }
+
+      .register-product-item input:checked + .register-product-label {
+        color: #9a1e22;
+        font-weight: 500;
+      }
+
+      .register-products-counter {
+        font-size: 0.8rem;
+        color: #6b7280;
+        margin-top: 0.5rem;
+        text-align: right;
+      }
+
       @media (max-width: 768px) {
         .register-content {
           padding: 1rem;
@@ -342,72 +428,94 @@ export default function Register() {
           flex-direction: column;
           gap: 0.8rem;
         }
+
+        .register-products-grid {
+          grid-template-columns: 1fr;
+          max-height: 250px;
+        }
+        
+        .register-product-item {
+          padding: 0.75rem 0.5rem;
+        }
       }
-    `;
-    document.head.appendChild(style);
+    `
+
+    document.head.appendChild(style)
     return () => {
-      document.head.removeChild(style);
-    };
-  }, []);
+      document.head.removeChild(style)
+    }
+  }, [])
 
   const handleSubmit = () => {
-    let errors = "";
-    const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+    let errors = ''
+    const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/
 
-    if (!firstName.trim()) errors += "El nombre es obligatorio. ";
-    if (!lastName.trim()) errors += "El apellido es obligatorio. ";
-    if (numDoc.length < 6 || numDoc.length > 10) errors += "El número de documento debe tener entre 6 y 10 dígitos. ";
-    if (!rivi) errors += "La imagén es requerida. ";
-    if (!emailRegex.test(email)) errors += "El email no es válido. ";
-    if (!vigencia) errors += "Debes elegir una opción de vigencia. ";
-    if (!products) errors += "Debes elegir por lo menos una opción. ";
-    if (password.length < 8) errors += "La contraseña debe tener al menos 8 caracteres. ";
-    if (password !== confirmPassword) errors += "Las contraseñas no coinciden. ";
-    if (!terms) errors += "Debes aceptar los términos y condiciones. ";
+    if (!firstName.trim()) errors += 'El nombre es obligatorio. '
+    if (!lastName.trim()) errors += 'El apellido es obligatorio. '
+    if (numDoc.length < 6 || numDoc.length > 10)
+      errors += 'El número de documento debe tener entre 6 y 10 dígitos. '
+    if (!rivi) errors += 'La imagen es requerida. '
+    if (!emailRegex.test(email)) errors += 'El email no es válido. '
+    if (!vigencia) errors += 'Debes elegir una opción de vigencia. '
+    if (selectedProducts.length === 0) errors += 'Debes seleccionar al menos una categoría de productos que ofreces. '
+    if (!NumTel) errors += 'El número telefónico es obligatorio. '
+    if (password.length < 8)
+      errors += 'La contraseña debe tener al menos 8 caracteres. '
+    if (password !== confirmPassword) errors += 'Las contraseñas no coinciden. '
+    if (!terms) errors += 'Debes aceptar los términos y condiciones. '
 
     if (errors) {
-      setMessage(errors);
+      setMessage(errors)
     } else {
-      setMessage("¡Registro exitoso! Bienvenido a UrbanStand.");
-      // Aquí normalmente enviarías los datos a tu backend
-      console.log("Datos del registro:", {
+      setMessage('¡Registro exitoso! Bienvenido a UrbanStand.')
+      console.log('Datos del registro:', {
         firstName,
         lastName,
         TypeDoc,
         numDoc,
         email,
         vigencia,
-        rivi
-      });
+        rivi,
+        selectedProducts,
+        NumTel
+      })
     }
-  };
+  }
 
   const handleKeyPress = (e) => {
-    if (e.key === "Enter") handleSubmit();
-  };
+    if (e.key === 'Enter') handleSubmit()
+  }
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files[0]
     if (file) {
-      setRivi(file.name); // O podrías manejar el archivo de otra manera
+      setRivi(file) // Guardar el archivo completo
     }
-  };
+  }
 
   const togglePassword = () => {
-    setIsPasswordVisible(!isPasswordVisible);
-  };
+    setIsPasswordVisible(!isPasswordVisible)
+  }
 
   const toggleConfirmPassword = () => {
-    setIsConfirmPasswordVisible(!isConfirmPasswordVisible);
-  };
+    setIsConfirmPasswordVisible(!isConfirmPasswordVisible)
+  }
 
   const goHome = () => {
-    alert("Redirigiendo al inicio…");
-  };
+    alert('Redirigiendo al inicio…')
+  }
 
   const goToLogin = () => {
-    alert("Redirigiendo a inicio de sesión…");
-  };
+    alert('Redirigiendo a inicio de sesión…')
+  }
+
+  const handleProductChange = (product, isChecked) => {
+    if (isChecked) {
+      setSelectedProducts((prev) => [...prev, product])
+    } else {
+      setSelectedProducts((prev) => prev.filter((p) => p !== product))
+    }
+  }
 
   return (
     <div className="register-container">
@@ -459,7 +567,7 @@ export default function Register() {
             {/* Type-Doc select */}
             <div className="register-input-group">
               <label className="register-label">Tipo de documento</label>
-              <select 
+              <select
                 value={TypeDoc}
                 onChange={(e) => setTypeDoc(e.target.value)}
                 onKeyPress={handleKeyPress}
@@ -487,11 +595,12 @@ export default function Register() {
 
             {/* File-(RIVI) Input */}
             <div className="register-input-group">
-              <label className="register-label">Adjunte la captura del RIVI Y HEMI</label>
+              <label className="register-label">
+                Adjunte la captura del RIVI Y HEMI
+              </label>
               <input
                 type="file"
-                value={rivi}
-                onChange={(e) => setRivi(e.target.value)}
+                onChange={handleFileChange}
                 className="register-input"
                 accept="image/*,.pdf"
                 required
@@ -507,7 +616,7 @@ export default function Register() {
                     type="radio"
                     name="vigencia"
                     value="vigente"
-                    checked={vigencia === "vigente"}
+                    checked={vigencia === 'vigente'}
                     onChange={(e) => setVigencia(e.target.value)}
                     className="register-radio"
                   />
@@ -518,7 +627,7 @@ export default function Register() {
                     type="radio"
                     name="vigencia"
                     value="vencido"
-                    checked={vigencia === "vencido"}
+                    checked={vigencia === 'vencido'}
                     onChange={(e) => setVigencia(e.target.value)}
                     className="register-radio"
                   />
@@ -527,70 +636,49 @@ export default function Register() {
               </div>
             </div>
 
-
             {/* Products Input */}
-
-<div className="register-input-group">
+            <div className="register-input-group">
               <label className="register-label">Productos que ofrece</label>
-              <div className="register-radio-group">
-                <label className="register-radio-label">
-                  <input
-                    type="checkbox"
-                    value={comidaspreparadas}
-                    onChange={(e) => setProducts(e.target.value)}
-                    className="register-radio"
-                  />
-                  <span>Comidas preparadas</span>
-                </label>
-
-
-                <label className="register-radio-label">
-                  <input
-                    type="checkbox"
-                    value={bebidas}
-                    onChange={(e) => setProducts(e.target.value)}
-                    className="register-radio"
-                  />
-                  <span>Bebidas</span>
-                </label>
-
-                <label className="register-radio-label">
-                  <input
-                    type="checkbox"
-                    value={confitería}
-                    onChange={(e) => setProducts(e.target.value)}
-                    className="register-radio"
-                  />
-                  <span>Confitería</span>
-                </label>
-
-
-                <label className="register-radio-label">
-                  <input
-                    type="checkbox"
-                    value={fruyver}
-                    onChange={(e) => setProducts(e.target.value)}
-                    className="register-radio"
-                  />
-                  <span>Frutas y verdiras</span>
-                </label>
+              <div className="register-products-grid">
+                {productsList.map((product, index) => (
+                  <div key={index} className="register-product-item">
+                    <input
+                      type="checkbox"
+                      id={`product-${index}`}
+                      className="register-product-checkbox"
+                      checked={selectedProducts.includes(product)}
+                      onChange={(e) =>
+                        handleProductChange(product, e.target.checked)
+                      }
+                    />
+                    <label
+                      htmlFor={`product-${index}`}
+                      className="register-product-label"
+                    >
+                      {product}
+                    </label>
+                  </div>
+                ))}
+              </div>
+              <div className="register-products-counter">
+                {selectedProducts.length} producto
+                {selectedProducts.length !== 1 ? 's' : ''} seleccionado
+                {selectedProducts.length !== 1 ? 's' : ''}
               </div>
             </div>
 
-
             {/* Phone Number Input */}
             <div className="register-input-group">
-              <label className="register-label">Correo electrónico</label>
+              <label className="register-label">Número de teléfono</label>
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                value={NumTel}
+                onChange={(e) => setNumTel(e.target.value)}
                 onKeyPress={handleKeyPress}
                 className="register-input"
                 required
               />
             </div>
-
 
             {/* Email Input */}
             <div className="register-input-group">
@@ -610,7 +698,7 @@ export default function Register() {
               <label className="register-label">Contraseña</label>
               <div className="register-password-container">
                 <input
-                  type={isPasswordVisible ? "text" : "password"}
+                  type={isPasswordVisible ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyPress={handleKeyPress}
@@ -621,16 +709,28 @@ export default function Register() {
                   type="button"
                   onClick={togglePassword}
                   className="register-eye-button"
-                  aria-label={isPasswordVisible ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  aria-label={
+                    isPasswordVisible
+                      ? 'Ocultar contraseña'
+                      : 'Mostrar contraseña'
+                  }
                 >
-                  <svg className="register-eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <svg
+                    className="register-eye-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                  >
                     {isPasswordVisible ? (
                       <>
                         <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
                         <line x1="1" y1="1" x2="23" y2="23" />
                       </>
                     ) : (
-                      <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></>
+                      <>
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </>
                     )}
                   </svg>
                 </button>
@@ -642,7 +742,7 @@ export default function Register() {
               <label className="register-label">Confirmar contraseña</label>
               <div className="register-password-container">
                 <input
-                  type={isConfirmPasswordVisible ? "text" : "password"}
+                  type={isConfirmPasswordVisible ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   onKeyPress={handleKeyPress}
@@ -653,16 +753,28 @@ export default function Register() {
                   type="button"
                   onClick={toggleConfirmPassword}
                   className="register-eye-button"
-                  aria-label={isConfirmPasswordVisible ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  aria-label={
+                    isConfirmPasswordVisible
+                      ? 'Ocultar contraseña'
+                      : 'Mostrar contraseña'
+                  }
                 >
-                  <svg className="register-eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <svg
+                    className="register-eye-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                  >
                     {isConfirmPasswordVisible ? (
                       <>
                         <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
                         <line x1="1" y1="1" x2="23" y2="23" />
                       </>
                     ) : (
-                      <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></>
+                      <>
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </>
                     )}
                   </svg>
                 </button>
@@ -680,7 +792,7 @@ export default function Register() {
                   required
                 />
                 <p className="register-checkbox-text">
-                  Acepto los 
+                  Acepto los
                   <a href="#"> términos y condiciones</a>
                 </p>
               </label>
@@ -701,10 +813,11 @@ export default function Register() {
             {/* Message */}
             {message && (
               <div
-                className={`register-message ${message.includes("exitoso")
-                    ? "register-message-success"
-                    : "register-message-error"
-                  }`}
+                className={`register-message ${
+                  message.includes('exitoso')
+                    ? 'register-message-success'
+                    : 'register-message-error'
+                }`}
               >
                 {message}
               </div>
@@ -713,5 +826,5 @@ export default function Register() {
         </div>
       </div>
     </div>
-  );
+  )
 }
