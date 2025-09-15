@@ -114,7 +114,7 @@ const GlobalStylesProvider = ({ children }) => {
   return <>{children}</>;
 };
 
-const UrbanStand = () => {
+const VistaVendedor = () => {
   const [isChatOpen, setChatOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([
@@ -212,7 +212,7 @@ const UrbanStand = () => {
             </div>
             <div style={{ flex: '1', textAlign: 'center' }}>
               <img 
-                src={vendorImage}
+                src="./img/vendedor.png"
                 alt="Vendedor ambulante"
                 className="hero-image"
               />
@@ -583,4 +583,4 @@ const UrbanStand = () => {
   );
 };
 
-export default UrbanStand;
+export default VistaVendedor;

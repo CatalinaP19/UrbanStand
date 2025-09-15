@@ -6,6 +6,7 @@ import UrbanStand from './Componentes/UrbanStand'
 import Chat from './Componentes/ChatTemplate'  // Corregido el nombre del import
 import Login from './Login/Login'
 import Register from './Login/Register'
+import VistaVendedor from './Componentes/VistaVendedor'
 
 function App() {
   // Aquí puedes controlar qué componente renderizar
@@ -21,6 +22,8 @@ function App() {
         return <Login />
       case 'register':
         return <Register />
+      case 'vista1':
+        return <VistaVendedor />
       default:
         return <UrbanStand />
     }
@@ -67,10 +70,10 @@ function App() {
           <button
             onClick={() => setCurrentView('login')}
             className={`btn ${currentView === 'login' ? 'btn-primary' : 'btn-secondary'}`}
-            style={{ 
+            style={{
               marginRight: '5px',
-              fontSize: '12px', 
-              padding: '5px 10px' 
+              fontSize: '12px',
+              padding: '5px 10px'
             }}
           >
             Login
@@ -78,9 +81,16 @@ function App() {
           <button
             onClick={() => setCurrentView('register')}
             className={`btn ${currentView === 'register' ? 'btn-primary' : 'btn-secondary'}`}
-            style={{ fontSize: '12px', padding: '5px 10px' }}
+            style={{ marginRight: '5px', fontSize: '12px', padding: '5px 10px' }}
           >
             Registro
+          </button>
+          <button
+            onClick={() => setCurrentView('vista1')}
+            className={`btn ${currentView === 'vista1' ? 'btn-primary' : 'btn-secondary'}`}
+            style={{ fontSize: '12px', padding: '5px 10px' }}
+          >
+            Vista
           </button>
         </div>
 
@@ -91,4 +101,4 @@ function App() {
   )
 }
 
-export default App
+export default App;
