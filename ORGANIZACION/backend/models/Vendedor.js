@@ -30,7 +30,7 @@ const VendedorSchema = new mongoose.Schema({
     required: [true, 'La contraseña es requerida'],
     minlength: [6, 'La contraseña debe tener al menos 6 caracteres']
   },
-  
+
   // Información de identificación
   tipo_documento: {
     type: String,
@@ -54,7 +54,7 @@ const VendedorSchema = new mongoose.Schema({
     trim: true,
     maxlength: [15, 'El número de celular no puede exceder 15 caracteres']
   },
-  
+
   // Información demográfica
   genero: {
     type: String,
@@ -64,7 +64,7 @@ const VendedorSchema = new mongoose.Schema({
     },
     required: [true, 'El género es requerido']
   },
-  
+
   // Información laboral
   direccion_puesto_trabajo: {
     type: String,
@@ -76,19 +76,31 @@ const VendedorSchema = new mongoose.Schema({
     required: [true, 'La categoría de producto es requerida'],
     enum: {
       values: [
-        'comida_bebidas',
-        'ropa_accesorios', 
-        'electrodomesticos',
-        'servicios',
-        'frutas_verduras',
-        'dulces_snacks',
-        'artesanias',
+        'Comidas preparadas',
+        'bebidas',
+        'confiteria',
+        'frutas y verduras',
+        'productos textiles',
+        'calzado',
+        'bisuteria y accesorios',
+        'jugeteria',
+        'articulos de temporada',
+        'cigarrillos y tabaco',
+        'electronicos y accesorios',
+        'arreglos florales',
+        'papeleria y utiles escolares',
+        'productos varios(para el hogar)',
+        'Productos de higiene y cuidado personal',
+        'S.lustrado de calzado',
+        'S.reparacion de calzado',
+        'S.reparacion de celulares y electrónicos',
+        'S.ambulantes de aseo y apoyo',
         'otros'
       ],
       message: 'Categoría de producto no válida'
     }
   },
-  
+
   // Estado y control
   estado_vendedor: {
     type: String,
@@ -102,7 +114,7 @@ const VendedorSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  
+
   // Ubicación en tiempo real
   ubicacion_actual: {
     latitud: {
@@ -120,7 +132,7 @@ const VendedorSchema = new mongoose.Schema({
       default: Date.now
     }
   },
-  
+
   // Referencias a otras entidades
   id_localidad: {
     type: mongoose.Schema.Types.ObjectId,
@@ -142,18 +154,18 @@ VendedorSchema.index({ correo: 1 });
 VendedorSchema.index({ numero_documento: 1 });
 VendedorSchema.index({ estado_vendedor: 1 });
 VendedorSchema.index({ categoria_producto: 1 });
-VendedorSchema.index({ 
-  "ubicacion_actual.latitud": 1, 
-  "ubicacion_actual.longitud": 1 
+VendedorSchema.index({
+  "ubicacion_actual.latitud": 1,
+  "ubicacion_actual.longitud": 1
 });
 
 // Middleware para encriptar contraseña antes de guardar
-VendedorSchema.pre('save', async function(next) {
+VendedorSchema.pre('save', async function (next) {
   // Solo encriptar si la contraseña ha sido modificada o es nueva
   if (!this.isModified('contrasenia')) return next();
-  
+
   try {
-    // Hash de la contraseña
+    // Hash de la contraseña(representa la contraseña como unica pasandola de un texto plano a una cadena alfa numerica)
     const salt = await bcrypt.genSalt(12);
     this.contrasenia = await bcrypt.hash(this.contrasenia, salt);
     next();
@@ -163,12 +175,12 @@ VendedorSchema.pre('save', async function(next) {
 });
 
 // Método para comparar contraseñas
-VendedorSchema.methods.compararContrasenia = async function(contrasenia) {
+VendedorSchema.methods.compararContrasenia = async function (contrasenia) {
   return await bcrypt.compare(contrasenia, this.contrasenia);
 };
 
 // Método para actualizar ubicación
-VendedorSchema.methods.actualizarUbicacion = function(latitud, longitud) {
+VendedorSchema.methods.actualizarUbicacion = function (latitud, longitud) {
   this.ubicacion_actual = {
     latitud,
     longitud,
@@ -178,18 +190,18 @@ VendedorSchema.methods.actualizarUbicacion = function(latitud, longitud) {
 };
 
 // Método estático para encontrar vendedores cercanos
-VendedorSchema.statics.encontrarCercanos = function(latitud, longitud, radioKm = 5) {
+VendedorSchema.statics.encontrarCercanos = function (latitud, longitud, radioKm = 5) {
   // Convertir km a grados aproximadamente (1 grado ≈ 111 km)
   const radioGrados = radioKm / 111;
-  
+
   return this.find({
     estado_vendedor: 'activo',
-    'ubicacion_actual.latitud': { 
+    'ubicacion_actual.latitud': {
       $exists: true,
       $gte: latitud - radioGrados,
       $lte: latitud + radioGrados
     },
-    'ubicacion_actual.longitud': { 
+    'ubicacion_actual.longitud': {
       $exists: true,
       $gte: longitud - radioGrados,
       $lte: longitud + radioGrados
@@ -198,7 +210,7 @@ VendedorSchema.statics.encontrarCercanos = function(latitud, longitud, radioKm =
 };
 
 // Método para obtener información pública del vendedor
-VendedorSchema.methods.toPublicJSON = function() {
+VendedorSchema.methods.toPublicJSON = function () {
   const vendedor = this.toObject();
   delete vendedor.contrasenia;
   delete vendedor.__v;
