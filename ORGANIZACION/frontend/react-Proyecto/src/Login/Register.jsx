@@ -7,6 +7,8 @@ export default function Register() {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [numDoc, setNumDoc] = useState('')
+  const [direccion, setDireccion] = useState('')
+  const [genero, setGenero] = useState('')
   const [TypeDoc, setTypeDoc] = useState('CC')
   const [rivi, setRivi] = useState(null) // Cambiar a null para archivos
   const [vigencia, setVigencia] = useState('')
@@ -15,7 +17,7 @@ export default function Register() {
   const [message, setMessage] = useState('')
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false)
-  
+
   // Estado para manejar los productos seleccionados
   const [selectedProducts, setSelectedProducts] = useState([])
 
@@ -139,6 +141,13 @@ export default function Register() {
         font-weight: 600;
         color: #374151;
         font-size: 0.9rem;
+        position: relative;
+      }
+
+      .register-label::after {
+        content: ' *';
+        color: #dc2626;
+        font-weight: bold;
       }
 
       .register-input {
@@ -401,6 +410,30 @@ export default function Register() {
         text-align: right;
       }
 
+      .password-requirements {
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        background: #f9f9f9;
+        border-radius: 0.25rem;
+        font-size: 0.8rem;
+        color: #666;
+      }
+
+      .password-requirement {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        margin: 0.25rem 0;
+      }
+
+      .password-requirement.valid {
+        color: #16a34a;
+      }
+
+      .password-requirement.invalid {
+        color: #dc2626;
+      }
+
       @media (max-width: 768px) {
         .register-content {
           padding: 1rem;
@@ -446,26 +479,52 @@ export default function Register() {
     }
   }, [])
 
+  // Validación de contraseña mejorada
+  const validatePassword = (pass) => {
+    const requirements = {
+      minLength: pass.length >= 8,
+      hasUppercase: /[A-Z]/.test(pass),
+      hasLowercase: /[a-z]/.test(pass),
+      hasNumber: /\d/.test(pass)
+    }
+    return requirements
+  }
+
+  // Validación de teléfono colombiano
+  const validatePhoneNumber = (phone) => {
+    // Regex para números colombianos: debe empezar con 3 y tener 10 dígitos
+    const colombianPhoneRegex = /^3\d{9}$/
+    return colombianPhoneRegex.test(phone.replace(/\s/g, ''))
+  }
+
   const handleSubmit = () => {
-    let errors = ''
+    let errors = []
     const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/
 
-    if (!firstName.trim()) errors += 'El nombre es obligatorio. '
-    if (!lastName.trim()) errors += 'El apellido es obligatorio. '
-    if (numDoc.length < 6 || numDoc.length > 10)
-      errors += 'El número de documento debe tener entre 6 y 10 dígitos. '
-    if (!rivi) errors += 'La imagen es requerida. '
-    if (!emailRegex.test(email)) errors += 'El email no es válido. '
-    if (!vigencia) errors += 'Debes elegir una opción de vigencia. '
-    if (selectedProducts.length === 0) errors += 'Debes seleccionar al menos una categoría de productos que ofreces. '
-    if (!NumTel) errors += 'El número telefónico es obligatorio. '
-    if (password.length < 8)
-      errors += 'La contraseña debe tener al menos 8 caracteres. '
-    if (password !== confirmPassword) errors += 'Las contraseñas no coinciden. '
-    if (!terms) errors += 'Debes aceptar los términos y condiciones. '
+    // Validaciones
+    if (!firstName.trim()) errors.push('El nombre es obligatorio.')
+    if (!lastName.trim()) errors.push('El apellido es obligatorio.')
+    if (numDoc.length < 6 || numDoc.length > 10) errors.push('El número de documento debe tener entre 6 y 10 dígitos.')
+    if (!rivi) errors.push('La imagen del RIVI Y HEMI es requerida.')
+    if (!emailRegex.test(email)) errors.push('El email no es válido.')
+    if (!direccion.trim()) errors.push('La dirección de su puesto de trabajo es obligatoria.')
+    if (!vigencia) errors.push('Debes elegir una opción de vigencia.')
+    if (!genero) errors.push('Debes elegir una opción de género.')
+    if (selectedProducts.length === 0) errors.push('Debes seleccionar al menos una categoría de productos que ofreces.')
+    if (!validatePhoneNumber(NumTel)) errors.push('El número telefónico debe ser válido y compatible con Colombia (formato: 3XXXXXXXXX).')
 
-    if (errors) {
-      setMessage(errors)
+    // Validación de contraseña mejorada
+    const passwordRequirements = validatePassword(password)
+    if (!passwordRequirements.minLength) errors.push('La contraseña debe tener al menos 8 caracteres.')
+    if (!passwordRequirements.hasUppercase) errors.push('La contraseña debe contener al menos una letra mayúscula.')
+    if (!passwordRequirements.hasLowercase) errors.push('La contraseña debe contener al menos una letra minúscula.')
+    if (!passwordRequirements.hasNumber) errors.push('La contraseña debe contener al menos un número.')
+
+    if (password !== confirmPassword) errors.push('Las contraseñas no coinciden.')
+    if (!terms) errors.push('Debes aceptar los términos y condiciones.')
+
+    if (errors.length > 0) {
+      setMessage(errors.join(' '))
     } else {
       setMessage('¡Registro exitoso! Bienvenido a UrbanStand.')
       console.log('Datos del registro:', {
@@ -474,6 +533,8 @@ export default function Register() {
         TypeDoc,
         numDoc,
         email,
+        direccion,
+        genero,
         vigencia,
         rivi,
         selectedProducts,
@@ -517,6 +578,8 @@ export default function Register() {
     }
   }
 
+  const passwordRequirements = validatePassword(password)
+
   return (
     <div className="register-container">
       {/* Header */}
@@ -547,6 +610,7 @@ export default function Register() {
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   onKeyPress={handleKeyPress}
+                  placeholder='Primer nombre'
                   className="register-input"
                   required
                 />
@@ -558,9 +622,50 @@ export default function Register() {
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   onKeyPress={handleKeyPress}
+                  placeholder='Primer apellido'
                   className="register-input"
                   required
                 />
+              </div>
+            </div>
+
+            {/* Gender Input */}
+            <div className="register-input-group">
+              <label className="register-label">Género</label>
+              <div className="register-radio-group">
+                <label className="register-radio-label">
+                  <input
+                    type="radio"
+                    name="genero"
+                    value="masculino"
+                    checked={genero === 'masculino'}
+                    onChange={(e) => setGenero(e.target.value)}
+                    className="register-radio"
+                  />
+                  <span>Masculino</span>
+                </label>
+                <label className="register-radio-label">
+                  <input
+                    type="radio"
+                    name="genero"
+                    value="femenino"
+                    checked={genero === 'femenino'}
+                    onChange={(e) => setGenero(e.target.value)}
+                    className="register-radio"
+                  />
+                  <span>Femenino</span>
+                </label>
+                <label className="register-radio-label">
+                  <input
+                    type="radio"
+                    name="genero"
+                    value="otro"
+                    checked={genero === 'otro'}
+                    onChange={(e) => setGenero(e.target.value)}
+                    className="register-radio"
+                  />
+                  <span>Otro</span>
+                </label>
               </div>
             </div>
 
@@ -588,6 +693,7 @@ export default function Register() {
                 value={numDoc}
                 onChange={(e) => setNumDoc(e.target.value)}
                 onKeyPress={handleKeyPress}
+                placeholder='Número de identificación'
                 className="register-input"
                 required
               />
@@ -603,6 +709,20 @@ export default function Register() {
                 onChange={handleFileChange}
                 className="register-input"
                 accept="image/*,.pdf"
+                required
+              />
+            </div>
+
+            {/* Address Input */}
+            <div className="register-input-group">
+              <label className="register-label">Dirección de su puesto de trabajo</label>
+              <input
+                type="text"
+                value={direccion}
+                onChange={(e) => setDireccion(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder='Ej. Calle 100 #15-55, barrio Barrios Unidos'
+                className="register-input"
                 required
               />
             </div>
@@ -632,6 +752,28 @@ export default function Register() {
                     className="register-radio"
                   />
                   <span>Vencido</span>
+                </label>
+                <label className="register-radio-label">
+                  <input
+                    type="radio"
+                    name="vigencia"
+                    value="suspendido"
+                    checked={vigencia === 'suspendido'}
+                    onChange={(e) => setVigencia(e.target.value)}
+                    className="register-radio"
+                  />
+                  <span>Suspendido</span>
+                </label>
+                <label className="register-radio-label">
+                  <input
+                    type="radio"
+                    name="vigencia"
+                    value="eliminado"
+                    checked={vigencia === 'eliminado'}
+                    onChange={(e) => setVigencia(e.target.value)}
+                    className="register-radio"
+                  />
+                  <span>Eliminado</span>
                 </label>
               </div>
             </div>
@@ -675,6 +817,7 @@ export default function Register() {
                 value={NumTel}
                 onChange={(e) => setNumTel(e.target.value)}
                 onKeyPress={handleKeyPress}
+                placeholder='Ej. 3123456789'
                 className="register-input"
                 required
               />
@@ -688,6 +831,7 @@ export default function Register() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 onKeyPress={handleKeyPress}
+                placeholder='email@correo.com'
                 className="register-input"
                 required
               />
@@ -702,6 +846,7 @@ export default function Register() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyPress={handleKeyPress}
+                  placeholder='Ej. MiContra123'
                   className="register-password-input"
                   required
                 />
@@ -735,6 +880,22 @@ export default function Register() {
                   </svg>
                 </button>
               </div>
+              {password && (
+                <div className="password-requirements">
+                  <div className={`password-requirement ${passwordRequirements.minLength ? 'valid' : 'invalid'}`}>
+                    {passwordRequirements.minLength ? '✓' : '✗'} Mínimo 8 caracteres
+                  </div>
+                  <div className={`password-requirement ${passwordRequirements.hasUppercase ? 'valid' : 'invalid'}`}>
+                    {passwordRequirements.hasUppercase ? '✓' : '✗'} Al menos una letra mayúscula
+                  </div>
+                  <div className={`password-requirement ${passwordRequirements.hasLowercase ? 'valid' : 'invalid'}`}>
+                    {passwordRequirements.hasLowercase ? '✓' : '✗'} Al menos una letra minúscula
+                  </div>
+                  <div className={`password-requirement ${passwordRequirements.hasNumber ? 'valid' : 'invalid'}`}>
+                    {passwordRequirements.hasNumber ? '✓' : '✗'} Al menos un número
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Confirm Password Input */}
@@ -746,6 +907,7 @@ export default function Register() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   onKeyPress={handleKeyPress}
+                  placeholder='Confirmar contraseña'
                   className="register-password-input"
                   required
                 />
@@ -813,11 +975,10 @@ export default function Register() {
             {/* Message */}
             {message && (
               <div
-                className={`register-message ${
-                  message.includes('exitoso')
+                className={`register-message ${message.includes('exitoso')
                     ? 'register-message-success'
                     : 'register-message-error'
-                }`}
+                  }`}
               >
                 {message}
               </div>

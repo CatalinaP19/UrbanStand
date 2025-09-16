@@ -46,13 +46,13 @@ const VendedorSchema = new mongoose.Schema({
     required: [true, 'El número de documento es requerido'],
     unique: true,
     trim: true,
-    maxlength: [20, 'El número de documento no puede exceder 20 caracteres']
+    maxlength: [10, 'El número de documento no puede exceder 10 caracteres']
   },
   numero_celular: {
     type: String,
     required: [true, 'El número de celular es requerido'],
     trim: true,
-    maxlength: [15, 'El número de celular no puede exceder 15 caracteres']
+    maxlength: [10, 'El número de celular no puede exceder 10 caracteres']
   },
 
   // Información demográfica
