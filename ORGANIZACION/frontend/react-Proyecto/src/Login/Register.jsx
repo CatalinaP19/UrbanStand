@@ -497,17 +497,28 @@ export default function Register() {
     return colombianPhoneRegex.test(phone.replace(/\s/g, ''))
   }
 
+  //Validación de la dirección
+const ValidateAddress = () => {
+    const direccionRegex = /^(Calle|Carrera|Transversal|Diagonal|Avenida|Av\.?|Cr|Cl)\s?\d+[A-Za-z]?(?:\s?(Bis)?)?\s?#\d+[A-Za-z]?-?\d*$/i
+}
+
   const handleSubmit = () => {
     let errors = []
     const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/
 
     // Validaciones
     if (!firstName.trim()) errors.push('El nombre es obligatorio.')
+       else if (firstName.length > 30) {
+        errors.push('Su nombre no debe tener más de 30 cáracteres.');
+        }
     if (!lastName.trim()) errors.push('El apellido es obligatorio.')
+       else if (lastName.length > 30) {
+        errors.push('Su apellido no debe tener más de 30 cáracteres.');
+        }
     if (numDoc.length < 6 || numDoc.length > 10) errors.push('El número de documento debe tener entre 6 y 10 dígitos.')
     if (!rivi) errors.push('La imagen del RIVI Y HEMI es requerida.')
     if (!emailRegex.test(email)) errors.push('El email no es válido.')
-    if (!direccion.trim()) errors.push('La dirección de su puesto de trabajo es obligatoria.')
+  if (!ValidateAddress(direccionE))errors.push('La dirección de la empresa debe ser válida y compatible con Bogotá.')
     if (!vigencia) errors.push('Debes elegir una opción de vigencia.')
     if (!genero) errors.push('Debes elegir una opción de género.')
     if (selectedProducts.length === 0) errors.push('Debes seleccionar al menos una categoría de productos que ofreces.')
@@ -538,9 +549,27 @@ export default function Register() {
         vigencia,
         rivi,
         selectedProducts,
-        NumTel
       })
     }
+
+if (errors.length === 0) {
+  setMessage('¡Registro fallido! Intentelo de nuevo.')
+  setFirstName('')
+  setLastName('')
+  setEmail('')
+  setPassword('')
+  setConfirmPassword('')
+  setNumDoc('')
+  setDireccion('')
+  setGenero('')
+  setTypeDoc('CC')
+  setRivi(null)
+  setVigencia('')
+  setNumTel('')
+  setSelectedProducts([])
+  setTerms(false)
+}
+
   }
 
   const handleKeyPress = (e) => {
@@ -589,7 +618,7 @@ export default function Register() {
             <img className="logo-img" src="../img/logo.png" alt="logo" />
             UrbanStand
           </div>
-          <button onClick={goHome} className="register-home-button">
+          <button type="button" onClick={goHome} className="register-home-button">
             Volver al inicio
           </button>
         </div>
@@ -598,7 +627,7 @@ export default function Register() {
       {/* Register Container */}
       <div className="register-content">
         <div className="register-box">
-          <h2 className="register-title">Registrarse</h2>
+          <h2 className="register-title">Vendedor, ¡Registrate!</h2>
 
           <div className="register-form">
             {/* Name Inputs */}
@@ -961,13 +990,13 @@ export default function Register() {
             </div>
 
             {/* Submit */}
-            <button onClick={handleSubmit} className="register-submit-button">
+            <button type="button" onClick={handleSubmit} className="register-submit-button">
               Registrarse
             </button>
 
             {/* Go to Login */}
             <div className="register-toggle-container">
-              <button onClick={goToLogin} className="register-toggle-button">
+              <button type="button" onClick={goToLogin} className="register-toggle-button">
                 ¿Ya tienes cuenta? Inicia sesión
               </button>
             </div>
