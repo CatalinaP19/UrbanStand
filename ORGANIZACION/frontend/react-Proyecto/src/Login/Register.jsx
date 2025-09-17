@@ -462,7 +462,7 @@ export default function Register({ onBackToRoles }) {
 
   // Validación de la dirección corregida
   const ValidateAddress = (address) => {
-    const direccionRegex = /^(Calle|Carrera|Transversal|Diagonal|Avenida|Av\.?|Cr|Cl)\s?\d+[A-Za-z]?(?:\s?(Bis)?)?\s?#\d+[A-Za-z]?-?\d*$/i
+    const direccionRegex = /^(Calle|Carrera|Transversal|Diagonal|Avenida|Av\.?|Cr|Cl)\s?\d+[A-Za-z]{0,2}(?:\s?Bis)?(?:\s?(Sur|Este|Oeste))?\s?#\d+[A-Za-z]?-?\d*(?:,\s?.+)?$/i
     return direccionRegex.test(address)
   }
 
@@ -476,41 +476,41 @@ export default function Register({ onBackToRoles }) {
     } else if (firstName.length > 30) {
       errors.push('Su nombre no debe tener más de 30 caracteres.')
     }
-    
+
     if (!lastName.trim()) {
       errors.push('El apellido es obligatorio.')
     } else if (lastName.length > 30) {
       errors.push('Su apellido no debe tener más de 30 caracteres.')
     }
-    
+
     if (numDoc.length < 6 || numDoc.length > 10) {
       errors.push('El número de documento debe tener entre 6 y 10 dígitos.')
     }
-    
+
     if (!rivi) {
       errors.push('La imagen del RIVI Y HEMI es requerida.')
     }
-    
+
     if (!emailRegex.test(email)) {
       errors.push('El email no es válido.')
     }
-    
+
     if (!ValidateAddress(direccion)) {
       errors.push('La dirección debe ser válida y compatible con Bogotá.')
     }
-    
+
     if (!vigencia) {
       errors.push('Debes elegir una opción de vigencia.')
     }
-    
+
     if (!genero) {
       errors.push('Debes elegir una opción de género.')
     }
-    
+
     if (selectedProducts.length === 0) {
       errors.push('Debes seleccionar al menos una categoría de productos que ofreces.')
     }
-    
+
     if (!validatePhoneNumber(NumTel)) {
       errors.push('El número telefónico debe ser válido y compatible con Colombia (formato: 3XXXXXXXXX).')
     }
@@ -533,7 +533,7 @@ export default function Register({ onBackToRoles }) {
     if (password !== confirmPassword) {
       errors.push('Las contraseñas no coinciden.')
     }
-    
+
     if (!terms) {
       errors.push('Debes aceptar los términos y condiciones.')
     }
@@ -614,7 +614,7 @@ export default function Register({ onBackToRoles }) {
       <div className="register-content">
         <div className="register-box">
           {/* Botón de regreso */}
-          <button 
+          <button
             onClick={onBackToRoles}
             className="back-button"
           >
@@ -977,8 +977,8 @@ export default function Register({ onBackToRoles }) {
             {message && (
               <div
                 className={`register-message ${message.includes('exitoso')
-                    ? 'register-message-success'
-                    : 'register-message-error'
+                  ? 'register-message-success'
+                  : 'register-message-error'
                   }`}
               >
                 {message}

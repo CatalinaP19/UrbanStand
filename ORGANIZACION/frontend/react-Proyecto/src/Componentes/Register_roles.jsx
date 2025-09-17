@@ -1,19 +1,15 @@
-import React, { useEffect, useState } from 'react'
-import Register from '../Login/Register';
-import RegistroEntidades from './RegistroEntidades';
+import React, { useEffect } from 'react'
 
-export default function Register_roles() {
-  const [currentView, setCurrentView] = useState('roles') // Estado agregado
-
-  // Simula función para ir al inicio
-  const goHome = () => {
-    console.log("Volver al inicio");
-  }
+export default function Register_roles({ onRoleSelect }) {
 
   // Función para manejar la selección de rol
   const handleRoleSelect = (role) => {
     console.log(`Rol seleccionado: ${role}`);
-    alert(`Has seleccionado: ${role}`);
+    
+    // Llamar a la función del padre para cambiar la vista
+    if (onRoleSelect) {
+      onRoleSelect(role);
+    }
   }
 
   useEffect(() => {
@@ -45,23 +41,6 @@ export default function Register_roles() {
         align-items: center;
         max-width: 1200px;
         margin: 0 auto;
-      }
-
-      .register-home-button {
-        background: #9a1e22;
-        border: 2px solid #9a1e22;
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
-        cursor: pointer;
-        font-size: 0.9rem;
-        font-weight: 500;
-        transition: all 0.2s ease;
-      }
-
-      .register-home-button:hover {
-        background: transparent;
-        color: #9a1e22;
       }
 
       .register-content {
@@ -137,31 +116,6 @@ export default function Register_roles() {
         gap: 8px;
       }
 
-      .role-description {
-        font-size: 0.9rem;
-        color: #6b7280;
-        margin-top: 0.5rem;
-        text-align: center;
-      }
-
-      .back-button {
-        background: #6b7280;
-        border: 2px solid #6b7280;
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
-        cursor: pointer;
-        font-size: 0.9rem;
-        font-weight: 500;
-        transition: all 0.2s ease;
-        margin-bottom: 1rem;
-      }
-
-      .back-button:hover {
-        background: transparent;
-        color: #6b7280;
-      }
-
       @media (max-width: 768px) {
         .register-content {
           padding: 1rem;
@@ -188,64 +142,6 @@ export default function Register_roles() {
     }
   }, [])
 
-  // Función para renderizar la vista de selección de roles
-  const renderRoleSelection = () => (
-    <div className="register-content">
-      <div className="register-box">
-        <h1 className="register-title">¡Regístrate!</h1>
-        <h3 className="register-subtitle">¿Qué rol cumples?</h3>
-        
-        <div className="register-buttons-container">
-          <button 
-            onClick={() => setCurrentView('register')}
-            className="register-role-button"
-          >
-            Vendedor
-          </button>
-
-          <button 
-            type="button" 
-            onClick={() => handleRoleSelect('Vendedor')} 
-            className="register-role-button"
-          >
-            Cliente
-          </button>
-
-          <button 
-            type="button" 
-            onClick={() => setCurrentView('registroEntidades')} 
-            className="register-role-button"
-          >
-            Entidad
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-
-  // Función para renderizar el formulario de registro con botón de regreso
-  const renderRegisterForm = () => (
-    <div className="register-content">
-        <Register />
-
-    </div>
-  )
-
-
-    const renderRegisterEntidadesForm = () => (
-    <div className="register-content">
-      <div className="register-box">
-        <button 
-          onClick={() => setCurrentView('roles')} 
-          className="back-button"
-        >
-          ← Volver a selección de roles
-        </button>
-        <RegistroEntidades />
-      </div>
-    </div>
-  )
-
   return (
     <div className="register-container">
       {/* Header */}
@@ -258,10 +154,38 @@ export default function Register_roles() {
         </div>
       </header>
 
-      {/* Contenido dinámico basado en currentView */}
-      {currentView === 'roles' ? renderRoleSelection() : renderRegisterForm()}
-      
-      {currentView === 'roles' ? renderRoleSelection() : renderRegisterEntidadesForm()}
+      {/* Contenido de selección de roles */}
+      <div className="register-content">
+        <div className="register-box">
+          <h1 className="register-title">¡Regístrate!</h1>
+          <h3 className="register-subtitle">¿Qué rol cumples?</h3>
+          
+          <div className="register-buttons-container">
+            <button 
+              onClick={() => handleRoleSelect('vendedor')}
+              className="register-role-button"
+            >
+              Vendedor
+            </button>
+
+            <button 
+              type="button" 
+              onClick={() => handleRoleSelect('cliente')} 
+              className="register-role-button"
+            >
+              Cliente
+            </button>
+
+            <button 
+              type="button" 
+              onClick={() => handleRoleSelect('entidad')} 
+              className="register-role-button"
+            >
+              Entidad
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

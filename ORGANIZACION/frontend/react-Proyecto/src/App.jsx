@@ -4,18 +4,33 @@ import GlobalStylesProvider from './GlobalStylesProvider'
 import UrbanStand from './Componentes/UrbanStand'
 import Chat from './Componentes/ChatTemplate'
 import Login from './Login/Login'
-
+import Register from './Login/Register'
 import Register_roles from './Componentes/Register_roles'
 import VistaVendedor from './Componentes/VistaVendedor'
 import RegistroEntidades from './Componentes/RegistroEntidades'
 import VistaEntidades from './Componentes/VistaEntidades'
 
 function App() {
-  // Definimos el estado para controlar la vista actual
+  // Estado para controlar la vista actual
   const [currentView, setCurrentView] = useState('urbanstand')
   
+  // Manejar selección de rol desde Register_roles
+  const handleRoleSelection = (role) => {
+    if (role === 'vendedor') {
+      setCurrentView('register') // Registro de vendedor
+    } else if (role === 'entidad') {
+      setCurrentView('registroEntidades') // Registro de entidades
+    } else if (role === 'cliente') {
+      alert(`Has seleccionado: ${role}`)
+    }
+  }
 
-  // Función que devuelve el componente según la vista actual
+  // Volver a selección de roles
+  const handleBackToRoles = () => {
+    setCurrentView('register_roles')
+  }
+
+  // Renderizar vistas según estado
   const renderCurrentView = () => {
     switch (currentView) {
       case 'urbanstand':
@@ -25,9 +40,11 @@ function App() {
       case 'login':
         return <Login />
       case 'register_roles':
-        return <Register_roles />
+        return <Register_roles onRoleSelect={handleRoleSelection} />
+      case 'register':
+        return <Register onBackToRoles={handleBackToRoles} />
       case 'registroEntidades':
-        return <RegistroEntidades />
+        return <RegistroEntidades onBackToRoles={handleBackToRoles} />
       case 'vista1':
         return <VistaVendedor />
       case 'vista2':
@@ -40,7 +57,7 @@ function App() {
   return (
     <GlobalStylesProvider>
       <div className="app">
-        {/* Botones de navegación */}
+        {/* Botones de navegación generales */}
         <div
           style={{
             position: 'fixed',
@@ -74,14 +91,6 @@ function App() {
           >
             Login
           </button>
-
-          <button 
-            onClick={() => setCurrentView('registroEntidades')}
-            className={`btn ${currentView === 'registroEntidades' ? 'btn-primary' : 'btn-secondary'}`}
-            style={{ marginRight: 5, fontSize: 12, padding: '5px 10px' }}
-          >
-            Registro Entidades
-          </button>
           <button
             onClick={() => setCurrentView('register_roles')}
             className={`btn ${currentView === 'register_roles' ? 'btn-primary' : 'btn-secondary'}`}
@@ -94,9 +103,8 @@ function App() {
             className={`btn ${currentView === 'vista1' ? 'btn-primary' : 'btn-secondary'}`}
             style={{ fontSize: 12, padding: '5px 10px' }}
           >
-            Vista
+            Vista Vendedor
           </button>
-
           <button
             onClick={() => setCurrentView('vista2')}
             className={`btn ${currentView === 'vista2' ? 'btn-primary' : 'btn-secondary'}`}

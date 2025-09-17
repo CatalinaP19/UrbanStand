@@ -1,6 +1,7 @@
+import apiService from '../services/apiService'
 import React, { useState, useEffect } from 'react'
 
-export default function RegistroEntidades() {
+export default function RegistroEntidades({ onBackToRoles }) {
 
     const [nomEnti, setNomEnti] = useState('')
     const [tipoE, setTipoE] = useState('')
@@ -9,7 +10,7 @@ export default function RegistroEntidades() {
     const [emailE, setEmailE] = useState('')
     const [NumTelE, setNumTelE] = useState('')
     const [direccionE, setDireccionE] = useState('')
-    const [password, setPassword] = useState('') // Corregido: era setPasswordE
+    const [password, setPassword] = useState('')
     const [confirmPasswordE, setConfirmPasswordE] = useState('')
     const [terms, setTerms] = useState(false)
     const [message, setMessage] = useState('')
@@ -47,23 +48,6 @@ export default function RegistroEntidades() {
         margin: 0 auto;
       }
 
-      .register-home-button {
-        background: #9a1e22;
-        border: 2px solid #9a1e22;
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
-        cursor: pointer;
-        font-size: 0.9rem;
-        font-weight: 500;
-        transition: all 0.2s ease;
-      }
-
-      .register-home-button:hover {
-        background: transparent;
-        color: #9a1e22;
-      }
-
       .register-content {
         display: flex;
         justify-content: center;
@@ -79,6 +63,24 @@ export default function RegistroEntidades() {
         padding: 2rem;
         border-radius: 1rem;
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+
+      .back-button {
+        background: #6b7280;
+        border: 2px solid #6b7280;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        margin-bottom: 1rem;
+      }
+
+      .back-button:hover {
+        background: transparent;
+        color: #6b7280;
       }
 
       .register-title {
@@ -396,63 +398,71 @@ export default function RegistroEntidades() {
 
     // Validación de teléfono colombiano
     const validatePhoneNumber = (phone) => {
-        // Regex para números colombianos: debe empezar con 3 y tener 10 dígitos
         const colombianPhoneRegex = /^3\d{9}$/
         return colombianPhoneRegex.test(phone.replace(/\s/g, ''))
     }
 
-//Validación de la dirección
-const ValidateAddressEnti = () => {
-    const direccionRegex = /^(Calle|Carrera|Transversal|Diagonal|Avenida|Av\.?|Cr|Cl)\s?\d+[A-Za-z]?(?:\s?(Bis)?)?\s?#\d+[A-Za-z]?-?\d*$/i
-}
+    // Validación de la dirección
+    const ValidateAddressEnti = (direccion) => {
+        const direccionRegex = /^(Calle|Carrera|Transversal|Diagonal|Avenida|Av\.?|Cr|Cl)\s?\d+[A-Za-z]?(?:\s?(Bis)?)?\s?#\d+[A-Za-z]?-?\d*$/i
+        return direccionRegex.test(direccion)
+    }
 
-
-    const handleSubmit = () => {
+    // Función handleSubmit actualizada con async y integración del backend
+    const handleSubmit = async () => {
         let errors = []
-        const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/ // Corregido: cambié nombre de variable
+        const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/
 
         // Validaciones
         if (!nomEnti.trim()) errors.push('El nombre de la empresa es obligatorio.')
-            
-        else if (nomEnti.length > 30) {
-        errors.push('El nombre de la empresa no debe exceder más de 30 cáracteres.');
+        else if (nomEnti.length > 100) {
+            errors.push('El nombre de la empresa no debe exceder más de 100 caracteres.')
         }
 
         if (!tipoE) errors.push('¿De qué tipo es tu entidad?.')
         if (!sector) errors.push('¿A qué sector pertenece tu entidad?.')
         if (!nit.trim()) errors.push('El NIT es requerido.')
-        if (!emailRegex.test(emailE)) errors.push('El email no es válido.') // Corregido: uso emailRegex
+        if (!emailRegex.test(emailE)) errors.push('El email no es válido.')
         if (!validatePhoneNumber(NumTelE)) errors.push('El número telefónico debe ser válido y compatible con Colombia (formato: 3XXXXXXXXX).')
-        if (!ValidateAddressEnti(direccionE))errors.push('La dirección de la empresa debe ser válida y compatible con Bogotá.')
 
         // Validación de contraseña mejorada
-        const passwordRequirements = validatePassword(password) // Corregido: uso password
+        const passwordRequirements = validatePassword(password)
         if (!passwordRequirements.minLength) errors.push('La contraseña debe tener al menos 8 caracteres.')
         if (!passwordRequirements.hasUppercase) errors.push('La contraseña debe contener al menos una letra mayúscula.')
         if (!passwordRequirements.hasLowercase) errors.push('La contraseña debe contener al menos una letra minúscula.')
         if (!passwordRequirements.hasNumber) errors.push('La contraseña debe contener al menos un número.')
 
-        if (password !== confirmPasswordE) errors.push('Las contraseñas no coinciden.') // Corregido: uso password
+        if (password !== confirmPasswordE) errors.push('Las contraseñas no coinciden.')
         if (!terms) errors.push('Debes aceptar los términos y condiciones.')
 
         if (errors.length > 0) {
             setMessage(errors.join(' '))
-        } else {
-            setMessage('¡Registro exitoso! Bienvenido a UrbanStand.')
-            console.log('Datos del registro:', {
-                nomEnti,
-                tipoE,
-                sector,
-                nit,
-                emailE,
-                NumTelE,
-                direccionE,
-                password,
-                confirmPasswordE,
-                terms,
-            })
+            return
+        }
 
-            // Corregido: Limpiar campos solo después del registro exitoso
+        // Preparar datos para enviar al backend
+        const registroData = {
+            nombre_entidad: nomEnti,
+            tipo_entidad: tipoE,
+            sector: sector,
+            nit: nit,
+            correo_institucional: emailE,
+            telefono_institucional: NumTelE,
+            direccion_sede_principal: direccionE,
+            contrasenia: password
+        }
+
+        try {
+            setMessage('Registrando entidad...')
+            console.log('Enviando datos:', registroData)
+            
+            const response = await apiService.entidad.register(registroData)
+            apiService.saveAuth(response.token, 'entidad')
+            
+            setMessage('¡Registro exitoso! Bienvenido a UrbanStand.')
+            console.log('Registro exitoso:', response)
+            
+            // Limpiar formulario después de 2 segundos
             setTimeout(() => {
                 setNomEnti('')
                 setTipoE('')
@@ -465,7 +475,11 @@ const ValidateAddressEnti = () => {
                 setConfirmPasswordE('')
                 setTerms(false)
                 setMessage('')
-            }, 2000) // Espera 2 segundos para mostrar el mensaje de éxito
+            }, 2000)
+            
+        } catch (error) {
+            console.error('Error en registro:', error)
+            setMessage(`Error: ${error.message}`)
         }
     }
 
@@ -481,15 +495,7 @@ const ValidateAddressEnti = () => {
         setIsConfirmPasswordVisible(!isConfirmPasswordVisible)
     }
 
-    const goHome = () => {
-        alert('Redirigiendo al inicio…')
-    }
-
-    const goToLogin = () => {
-        alert('Redirigiendo a inicio de sesión…')
-    }
-
-    const passwordRequirements = validatePassword(password) // Corregido: uso password
+    const passwordRequirements = validatePassword(password)
 
     return (
         <div className="register-container">
@@ -500,15 +506,19 @@ const ValidateAddressEnti = () => {
                         <img className="logo-img" src="../img/logo.png" alt="logo" />
                         UrbanStand
                     </div>
-                    <button type="button" onClick={goHome} className="register-home-button">
-                        Volver al inicio
-                    </button>
                 </div>
             </header>
 
             {/* Register Container */}
             <div className="register-content">
                 <div className="register-box">
+                    <button 
+                        onClick={onBackToRoles}
+                        className="back-button"
+                    >
+                        ← Volver a selección de roles
+                    </button>
+
                     <h2 className="register-title">Entidad, ¡Registrate!</h2>
 
                     <div className="register-form">
@@ -632,8 +642,8 @@ const ValidateAddressEnti = () => {
                                         type="radio"
                                         name="sector"
                                         value="otro"
-                                        checked={sector === 'otro'} // Corregido: cambié tipoE por sector
-                                        onChange={(e) => setSector(e.target.value)} // Corregido: cambié setTipoE por setSector
+                                        checked={sector === 'otro'}
+                                        onChange={(e) => setSector(e.target.value)}
                                         className="register-radio"
                                     />
                                     <span>Otro</span>
@@ -703,8 +713,8 @@ const ValidateAddressEnti = () => {
                             <div className="register-password-container">
                                 <input
                                     type={isPasswordVisible ? 'text' : 'password'}
-                                    value={password} // Corregido: cambié passwordE por password
-                                    onChange={(e) => setPassword(e.target.value)} // Corregido: cambié setPasswordE por setPassword
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                     onKeyPress={handleKeyPress}
                                     placeholder='Ej. MiContra123'
                                     className="register-password-input"
@@ -823,13 +833,6 @@ const ValidateAddressEnti = () => {
                         <button type="button" onClick={handleSubmit} className="register-submit-button">
                             Registrarse
                         </button>
-
-                        {/* Go to Login */}
-                        <div className="register-toggle-container">
-                            <button type="button" onClick={goToLogin} className="register-toggle-button">
-                                ¿Ya tienes cuenta? Inicia sesión
-                            </button>
-                        </div>
 
                         {/* Message */}
                         {message && (
