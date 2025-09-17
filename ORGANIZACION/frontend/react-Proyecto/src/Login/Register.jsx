@@ -776,28 +776,6 @@ export default function Register({ onBackToRoles }) {
                   />
                   <span>Vencido</span>
                 </label>
-                <label className="register-radio-label">
-                  <input
-                    type="radio"
-                    name="vigencia"
-                    value="suspendido"
-                    checked={vigencia === 'suspendido'}
-                    onChange={(e) => setVigencia(e.target.value)}
-                    className="register-radio"
-                  />
-                  <span>Suspendido</span>
-                </label>
-                <label className="register-radio-label">
-                  <input
-                    type="radio"
-                    name="vigencia"
-                    value="eliminado"
-                    checked={vigencia === 'eliminado'}
-                    onChange={(e) => setVigencia(e.target.value)}
-                    className="register-radio"
-                  />
-                  <span>Eliminado</span>
-                </label>
               </div>
             </div>
 
