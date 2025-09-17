@@ -164,6 +164,8 @@ const GlobalStylesProvider = ({ children }) => {
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
+        max-width: 1200px;
+        margin: 0 auto;
         gap: var(--spacing-xl);
       }
 

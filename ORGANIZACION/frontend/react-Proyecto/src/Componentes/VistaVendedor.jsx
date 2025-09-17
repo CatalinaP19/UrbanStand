@@ -169,10 +169,12 @@ const VistaVendedor = ({ vendedorData = null }) => {
     <div className="container">
       {/* Header */}
       <header className="header">
-        <div className="header-content">
-          <div className="logo">
-            <MapPin size={24} />
-            UrbanStand
+        <div className="container">
+          <div className="header-content">
+            <div className="logo">
+              <img src="../img/logo.png" alt="logo" />
+              UrbanStand
+            </div>
           </div>
           <nav style={{
             display: 'flex',
