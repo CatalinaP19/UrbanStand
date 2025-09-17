@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 
-export default function Register() {
+export default function Register({ onBackToRoles }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -10,15 +10,13 @@ export default function Register() {
   const [direccion, setDireccion] = useState('')
   const [genero, setGenero] = useState('')
   const [TypeDoc, setTypeDoc] = useState('CC')
-  const [rivi, setRivi] = useState(null) // Cambiar a null para archivos
+  const [rivi, setRivi] = useState(null)
   const [vigencia, setVigencia] = useState('')
   const [NumTel, setNumTel] = useState('')
   const [terms, setTerms] = useState(false)
   const [message, setMessage] = useState('')
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false)
-
-  // Estado para manejar los productos seleccionados
   const [selectedProducts, setSelectedProducts] = useState([])
 
   const productsList = [
@@ -47,47 +45,12 @@ export default function Register() {
     style.textContent = `
       .register-container {
         width: 100vw;
-        height: 100vh;
         background: #faf3e0;
         font-family: system-ui, -apple-system, sans-serif;
         overflow-x: hidden;
         margin: 0;
         padding: 0;
-      }
-      
-      .register-header {
-        background: #faf3e0;
-        backdrop-filter: blur(10px);
-        padding: 1rem 2rem;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        position: sticky;
-        top: 0;
-        z-index: 50;
-      }
-
-      .register-header-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        max-width: 1200px;
-        margin: 0 auto;
-      }
-
-      .register-home-button {
-        background: #9a1e22;
-        border: 2px solid #9a1e22;
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
-        cursor: pointer;
-        font-size: 0.9rem;
-        font-weight: 500;
-        transition: all 0.2s ease;
-      }
-
-      .register-home-button:hover {
-        background: transparent;
-        color: #9a1e22;
+        min-height: 100vh;
       }
 
       .register-content {
@@ -95,7 +58,7 @@ export default function Register() {
         justify-content: center;
         align-items: center;
         padding: 2rem;
-        min-height: calc(100vh - 80px);
+        min-height: 100vh;
       }
 
       .register-box {
@@ -221,6 +184,7 @@ export default function Register() {
         display: flex;
         gap: 1rem;
         margin-top: 0.5rem;
+        flex-wrap: wrap;
       }
 
       .register-radio-label {
@@ -340,16 +304,6 @@ export default function Register() {
         stroke-linejoin: round;
       }
 
-      .logo {
-        font-size: 28px;
-        font-weight: bold;
-        color: #f97316;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      /* ===== ESTILOS PARA PRODUCTOS ===== */
       .register-products-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -434,6 +388,25 @@ export default function Register() {
         color: #dc2626;
       }
 
+      .back-button {
+        background: #6b7280;
+        border: 2px solid #6b7280;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        margin-bottom: 1.5rem;
+        width: 100%;
+      }
+
+      .back-button:hover {
+        background: transparent;
+        color: #6b7280;
+      }
+
       @media (max-width: 768px) {
         .register-content {
           padding: 1rem;
@@ -441,15 +414,6 @@ export default function Register() {
         
         .register-box {
           padding: 1.5rem;
-        }
-        
-        .logo img {
-          height: 40px;
-          width: auto;
-        }
-        
-        .register-header-content {
-          padding: 0 1rem;
         }
 
         .register-name-group {
@@ -492,47 +456,87 @@ export default function Register() {
 
   // Validación de teléfono colombiano
   const validatePhoneNumber = (phone) => {
-    // Regex para números colombianos: debe empezar con 3 y tener 10 dígitos
     const colombianPhoneRegex = /^3\d{9}$/
     return colombianPhoneRegex.test(phone.replace(/\s/g, ''))
   }
 
-  //Validación de la dirección
-const ValidateAddress = () => {
+  // Validación de la dirección corregida
+  const ValidateAddress = (address) => {
     const direccionRegex = /^(Calle|Carrera|Transversal|Diagonal|Avenida|Av\.?|Cr|Cl)\s?\d+[A-Za-z]?(?:\s?(Bis)?)?\s?#\d+[A-Za-z]?-?\d*$/i
-}
+    return direccionRegex.test(address)
+  }
 
   const handleSubmit = () => {
     let errors = []
     const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/
 
     // Validaciones
-    if (!firstName.trim()) errors.push('El nombre es obligatorio.')
-       else if (firstName.length > 30) {
-        errors.push('Su nombre no debe tener más de 30 cáracteres.');
-        }
-    if (!lastName.trim()) errors.push('El apellido es obligatorio.')
-       else if (lastName.length > 30) {
-        errors.push('Su apellido no debe tener más de 30 cáracteres.');
-        }
-    if (numDoc.length < 6 || numDoc.length > 10) errors.push('El número de documento debe tener entre 6 y 10 dígitos.')
-    if (!rivi) errors.push('La imagen del RIVI Y HEMI es requerida.')
-    if (!emailRegex.test(email)) errors.push('El email no es válido.')
-  if (!ValidateAddress(direccionE))errors.push('La dirección de la empresa debe ser válida y compatible con Bogotá.')
-    if (!vigencia) errors.push('Debes elegir una opción de vigencia.')
-    if (!genero) errors.push('Debes elegir una opción de género.')
-    if (selectedProducts.length === 0) errors.push('Debes seleccionar al menos una categoría de productos que ofreces.')
-    if (!validatePhoneNumber(NumTel)) errors.push('El número telefónico debe ser válido y compatible con Colombia (formato: 3XXXXXXXXX).')
+    if (!firstName.trim()) {
+      errors.push('El nombre es obligatorio.')
+    } else if (firstName.length > 30) {
+      errors.push('Su nombre no debe tener más de 30 caracteres.')
+    }
+    
+    if (!lastName.trim()) {
+      errors.push('El apellido es obligatorio.')
+    } else if (lastName.length > 30) {
+      errors.push('Su apellido no debe tener más de 30 caracteres.')
+    }
+    
+    if (numDoc.length < 6 || numDoc.length > 10) {
+      errors.push('El número de documento debe tener entre 6 y 10 dígitos.')
+    }
+    
+    if (!rivi) {
+      errors.push('La imagen del RIVI Y HEMI es requerida.')
+    }
+    
+    if (!emailRegex.test(email)) {
+      errors.push('El email no es válido.')
+    }
+    
+    if (!ValidateAddress(direccion)) {
+      errors.push('La dirección debe ser válida y compatible con Bogotá.')
+    }
+    
+    if (!vigencia) {
+      errors.push('Debes elegir una opción de vigencia.')
+    }
+    
+    if (!genero) {
+      errors.push('Debes elegir una opción de género.')
+    }
+    
+    if (selectedProducts.length === 0) {
+      errors.push('Debes seleccionar al menos una categoría de productos que ofreces.')
+    }
+    
+    if (!validatePhoneNumber(NumTel)) {
+      errors.push('El número telefónico debe ser válido y compatible con Colombia (formato: 3XXXXXXXXX).')
+    }
 
     // Validación de contraseña mejorada
     const passwordRequirements = validatePassword(password)
-    if (!passwordRequirements.minLength) errors.push('La contraseña debe tener al menos 8 caracteres.')
-    if (!passwordRequirements.hasUppercase) errors.push('La contraseña debe contener al menos una letra mayúscula.')
-    if (!passwordRequirements.hasLowercase) errors.push('La contraseña debe contener al menos una letra minúscula.')
-    if (!passwordRequirements.hasNumber) errors.push('La contraseña debe contener al menos un número.')
+    if (!passwordRequirements.minLength) {
+      errors.push('La contraseña debe tener al menos 8 caracteres.')
+    }
+    if (!passwordRequirements.hasUppercase) {
+      errors.push('La contraseña debe contener al menos una letra mayúscula.')
+    }
+    if (!passwordRequirements.hasLowercase) {
+      errors.push('La contraseña debe contener al menos una letra minúscula.')
+    }
+    if (!passwordRequirements.hasNumber) {
+      errors.push('La contraseña debe contener al menos un número.')
+    }
 
-    if (password !== confirmPassword) errors.push('Las contraseñas no coinciden.')
-    if (!terms) errors.push('Debes aceptar los términos y condiciones.')
+    if (password !== confirmPassword) {
+      errors.push('Las contraseñas no coinciden.')
+    }
+    
+    if (!terms) {
+      errors.push('Debes aceptar los términos y condiciones.')
+    }
 
     if (errors.length > 0) {
       setMessage(errors.join(' '))
@@ -550,26 +554,26 @@ const ValidateAddress = () => {
         rivi,
         selectedProducts,
       })
+
+      // Limpiar formulario después del registro exitoso
+      setTimeout(() => {
+        setFirstName('')
+        setLastName('')
+        setEmail('')
+        setPassword('')
+        setConfirmPassword('')
+        setNumDoc('')
+        setDireccion('')
+        setGenero('')
+        setTypeDoc('CC')
+        setRivi(null)
+        setVigencia('')
+        setNumTel('')
+        setSelectedProducts([])
+        setTerms(false)
+        setMessage('')
+      }, 3000)
     }
-
-if (errors.length === 0) {
-  setMessage('¡Registro fallido! Intentelo de nuevo.')
-  setFirstName('')
-  setLastName('')
-  setEmail('')
-  setPassword('')
-  setConfirmPassword('')
-  setNumDoc('')
-  setDireccion('')
-  setGenero('')
-  setTypeDoc('CC')
-  setRivi(null)
-  setVigencia('')
-  setNumTel('')
-  setSelectedProducts([])
-  setTerms(false)
-}
-
   }
 
   const handleKeyPress = (e) => {
@@ -579,7 +583,7 @@ if (errors.length === 0) {
   const handleFileChange = (e) => {
     const file = e.target.files[0]
     if (file) {
-      setRivi(file) // Guardar el archivo completo
+      setRivi(file)
     }
   }
 
@@ -589,10 +593,6 @@ if (errors.length === 0) {
 
   const toggleConfirmPassword = () => {
     setIsConfirmPasswordVisible(!isConfirmPasswordVisible)
-  }
-
-  const goHome = () => {
-    alert('Redirigiendo al inicio…')
   }
 
   const goToLogin = () => {
@@ -611,23 +611,17 @@ if (errors.length === 0) {
 
   return (
     <div className="register-container">
-      {/* Header */}
-      <header className="register-header">
-        <div className="register-header-content">
-          <div className="logo">
-            <img className="logo-img" src="../img/logo.png" alt="logo" />
-            UrbanStand
-          </div>
-          <button type="button" onClick={goHome} className="register-home-button">
-            Volver al inicio
-          </button>
-        </div>
-      </header>
-
-      {/* Register Container */}
       <div className="register-content">
         <div className="register-box">
-          <h2 className="register-title">Vendedor, ¡Registrate!</h2>
+          {/* Botón de regreso */}
+          <button 
+            onClick={onBackToRoles}
+            className="back-button"
+          >
+            ← Volver a selección de roles
+          </button>
+
+          <h2 className="register-title">Vendedor, ¡Regístrate!</h2>
 
           <div className="register-form">
             {/* Name Inputs */}

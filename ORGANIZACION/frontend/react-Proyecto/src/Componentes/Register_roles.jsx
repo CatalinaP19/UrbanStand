@@ -1,16 +1,20 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
+import Register from '../Login/Register';
+import RegistroEntidades from './RegistroEntidades';
 
 export default function Register_roles() {
+  const [currentView, setCurrentView] = useState('roles') // Estado agregado
+
   // Simula función para ir al inicio
   const goHome = () => {
     console.log("Volver al inicio");
   }
 
-    // Simula función para enviar formulario
-  const handleSubmit = () => {
-    console.log("Formulario enviado");
+  // Función para manejar la selección de rol
+  const handleRoleSelect = (role) => {
+    console.log(`Rol seleccionado: ${role}`);
+    alert(`Has seleccionado: ${role}`);
   }
-
 
   useEffect(() => {
     const style = document.createElement('style')
@@ -86,38 +90,42 @@ export default function Register_roles() {
       }
 
       .register-subtitle {
-        font-size: 1.5rem;
-        font-weight: bold;
+        font-size: 1.2rem;
+        font-weight: 500;
         margin-bottom: 2rem;
         text-align: center;
-        color: #9a1e22;
+        color: #374151;
       }
 
-      .register-form {
+      .register-buttons-container {
         display: flex;
         flex-direction: column;
-        gap: 1.5rem;
-        margin: 1rem;
+        gap: 1rem;
       }
 
-
-      .register-submit-button {
+      .register-role-button {
         border: 2px solid #ea580c;
-        padding: 0.75rem 1.5rem;
+        padding: 1rem 1.5rem;
         border-radius: 0.5rem;
         background: transparent;
         cursor: pointer;
-        font-size: 1rem;
+        font-size: 1.1rem;
         font-weight: 600;
         transition: all 0.2s ease;
         width: 100%;
         color: #ea580c;
+        text-align: center;
       }
 
-      .register-submit-button:hover {
-        background: #9a1e22;
+      .register-role-button:hover {
+        background: #ea580c;
         color: white;
-        border-color: #9a1e22;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+      }
+
+      .register-role-button:active {
+        transform: translateY(0);
       }
 
       .logo {
@@ -128,13 +136,115 @@ export default function Register_roles() {
         align-items: center;
         gap: 8px;
       }
-    `
-    document.head.appendChild(style)
 
+      .role-description {
+        font-size: 0.9rem;
+        color: #6b7280;
+        margin-top: 0.5rem;
+        text-align: center;
+      }
+
+      .back-button {
+        background: #6b7280;
+        border: 2px solid #6b7280;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        margin-bottom: 1rem;
+      }
+
+      .back-button:hover {
+        background: transparent;
+        color: #6b7280;
+      }
+
+      @media (max-width: 768px) {
+        .register-content {
+          padding: 1rem;
+        }
+        
+        .register-box {
+          padding: 1.5rem;
+        }
+        
+        .register-title {
+          font-size: 1.5rem;
+        }
+        
+        .register-subtitle {
+          font-size: 1rem;
+        }
+      }
+    `
+    
+    document.head.appendChild(style)
+    
     return () => {
       document.head.removeChild(style)
     }
   }, [])
+
+  // Función para renderizar la vista de selección de roles
+  const renderRoleSelection = () => (
+    <div className="register-content">
+      <div className="register-box">
+        <h1 className="register-title">¡Regístrate!</h1>
+        <h3 className="register-subtitle">¿Qué rol cumples?</h3>
+        
+        <div className="register-buttons-container">
+          <button 
+            onClick={() => setCurrentView('register')}
+            className="register-role-button"
+          >
+            Vendedor
+          </button>
+
+          <button 
+            type="button" 
+            onClick={() => handleRoleSelect('Vendedor')} 
+            className="register-role-button"
+          >
+            Cliente
+          </button>
+
+          <button 
+            type="button" 
+            onClick={() => setCurrentView('registroEntidades')} 
+            className="register-role-button"
+          >
+            Entidad
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+
+  // Función para renderizar el formulario de registro con botón de regreso
+  const renderRegisterForm = () => (
+    <div className="register-content">
+        <Register />
+
+    </div>
+  )
+
+
+    const renderRegisterEntidadesForm = () => (
+    <div className="register-content">
+      <div className="register-box">
+        <button 
+          onClick={() => setCurrentView('roles')} 
+          className="back-button"
+        >
+          ← Volver a selección de roles
+        </button>
+        <RegistroEntidades />
+      </div>
+    </div>
+  )
 
   return (
     <div className="register-container">
@@ -145,36 +255,13 @@ export default function Register_roles() {
             <img className="logo-img" src="../img/logo.png" alt="logo" />
             UrbanStand
           </div>
-          <button onClick={goHome} className="register-home-button">
-            Volver al inicio
-          </button>
         </div>
       </header>
 
-      {/* Register Container */}
-      <div className="register-content">
-        <div className="register-box">
-          <h1 className="register-title">¡Registrate!</h1>
-          <h3 className="register-subtitle">¿Qué rol cumples?</h3>
-          <div className="register-form">
-            <button type="button" onClick={handleSubmit} className="register-submit-button">
-              Cliente
-            </button>
-          </div>
-
-          <div className="register-form">
-            <button type="button" onClick={handleSubmit} className="register-submit-button">
-              Vendedor
-            </button>
-          </div>
-
-          <div className="register-form">
-            <button type="button" onClick={handleSubmit} className="register-submit-button">
-              Entidad
-            </button>
-          </div>
-        </div>
-      </div>
+      {/* Contenido dinámico basado en currentView */}
+      {currentView === 'roles' ? renderRoleSelection() : renderRegisterForm()}
+      
+      {currentView === 'roles' ? renderRoleSelection() : renderRegisterEntidadesForm()}
     </div>
   )
 }

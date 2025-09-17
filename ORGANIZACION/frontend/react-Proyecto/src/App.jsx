@@ -4,10 +4,11 @@ import GlobalStylesProvider from './GlobalStylesProvider'
 import UrbanStand from './Componentes/UrbanStand'
 import Chat from './Componentes/ChatTemplate'
 import Login from './Login/Login'
-import Register from './Login/Register'
+
 import Register_roles from './Componentes/Register_roles'
 import VistaVendedor from './Componentes/VistaVendedor'
 import RegistroEntidades from './Componentes/RegistroEntidades'
+import VistaEntidades from './Componentes/VistaEntidades'
 
 function App() {
   // Definimos el estado para controlar la vista actual
@@ -23,14 +24,14 @@ function App() {
         return <Chat />
       case 'login':
         return <Login />
-      case 'register':
-        return <Register />
       case 'register_roles':
         return <Register_roles />
       case 'registroEntidades':
         return <RegistroEntidades />
       case 'vista1':
         return <VistaVendedor />
+      case 'vista2':
+        return <VistaEntidades />
       default:
         return <UrbanStand />
     }
@@ -73,14 +74,8 @@ function App() {
           >
             Login
           </button>
-          <button
-            onClick={() => setCurrentView('register')}
-            className={`btn ${currentView === 'register' ? 'btn-primary' : 'btn-secondary'}`}
-            style={{ marginRight: 5, fontSize: 12, padding: '5px 10px' }}
-          >
-            Registro Vendedor
-          </button>
-          <button
+
+          <button 
             onClick={() => setCurrentView('registroEntidades')}
             className={`btn ${currentView === 'registroEntidades' ? 'btn-primary' : 'btn-secondary'}`}
             style={{ marginRight: 5, fontSize: 12, padding: '5px 10px' }}
@@ -100,6 +95,14 @@ function App() {
             style={{ fontSize: 12, padding: '5px 10px' }}
           >
             Vista
+          </button>
+
+          <button
+            onClick={() => setCurrentView('vista2')}
+            className={`btn ${currentView === 'vista2' ? 'btn-primary' : 'btn-secondary'}`}
+            style={{ fontSize: 12, padding: '5px 10px' }}
+          >
+            Vista Entidades
           </button>
         </div>
 

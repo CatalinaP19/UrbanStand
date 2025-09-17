@@ -52,7 +52,7 @@ const VendedorSchema = new mongoose.Schema({
     type: String,
     required: [true, 'El número de celular es requerido'],
     trim: true,
-    maxlength: [10, 'El número de celular no puede exceder 10 caracteres']
+    maxlength: [10, 'El número de celular no puede exceder 1 caracteres']
   },
 
   // Información demográfica
