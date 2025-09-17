@@ -1,4 +1,3 @@
-// frontend/src/services/apiService.js
 import API_CONFIG from '../config/api';
 
 class ApiService {
@@ -54,10 +53,18 @@ class ApiService {
     localStorage.setItem('userType', userType);
   }
 
+  // APIs para vendedores
+  vendedor = {
+    register: (data) => this.post(API_CONFIG.VENDEDOR.REGISTER, data),
+    login: (data) => this.post(API_CONFIG.VENDEDOR.LOGIN, data),
+    profile: () => this.request(API_CONFIG.VENDEDOR.PROFILE),
+  };
+
   // APIs para entidades
   entidad = {
     register: (data) => this.post(API_CONFIG.ENTIDAD.REGISTER, data),
     login: (data) => this.post(API_CONFIG.ENTIDAD.LOGIN, data),
+    profile: () => this.request(API_CONFIG.ENTIDAD.PROFILE),
   };
 }
 
