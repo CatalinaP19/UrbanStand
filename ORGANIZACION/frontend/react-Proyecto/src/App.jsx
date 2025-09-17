@@ -30,6 +30,11 @@ function App() {
     setCurrentView('register_roles')
   }
 
+  // Ir a la vista de login
+  const handleGoToLogin = () => {
+    setCurrentView('login');
+  }
+
   // Renderizar vistas según estado
   const renderCurrentView = () => {
     switch (currentView) {
@@ -40,9 +45,9 @@ function App() {
       case 'login':
         return <Login />
       case 'register_roles':
-        return <Register_roles onRoleSelect={handleRoleSelection} />
+        return <Register_roles onRoleSelect={handleRoleSelection} onLoginClick={handleGoToLogin} />
       case 'register':
-        return <Register onBackToRoles={handleBackToRoles} />
+        return <Register onBackToRoles={handleBackToRoles} onGoToLogin={handleGoToLogin} />
       case 'registroEntidades':
         return <RegistroEntidades onBackToRoles={handleBackToRoles} />
       case 'vista1':

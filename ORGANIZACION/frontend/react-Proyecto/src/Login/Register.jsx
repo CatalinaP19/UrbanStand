@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
+import apiService from '../services/apiService' //
 
-export default function Register({ onBackToRoles }) {
+export default function Register({ onBackToRoles, onGoToLogin }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -10,34 +11,36 @@ export default function Register({ onBackToRoles }) {
   const [direccion, setDireccion] = useState('')
   const [genero, setGenero] = useState('')
   const [TypeDoc, setTypeDoc] = useState('CC')
-  const [rivi, setRivi] = useState(null)
-  const [vigencia, setVigencia] = useState('')
   const [NumTel, setNumTel] = useState('')
   const [terms, setTerms] = useState(false)
   const [message, setMessage] = useState('')
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false)
   const [selectedProducts, setSelectedProducts] = useState([])
+  const [loading, setLoading] = useState(false)
 
+  // Mapear las categorías del frontend con las del backend
   const productsList = [
-    'Comidas preparadas',
-    'Bebidas',
-    'Confitería',
-    'Frutas y verduras',
-    'Productos textiles',
-    'Calzado',
-    'Bisutería y accesorios',
-    'Juguetería',
-    'Artículos de temporada',
-    'Cigarrillos y tabaco',
-    'Electrónicos y accesorios',
-    'Arreglos florales',
-    'Papelería y útiles escolares',
-    'Productos varios (Para el hogar)',
-    'S. Lustrado de calzado',
-    'S. Reparación de calzado',
-    'S. Reparación de celulares y electrónicos',
-    'S. Ambulantes de aseo y apoyo',
+    'comidas preparadas',
+    'bebidas',
+    'confiteria',
+    'frutas y verduras',
+    'productos textiles',
+    'calzado',
+    'bisuteria y accesorios',
+    'jugeteria',
+    'articulos de temporada',
+    'cigarrillos y tabaco',
+    'electronicos y accesorios',
+    'arreglos florales',
+    'papeleria y utiles escolares',
+    'productos varios(para el hogar)',
+    'productos de higiene y cuidado personal',
+    's.lustrado de calzado',
+    's.reparacion de calzado',
+    's.reparacion de celulares y electrónicos',
+    's.ambulantes de aseo y apoyo',
+    'otros'
   ]
 
   useEffect(() => {
@@ -272,10 +275,15 @@ export default function Register({ onBackToRoles }) {
         color: white;
       }
 
-      .register-submit-button:hover {
+      .register-submit-button:hover:not(:disabled) {
         background: transparent;
         color: #ea580c;
         border-color: #f97316;
+      }
+
+      .register-submit-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
       }
 
       .register-toggle-container {
@@ -430,6 +438,21 @@ export default function Register({ onBackToRoles }) {
         color: #6b7280;
       }
 
+      .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #ffffff;
+        border-radius: 50%;
+        border-top-color: transparent;
+        animation: spin 1s ease-in-out infinite;
+        margin-right: 10px;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
       @media (max-width: 768px) {
         .register-content {
           padding: 1rem;
@@ -483,35 +506,41 @@ export default function Register({ onBackToRoles }) {
     return colombianPhoneRegex.test(phone.replace(/\s/g, ''))
   }
 
-  // Validación de la dirección corregida
+  // Validación de la dirección
   const ValidateAddress = (address) => {
     const direccionRegex = /^(Calle|Carrera|Transversal|Diagonal|Avenida|Av\.?|Cr|Cl)\s?\d+[A-Za-z]{0,2}(?:\s?Bis)?(?:\s?(Sur|Este|Oeste))?\s?#\d+[A-Za-z]?-?\d*(?:,\s?.+)?$/i
     return direccionRegex.test(address)
   }
 
-  const handleSubmit = () => {
+  // Mapear género del frontend al backend
+  const mapGenero = (generoFrontend) => {
+    const map = {
+      'masculino': 'M',
+      'femenino': 'F',
+      'otro': 'O'
+    }
+    return map[generoFrontend] || ''
+  }
+
+  const handleSubmit = async () => {
     let errors = []
     const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/
 
-    // Validaciones
+    // Validaciones del frontend
     if (!firstName.trim()) {
       errors.push('El nombre es obligatorio.')
-    } else if (firstName.length > 30) {
-      errors.push('Su nombre no debe tener más de 30 caracteres.')
+    } else if (firstName.length < 3 || firstName.length > 10) {
+      errors.push('El nombre debe tener entre 3 y 10 caracteres.')
     }
 
     if (!lastName.trim()) {
       errors.push('El apellido es obligatorio.')
-    } else if (lastName.length > 30) {
-      errors.push('Su apellido no debe tener más de 30 caracteres.')
+    } else if (lastName.length < 3 || lastName.length > 15) {
+      errors.push('El apellido debe tener entre 3 y 15 caracteres.')
     }
 
-    if (numDoc.length < 6 || numDoc.length > 10) {
-      errors.push('El número de documento debe tener entre 6 y 10 dígitos.')
-    }
-
-    if (!rivi) {
-      errors.push('La imagen del RIVI Y HEMI es requerida.')
+    if (numDoc.length < 6 || numDoc.length > 20) {
+      errors.push('El número de documento debe tener entre 6 y 20 caracteres.')
     }
 
     if (!emailRegex.test(email)) {
@@ -522,35 +551,23 @@ export default function Register({ onBackToRoles }) {
       errors.push('La dirección debe ser válida y compatible con Bogotá.')
     }
 
-    if (!vigencia) {
-      errors.push('Debes elegir una opción de vigencia.')
-    }
-
     if (!genero) {
       errors.push('Debes elegir una opción de género.')
     }
 
     if (selectedProducts.length === 0) {
-      errors.push('Debes seleccionar al menos una categoría de productos que ofreces.')
+      errors.push('Debes seleccionar al menos una categoría de productos.')
     }
 
     if (!validatePhoneNumber(NumTel)) {
-      errors.push('El número telefónico debe ser válido y compatible con Colombia (formato: 3XXXXXXXXX).')
+      errors.push('El número telefónico debe ser válido (formato: 3XXXXXXXXX).')
     }
 
-    // Validación de contraseña mejorada
+    // Validación de contraseña
     const passwordRequirements = validatePassword(password)
-    if (!passwordRequirements.minLength) {
-      errors.push('La contraseña debe tener al menos 8 caracteres.')
-    }
-    if (!passwordRequirements.hasUppercase) {
-      errors.push('La contraseña debe contener al menos una letra mayúscula.')
-    }
-    if (!passwordRequirements.hasLowercase) {
-      errors.push('La contraseña debe contener al menos una letra minúscula.')
-    }
-    if (!passwordRequirements.hasNumber) {
-      errors.push('La contraseña debe contener al menos un número.')
+    if (!passwordRequirements.minLength || !passwordRequirements.hasUppercase ||
+      !passwordRequirements.hasLowercase || !passwordRequirements.hasNumber) {
+      errors.push('La contraseña no cumple con los requisitos.')
     }
 
     if (password !== confirmPassword) {
@@ -563,50 +580,92 @@ export default function Register({ onBackToRoles }) {
 
     if (errors.length > 0) {
       setMessage(errors.join(' '))
-    } else {
-      setMessage('¡Registro exitoso! Bienvenido a UrbanStand.')
-      console.log('Datos del registro:', {
-        firstName,
-        lastName,
-        TypeDoc,
-        numDoc,
-        email,
-        direccion,
-        genero,
-        vigencia,
-        rivi,
-        selectedProducts,
-      })
+      return
+    }
 
-      // Limpiar formulario después del registro exitoso
-      setTimeout(() => {
-        setFirstName('')
-        setLastName('')
-        setEmail('')
-        setPassword('')
-        setConfirmPassword('')
-        setNumDoc('')
-        setDireccion('')
-        setGenero('')
-        setTypeDoc('CC')
-        setRivi(null)
-        setVigencia('')
-        setNumTel('')
-        setSelectedProducts([])
-        setTerms(false)
-        setMessage('')
-      }, 3000)
+    // Si no hay errores, enviar al backend
+    setLoading(true)
+    setMessage('')
+
+    try {
+      const registroData = {
+        nombre: firstName.trim(),
+        apellido: lastName.trim(),
+        correo: email.trim().toLowerCase(),
+        contrasenia: password,
+        numero_documento: numDoc.trim(),
+        numero_celular: NumTel.trim(),
+        tipo_documento: TypeDoc,
+        genero: mapGenero(genero),
+        categoria_producto: selectedProducts[0], // Tomar la primera seleccionada
+        direccion_puesto_trabajo: direccion.trim()
+      }
+
+      console.log('Enviando datos:', registroData)
+
+      // Hacer la petición al backend
+      const response = await apiService.vendedor.register(registroData);
+      apiService.saveAuth(response.token, 'vendedor');
+
+
+      if (response.data) {
+        setMessage('¡Registro exitoso! Bienvenido a UrbanStand.')
+
+        // Guardar el token si se devuelve uno
+        if (response.data.token) {
+          localStorage.setItem('urbanstand_token', response.data.token)
+        }
+
+        // Limpiar formulario después del registro exitoso
+        setTimeout(() => {
+          setFirstName('')
+          setLastName('')
+          setEmail('')
+          setPassword('')
+          setConfirmPassword('')
+          setNumDoc('')
+          setDireccion('')
+          setGenero('')
+          setTypeDoc('CC')
+          setNumTel('')
+          setSelectedProducts([])
+          setTerms(false)
+          setMessage('')
+
+          // Opcional: redirigir al login
+          // onBackToRoles()
+        }, 3000)
+      }
+
+    } catch (error) {
+      console.error('Error en registro:', error)
+
+      if (error.response && error.response.data) {
+        // Error del servidor con respuesta
+        if (error.response.data.details) {
+          // Errores de validación
+          const backendErrors = error.response.data.details.map(detail => detail.msg).join(' ')
+          setMessage(backendErrors)
+        } else {
+          // Otros errores del servidor
+          setMessage(error.response.data.message || error.response.data.error || 'Error en el servidor')
+        }
+      } else if (error.request) {
+        // Error de conexión
+        setMessage('Error de conexión. Verifica que el servidor esté ejecutándose en http://localhost:3005')
+      } else {
+        // Otros errores
+        setMessage('Error inesperado. Intenta nuevamente.')
+      }
+    } finally {
+      setLoading(false)
     }
   }
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter') handleSubmit()
-  }
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      setRivi(file)
+    if (e.key === 'Enter' && !loading) {
+      e.preventDefault()
+      handleSubmit()
     }
   }
 
@@ -618,45 +677,37 @@ export default function Register({ onBackToRoles }) {
     setIsConfirmPasswordVisible(!isConfirmPasswordVisible)
   }
 
-  const goToLogin = () => {
-    alert('Redirigiendo a inicio de sesión…')
-  }
-
   const handleProductChange = (product, isChecked) => {
     if (isChecked) {
-      setSelectedProducts((prev) => [...prev, product])
+      // Solo permitir una selección para coincidir con el backend
+      setSelectedProducts([product])
     } else {
-      setSelectedProducts((prev) => prev.filter((p) => p !== product))
+      setSelectedProducts(prev => prev.filter(p => p !== product))
     }
   }
 
   const passwordRequirements = validatePassword(password)
 
   return (
-    <div className="register-container">
-      {/* Header */}
-            <header className="register-header">
-                <div className="register-header-content">
-                    <div className="logo">
-                        <img className="logo-img" src="../img/logo.png" alt="logo" />
-                        UrbanStand
-                    </div>
-                </div>
-            </header>
+<div className="register-container">
+  <header className="register-header">
+    <div className="register-header-content">
+      <div className="logo">
+        <img className="logo-img" src="../img/logo.png" alt="logo" />
+        UrbanStand
+      </div>
+    </div>
+  </header>
       <div className="register-content">
         <div className="register-box">
-          {/* Botón de regreso */}
-          <button
-            onClick={onBackToRoles}
-            className="back-button"
-          >
+          <button onClick={onBackToRoles} className="back-button">
             ← Volver a selección de roles
           </button>
 
           <h2 className="register-title">Vendedor, ¡Regístrate!</h2>
 
           <div className="register-form">
-            {/* Name Inputs */}
+            {/* Nombre y Apellido */}
             <div className="register-name-group">
               <div className="register-input-group">
                 <label className="register-label">Nombre</label>
@@ -668,6 +719,7 @@ export default function Register({ onBackToRoles }) {
                   placeholder='Primer nombre'
                   className="register-input"
                   required
+                  disabled={loading}
                 />
               </div>
               <div className="register-input-group">
@@ -680,11 +732,12 @@ export default function Register({ onBackToRoles }) {
                   placeholder='Primer apellido'
                   className="register-input"
                   required
+                  disabled={loading}
                 />
               </div>
             </div>
 
-            {/* Gender Input */}
+            {/* Género */}
             <div className="register-input-group">
               <label className="register-label">Género</label>
               <div className="register-radio-group">
@@ -696,6 +749,7 @@ export default function Register({ onBackToRoles }) {
                     checked={genero === 'masculino'}
                     onChange={(e) => setGenero(e.target.value)}
                     className="register-radio"
+                    disabled={loading}
                   />
                   <span>Masculino</span>
                 </label>
@@ -707,6 +761,7 @@ export default function Register({ onBackToRoles }) {
                     checked={genero === 'femenino'}
                     onChange={(e) => setGenero(e.target.value)}
                     className="register-radio"
+                    disabled={loading}
                   />
                   <span>Femenino</span>
                 </label>
@@ -718,29 +773,31 @@ export default function Register({ onBackToRoles }) {
                     checked={genero === 'otro'}
                     onChange={(e) => setGenero(e.target.value)}
                     className="register-radio"
+                    disabled={loading}
                   />
                   <span>Otro</span>
                 </label>
               </div>
             </div>
 
-            {/* Type-Doc select */}
+            {/* Tipo de documento */}
             <div className="register-input-group">
               <label className="register-label">Tipo de documento</label>
               <select
                 value={TypeDoc}
                 onChange={(e) => setTypeDoc(e.target.value)}
-                onKeyPress={handleKeyPress}
                 className="register-input"
                 required
+                disabled={loading}
               >
                 <option value="CC">Cédula de ciudadanía</option>
                 <option value="CE">Cédula de extranjería</option>
+                <option value="TI">Tarjeta de identidad</option>
                 <option value="PA">Pasaporte</option>
               </select>
             </div>
 
-            {/* Num-Doc Input */}
+            {/* Número de documento */}
             <div className="register-input-group">
               <label className="register-label">Número de documento</label>
               <input
@@ -751,24 +808,11 @@ export default function Register({ onBackToRoles }) {
                 placeholder='Número de identificación'
                 className="register-input"
                 required
+                disabled={loading}
               />
             </div>
 
-            {/* File-(RIVI) Input */}
-            <div className="register-input-group">
-              <label className="register-label">
-                Adjunte la captura del RIVI Y HEMI
-              </label>
-              <input
-                type="file"
-                onChange={handleFileChange}
-                className="register-input"
-                accept="image/*,.pdf"
-                required
-              />
-            </div>
-
-            {/* Address Input */}
+            {/* Dirección de trabajo */}
             <div className="register-input-group">
               <label className="register-label">Dirección de su puesto de trabajo</label>
               <input
@@ -776,55 +820,27 @@ export default function Register({ onBackToRoles }) {
                 value={direccion}
                 onChange={(e) => setDireccion(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder='Ej. Calle 100 #15-55, barrio Barrios Unidos'
+                placeholder='Tal cual tiene que escribri la direccion calle NUm letra(2) sur #num-num,texto(barrio)'
                 className="register-input"
                 required
+                disabled={loading}
               />
             </div>
 
-            {/* Validity Input */}
+            {/* Categoría de producto (solo una) */}
             <div className="register-input-group">
-              <label className="register-label">Vigencia</label>
-              <div className="register-radio-group">
-                <label className="register-radio-label">
-                  <input
-                    type="radio"
-                    name="vigencia"
-                    value="vigente"
-                    checked={vigencia === 'vigente'}
-                    onChange={(e) => setVigencia(e.target.value)}
-                    className="register-radio"
-                  />
-                  <span>Vigente</span>
-                </label>
-                <label className="register-radio-label">
-                  <input
-                    type="radio"
-                    name="vigencia"
-                    value="vencido"
-                    checked={vigencia === 'vencido'}
-                    onChange={(e) => setVigencia(e.target.value)}
-                    className="register-radio"
-                  />
-                  <span>Vencido</span>
-                </label>
-              </div>
-            </div>
-
-            {/* Products Input */}
-            <div className="register-input-group">
-              <label className="register-label">Productos que ofrece</label>
+              <label className="register-label">Categoría de producto principal</label>
               <div className="register-products-grid">
                 {productsList.map((product, index) => (
                   <div key={index} className="register-product-item">
                     <input
-                      type="checkbox"
+                      type="radio"
                       id={`product-${index}`}
+                      name="categoria_producto"
                       className="register-product-checkbox"
                       checked={selectedProducts.includes(product)}
-                      onChange={(e) =>
-                        handleProductChange(product, e.target.checked)
-                      }
+                      onChange={(e) => handleProductChange(product, e.target.checked)}
+                      disabled={loading}
                     />
                     <label
                       htmlFor={`product-${index}`}
@@ -836,13 +852,11 @@ export default function Register({ onBackToRoles }) {
                 ))}
               </div>
               <div className="register-products-counter">
-                {selectedProducts.length} producto
-                {selectedProducts.length !== 1 ? 's' : ''} seleccionado
-                {selectedProducts.length !== 1 ? 's' : ''}
+                {selectedProducts.length} categoría seleccionada
               </div>
             </div>
 
-            {/* Phone Number Input */}
+            {/* Número de teléfono */}
             <div className="register-input-group">
               <label className="register-label">Número de teléfono</label>
               <input
@@ -853,10 +867,11 @@ export default function Register({ onBackToRoles }) {
                 placeholder='Ej. 3123456789'
                 className="register-input"
                 required
+                disabled={loading}
               />
             </div>
 
-            {/* Email Input */}
+            {/* Email */}
             <div className="register-input-group">
               <label className="register-label">Correo electrónico</label>
               <input
@@ -867,10 +882,11 @@ export default function Register({ onBackToRoles }) {
                 placeholder='email@correo.com'
                 className="register-input"
                 required
+                disabled={loading}
               />
             </div>
 
-            {/* Password Input */}
+            {/* Contraseña */}
             <div className="register-input-group">
               <label className="register-label">Contraseña</label>
               <div className="register-password-container">
@@ -882,32 +898,24 @@ export default function Register({ onBackToRoles }) {
                   placeholder='Ej. MiContra123'
                   className="register-password-input"
                   required
+                  disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={togglePassword}
                   className="register-eye-button"
-                  aria-label={
-                    isPasswordVisible
-                      ? 'Ocultar contraseña'
-                      : 'Mostrar contraseña'
-                  }
+                  disabled={loading}
                 >
-                  <svg
-                    className="register-eye-icon"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                  >
+                  <svg className="register-eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     {isPasswordVisible ? (
-                      <>
-                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                        <line x1="1" y1="1" x2="23" y2="23" />
-                      </>
-                    ) : (
                       <>
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
                         <circle cx="12" cy="12" r="3" />
+                      </>
+                    ) : (
+                      <>
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                        <line x1="1" y1="1" x2="23" y2="23" />
                       </>
                     )}
                   </svg>
@@ -931,7 +939,7 @@ export default function Register({ onBackToRoles }) {
               )}
             </div>
 
-            {/* Confirm Password Input */}
+            {/* Confirmar contraseña */}
             <div className="register-input-group">
               <label className="register-label">Confirmar contraseña</label>
               <div className="register-password-container">
@@ -943,23 +951,15 @@ export default function Register({ onBackToRoles }) {
                   placeholder='Confirmar contraseña'
                   className="register-password-input"
                   required
+                  disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={toggleConfirmPassword}
                   className="register-eye-button"
-                  aria-label={
-                    isConfirmPasswordVisible
-                      ? 'Ocultar contraseña'
-                      : 'Mostrar contraseña'
-                  }
+                  disabled={loading}
                 >
-                  <svg
-                    className="register-eye-icon"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                  >
+                  <svg className="register-eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     {isConfirmPasswordVisible ? (
                       <>
                         <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
@@ -967,8 +967,7 @@ export default function Register({ onBackToRoles }) {
                       </>
                     ) : (
                       <>
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
-                        <circle cx="12" cy="12" r="3" />
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" />
                       </>
                     )}
                   </svg>
@@ -976,7 +975,7 @@ export default function Register({ onBackToRoles }) {
               </div>
             </div>
 
-            {/* Checkbox */}
+            {/* Términos y condiciones */}
             <div className="register-checkbox-container">
               <label className="register-checkbox-label">
                 <input
@@ -985,29 +984,47 @@ export default function Register({ onBackToRoles }) {
                   onChange={(e) => setTerms(e.target.checked)}
                   className="register-checkbox"
                   required
+                  disabled={loading}
                 />
                 <p className="register-checkbox-text">
                   He leído y acepto los
-                  <a href="../POLÍTICA DE PRIVACIDAD Y TÉRMINOS Y CONDICIONES URBANSTAND.pdf"> Términos y condiciones </a>
-                   y la
-                  <a href="../CONSENTIMIENTO INFORMADO PARA TRATAMIENTO DE DATOS PERSONALES URBANSTAND.pdf"> Política de Privacidad.</a>
+<a href="../POLÍTICA DE PRIVACIDAD Y TÉRMINOS Y CONDICIONES URBANSTAND.pdf"> Términos y condiciones </a>
+y la
+<a href="../CONSENTIMIENTO INFORMADO PARA TRATAMIENTO DE DATOS PERSONALES URBANSTAND.pdf"> Política de Privacidad.</a>
                 </p>
               </label>
             </div>
 
-            {/* Submit */}
-            <button type="button" onClick={handleSubmit} className="register-submit-button">
-              Registrarse
+            {/* Botón de registro */}
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="register-submit-button"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <span className="loading-spinner" />
+                  Registrando...
+                </>
+              ) : (
+                'Registrarse'
+              )}
             </button>
 
-            {/* Go to Login */}
+            {/* Link al login */}
             <div className="register-toggle-container">
-              <button type="button" onClick={goToLogin} className="register-toggle-button">
+              <button
+                type="button"
+                onClick={onGoToLogin}
+                className="register-toggle-button"
+                disabled={loading}
+              >
                 ¿Ya tienes cuenta? Inicia sesión
               </button>
             </div>
 
-            {/* Message */}
+            {/* Mensaje de respuesta */}
             {message && (
               <div
                 className={`register-message ${message.includes('exitoso')
@@ -1022,5 +1039,6 @@ export default function Register({ onBackToRoles }) {
         </div>
       </div>
     </div>
-  )
+  );
 }
+
