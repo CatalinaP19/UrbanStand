@@ -503,7 +503,7 @@ export default function RegistroEntidades({ onBackToRoles }) {
             <header className="register-header">
                 <div className="register-header-content">
                     <div className="logo">
-                        <img className="logo-img" src="../img/logo.png" alt="logo" />
+                        <img className="logo-img" src="/img/logo.png" alt="logo" />
                         UrbanStand
                     </div>
                 </div>

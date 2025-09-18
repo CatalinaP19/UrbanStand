@@ -278,7 +278,7 @@ export default function ChatTemplate({
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
-                  height: "100%",
+                  height: "50%",
                   textAlign: "center",
                   color: "#6b7280"
                 }}>
