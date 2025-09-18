@@ -689,356 +689,358 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
   const passwordRequirements = validatePassword(password)
 
   return (
-<div className="register-container">
-  <header className="register-header">
-    <div className="register-header-content">
-      <div className="logo">
-        <img className="logo-img" src="../img/logo.png" alt="logo" />
-        UrbanStand
-      </div>
-    </div>
-  </header>
-      <div className="register-content">
-        <div className="register-box">
-          <button onClick={onBackToRoles} className="back-button">
-            ← Volver a selección de roles
-          </button>
+    <div className="register-container">
+      <header className="register-header">
+        <div className="register-header-content">
+          <div className="logo">
+            <img className="logo-img" src="../img/logo.png" alt="logo" />
+            UrbanStand
+          </div>
+        </div>
+      </header>
 
-          <h2 className="register-title">Vendedor, ¡Regístrate!</h2>
+        <div className="register-content">
+          <div className="register-box">
+            <button onClick={onBackToRoles} className="back-button">
+              ← Volver a selección de roles
+            </button>
 
-          <div className="register-form">
-            {/* Nombre y Apellido */}
-            <div className="register-name-group">
+            <h2 className="register-title">Vendedor, ¡Regístrate!</h2>
+
+            <div className="register-form">
+              {/* Nombre y Apellido */}
+              <div className="register-name-group">
+                <div className="register-input-group">
+                  <label className="register-label">Nombre</label>
+                  <input
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder='Primer nombre'
+                    className="register-input"
+                    required
+                    disabled={loading}
+                  />
+                </div>
+                <div className="register-input-group">
+                  <label className="register-label">Apellido</label>
+                  <input
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder='Primer apellido'
+                    className="register-input"
+                    required
+                    disabled={loading}
+                  />
+                </div>
+              </div>
+
+              {/* Género */}
               <div className="register-input-group">
-                <label className="register-label">Nombre</label>
-                <input
-                  type="text"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder='Primer nombre'
-                  className="register-input"
-                  required
-                  disabled={loading}
-                />
-              </div>
-              <div className="register-input-group">
-                <label className="register-label">Apellido</label>
-                <input
-                  type="text"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder='Primer apellido'
-                  className="register-input"
-                  required
-                  disabled={loading}
-                />
-              </div>
-            </div>
-
-            {/* Género */}
-            <div className="register-input-group">
-              <label className="register-label">Género</label>
-              <div className="register-radio-group">
-                <label className="register-radio-label">
-                  <input
-                    type="radio"
-                    name="genero"
-                    value="masculino"
-                    checked={genero === 'masculino'}
-                    onChange={(e) => setGenero(e.target.value)}
-                    className="register-radio"
-                    disabled={loading}
-                  />
-                  <span>Masculino</span>
-                </label>
-                <label className="register-radio-label">
-                  <input
-                    type="radio"
-                    name="genero"
-                    value="femenino"
-                    checked={genero === 'femenino'}
-                    onChange={(e) => setGenero(e.target.value)}
-                    className="register-radio"
-                    disabled={loading}
-                  />
-                  <span>Femenino</span>
-                </label>
-                <label className="register-radio-label">
-                  <input
-                    type="radio"
-                    name="genero"
-                    value="otro"
-                    checked={genero === 'otro'}
-                    onChange={(e) => setGenero(e.target.value)}
-                    className="register-radio"
-                    disabled={loading}
-                  />
-                  <span>Otro</span>
-                </label>
-              </div>
-            </div>
-
-            {/* Tipo de documento */}
-            <div className="register-input-group">
-              <label className="register-label">Tipo de documento</label>
-              <select
-                value={TypeDoc}
-                onChange={(e) => setTypeDoc(e.target.value)}
-                className="register-input"
-                required
-                disabled={loading}
-              >
-                <option value="CC">Cédula de ciudadanía</option>
-                <option value="CE">Cédula de extranjería</option>
-                <option value="TI">Tarjeta de identidad</option>
-                <option value="PA">Pasaporte</option>
-              </select>
-            </div>
-
-            {/* Número de documento */}
-            <div className="register-input-group">
-              <label className="register-label">Número de documento</label>
-              <input
-                type="text"
-                value={numDoc}
-                onChange={(e) => setNumDoc(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder='Número de identificación'
-                className="register-input"
-                required
-                disabled={loading}
-              />
-            </div>
-
-            {/* Dirección de trabajo */}
-            <div className="register-input-group">
-              <label className="register-label">Dirección de su puesto de trabajo</label>
-              <input
-                type="text"
-                value={direccion}
-                onChange={(e) => setDireccion(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder='Tal cual tiene que escribri la direccion calle NUm letra(2) sur #num-num,texto(barrio)'
-                className="register-input"
-                required
-                disabled={loading}
-              />
-            </div>
-
-            {/* Categoría de producto (solo una) */}
-            <div className="register-input-group">
-              <label className="register-label">Categoría de producto principal</label>
-              <div className="register-products-grid">
-                {productsList.map((product, index) => (
-                  <div key={index} className="register-product-item">
+                <label className="register-label">Género</label>
+                <div className="register-radio-group">
+                  <label className="register-radio-label">
                     <input
                       type="radio"
-                      id={`product-${index}`}
-                      name="categoria_producto"
-                      className="register-product-checkbox"
-                      checked={selectedProducts.includes(product)}
-                      onChange={(e) => handleProductChange(product, e.target.checked)}
+                      name="genero"
+                      value="masculino"
+                      checked={genero === 'masculino'}
+                      onChange={(e) => setGenero(e.target.value)}
+                      className="register-radio"
                       disabled={loading}
                     />
-                    <label
-                      htmlFor={`product-${index}`}
-                      className="register-product-label"
-                    >
-                      {product}
-                    </label>
-                  </div>
-                ))}
+                    <span>Masculino</span>
+                  </label>
+                  <label className="register-radio-label">
+                    <input
+                      type="radio"
+                      name="genero"
+                      value="femenino"
+                      checked={genero === 'femenino'}
+                      onChange={(e) => setGenero(e.target.value)}
+                      className="register-radio"
+                      disabled={loading}
+                    />
+                    <span>Femenino</span>
+                  </label>
+                  <label className="register-radio-label">
+                    <input
+                      type="radio"
+                      name="genero"
+                      value="otro"
+                      checked={genero === 'otro'}
+                      onChange={(e) => setGenero(e.target.value)}
+                      className="register-radio"
+                      disabled={loading}
+                    />
+                    <span>Otro</span>
+                  </label>
+                </div>
               </div>
-              <div className="register-products-counter">
-                {selectedProducts.length} categoría seleccionada
+
+              {/* Tipo de documento */}
+              <div className="register-input-group">
+                <label className="register-label">Tipo de documento</label>
+                <select
+                  value={TypeDoc}
+                  onChange={(e) => setTypeDoc(e.target.value)}
+                  className="register-input"
+                  required
+                  disabled={loading}
+                >
+                  <option value="CC">Cédula de ciudadanía</option>
+                  <option value="CE">Cédula de extranjería</option>
+                  <option value="TI">Tarjeta de identidad</option>
+                  <option value="PA">Pasaporte</option>
+                </select>
               </div>
-            </div>
 
-            {/* Número de teléfono */}
-            <div className="register-input-group">
-              <label className="register-label">Número de teléfono</label>
-              <input
-                type="text"
-                value={NumTel}
-                onChange={(e) => setNumTel(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder='Ej. 3123456789'
-                className="register-input"
-                required
-                disabled={loading}
-              />
-            </div>
-
-            {/* Email */}
-            <div className="register-input-group">
-              <label className="register-label">Correo electrónico</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder='email@correo.com'
-                className="register-input"
-                required
-                disabled={loading}
-              />
-            </div>
-
-            {/* Contraseña */}
-            <div className="register-input-group">
-              <label className="register-label">Contraseña</label>
-              <div className="register-password-container">
+              {/* Número de documento */}
+              <div className="register-input-group">
+                <label className="register-label">Número de documento</label>
                 <input
-                  type={isPasswordVisible ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  type="text"
+                  value={numDoc}
+                  onChange={(e) => setNumDoc(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder='Ej. MiContra123'
-                  className="register-password-input"
+                  placeholder='Número de identificación'
+                  className="register-input"
                   required
                   disabled={loading}
                 />
+              </div>
+
+              {/* Dirección de trabajo */}
+              <div className="register-input-group">
+                <label className="register-label">Dirección de su puesto de trabajo</label>
+                <input
+                  type="text"
+                  value={direccion}
+                  onChange={(e) => setDireccion(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder='Tal cual tiene que escribri la direccion calle NUm letra(2) sur #num-num,texto(barrio)'
+                  className="register-input"
+                  required
+                  disabled={loading}
+                />
+              </div>
+
+              {/* Categoría de producto (solo una) */}
+              <div className="register-input-group">
+                <label className="register-label">Categoría de producto principal</label>
+                <div className="register-products-grid">
+                  {productsList.map((product, index) => (
+                    <div key={index} className="register-product-item">
+                      <input
+                        type="radio"
+                        id={`product-${index}`}
+                        name="categoria_producto"
+                        className="register-product-checkbox"
+                        checked={selectedProducts.includes(product)}
+                        onChange={(e) => handleProductChange(product, e.target.checked)}
+                        disabled={loading}
+                      />
+                      <label
+                        htmlFor={`product-${index}`}
+                        className="register-product-label"
+                      >
+                        {product}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <div className="register-products-counter">
+                  {selectedProducts.length} categoría seleccionada
+                </div>
+              </div>
+
+              {/* Número de teléfono */}
+              <div className="register-input-group">
+                <label className="register-label">Número de teléfono</label>
+                <input
+                  type="text"
+                  value={NumTel}
+                  onChange={(e) => setNumTel(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder='Ej. 3123456789'
+                  className="register-input"
+                  required
+                  disabled={loading}
+                />
+              </div>
+
+              {/* Email */}
+              <div className="register-input-group">
+                <label className="register-label">Correo electrónico</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder='email@correo.com'
+                  className="register-input"
+                  required
+                  disabled={loading}
+                />
+              </div>
+
+              {/* Contraseña */}
+              <div className="register-input-group">
+                <label className="register-label">Contraseña</label>
+                <div className="register-password-container">
+                  <input
+                    type={isPasswordVisible ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder='Ej. MiContra123'
+                    className="register-password-input"
+                    required
+                    disabled={loading}
+                  />
+                  <button
+                    type="button"
+                    onClick={togglePassword}
+                    className="register-eye-button"
+                    disabled={loading}
+                  >
+                    <svg className="register-eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      {isPasswordVisible ? (
+                        <>
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+                          <circle cx="12" cy="12" r="3" />
+                        </>
+                      ) : (
+                        <>
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                          <line x1="1" y1="1" x2="23" y2="23" />
+                        </>
+                      )}
+                    </svg>
+                  </button>
+                </div>
+                {password && (
+                  <div className="password-requirements">
+                    <div className={`password-requirement ${passwordRequirements.minLength ? 'valid' : 'invalid'}`}>
+                      {passwordRequirements.minLength ? '✓' : '✗'} Mínimo 8 caracteres
+                    </div>
+                    <div className={`password-requirement ${passwordRequirements.hasUppercase ? 'valid' : 'invalid'}`}>
+                      {passwordRequirements.hasUppercase ? '✓' : '✗'} Al menos una letra mayúscula
+                    </div>
+                    <div className={`password-requirement ${passwordRequirements.hasLowercase ? 'valid' : 'invalid'}`}>
+                      {passwordRequirements.hasLowercase ? '✓' : '✗'} Al menos una letra minúscula
+                    </div>
+                    <div className={`password-requirement ${passwordRequirements.hasNumber ? 'valid' : 'invalid'}`}>
+                      {passwordRequirements.hasNumber ? '✓' : '✗'} Al menos un número
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Confirmar contraseña */}
+              <div className="register-input-group">
+                <label className="register-label">Confirmar contraseña</label>
+                <div className="register-password-container">
+                  <input
+                    type={isConfirmPasswordVisible ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder='Confirmar contraseña'
+                    className="register-password-input"
+                    required
+                    disabled={loading}
+                  />
+                  <button
+                    type="button"
+                    onClick={toggleConfirmPassword}
+                    className="register-eye-button"
+                    disabled={loading}
+                  >
+                    <svg className="register-eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      {isConfirmPasswordVisible ? (
+                        <>
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                          <line x1="1" y1="1" x2="23" y2="23" />
+                        </>
+                      ) : (
+                        <>
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" />
+                        </>
+                      )}
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Términos y condiciones */}
+              <div className="register-checkbox-container">
+                <label className="register-checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={terms}
+                    onChange={(e) => setTerms(e.target.checked)}
+                    className="register-checkbox"
+                    required
+                    disabled={loading}
+                  />
+                  <p className="register-checkbox-text">
+                    He leído y acepto los
+
+                    <a href="../POLÍTICA DE PRIVACIDAD Y TÉRMINOS Y CONDICIONES URBANSTAND.pdf"> Términos y condiciones </a>
+                    y la
+                    <a href="../CONSENTIMIENTO INFORMADO PARA TRATAMIENTO DE DATOS PERSONALES URBANSTAND.pdf"> Política de Privacidad.</a>;
+                  </p>
+                </label>
+              </div>
+
+              {/* Botón de registro */}
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className="register-submit-button"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <span className="loading-spinner" />
+                    Registrando...
+                  </>
+                ) : (
+                  'Registrarse'
+                )}
+              </button>
+
+              {/* Link al login */}
+              <div className="register-toggle-container">
                 <button
                   type="button"
-                  onClick={togglePassword}
-                  className="register-eye-button"
+                  onClick={onGoToLogin}
+                  className="register-toggle-button"
                   disabled={loading}
                 >
-                  <svg className="register-eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    {isPasswordVisible ? (
-                      <>
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
-                        <circle cx="12" cy="12" r="3" />
-                      </>
-                    ) : (
-                      <>
-                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                        <line x1="1" y1="1" x2="23" y2="23" />
-                      </>
-                    )}
-                  </svg>
+                  ¿Ya tienes cuenta? Inicia sesión
                 </button>
               </div>
-              {password && (
-                <div className="password-requirements">
-                  <div className={`password-requirement ${passwordRequirements.minLength ? 'valid' : 'invalid'}`}>
-                    {passwordRequirements.minLength ? '✓' : '✗'} Mínimo 8 caracteres
-                  </div>
-                  <div className={`password-requirement ${passwordRequirements.hasUppercase ? 'valid' : 'invalid'}`}>
-                    {passwordRequirements.hasUppercase ? '✓' : '✗'} Al menos una letra mayúscula
-                  </div>
-                  <div className={`password-requirement ${passwordRequirements.hasLowercase ? 'valid' : 'invalid'}`}>
-                    {passwordRequirements.hasLowercase ? '✓' : '✗'} Al menos una letra minúscula
-                  </div>
-                  <div className={`password-requirement ${passwordRequirements.hasNumber ? 'valid' : 'invalid'}`}>
-                    {passwordRequirements.hasNumber ? '✓' : '✗'} Al menos un número
-                  </div>
+
+              {/* Mensaje de respuesta */}
+              {message && (
+                <div
+                  className={`register-message ${message.includes('exitoso')
+                    ? 'register-message-success'
+                    : 'register-message-error'
+                    }`}
+                >
+                  {message}
                 </div>
               )}
             </div>
-
-            {/* Confirmar contraseña */}
-            <div className="register-input-group">
-              <label className="register-label">Confirmar contraseña</label>
-              <div className="register-password-container">
-                <input
-                  type={isConfirmPasswordVisible ? 'text' : 'password'}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder='Confirmar contraseña'
-                  className="register-password-input"
-                  required
-                  disabled={loading}
-                />
-                <button
-                  type="button"
-                  onClick={toggleConfirmPassword}
-                  className="register-eye-button"
-                  disabled={loading}
-                >
-                  <svg className="register-eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    {isConfirmPasswordVisible ? (
-                      <>
-                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                        <line x1="1" y1="1" x2="23" y2="23" />
-                      </>
-                    ) : (
-                      <>
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" />
-                      </>
-                    )}
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            {/* Términos y condiciones */}
-            <div className="register-checkbox-container">
-              <label className="register-checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={terms}
-                  onChange={(e) => setTerms(e.target.checked)}
-                  className="register-checkbox"
-                  required
-                  disabled={loading}
-                />
-                <p className="register-checkbox-text">
-                  He leído y acepto los
-<a href="../POLÍTICA DE PRIVACIDAD Y TÉRMINOS Y CONDICIONES URBANSTAND.pdf"> Términos y condiciones </a>
-y la
-<a href="../CONSENTIMIENTO INFORMADO PARA TRATAMIENTO DE DATOS PERSONALES URBANSTAND.pdf"> Política de Privacidad.</a>
-                </p>
-              </label>
-            </div>
-
-            {/* Botón de registro */}
-            <button
-              type="button"
-              onClick={handleSubmit}
-              className="register-submit-button"
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <span className="loading-spinner" />
-                  Registrando...
-                </>
-              ) : (
-                'Registrarse'
-              )}
-            </button>
-
-            {/* Link al login */}
-            <div className="register-toggle-container">
-              <button
-                type="button"
-                onClick={onGoToLogin}
-                className="register-toggle-button"
-                disabled={loading}
-              >
-                ¿Ya tienes cuenta? Inicia sesión
-              </button>
-            </div>
-
-            {/* Mensaje de respuesta */}
-            {message && (
-              <div
-                className={`register-message ${message.includes('exitoso')
-                  ? 'register-message-success'
-                  : 'register-message-error'
-                  }`}
-              >
-                {message}
-              </div>
-            )}
           </div>
         </div>
       </div>
-    </div>
-  );
+      );
 }
 
