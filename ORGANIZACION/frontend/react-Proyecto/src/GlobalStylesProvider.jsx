@@ -164,6 +164,8 @@ const GlobalStylesProvider = ({ children }) => {
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
+        max-width: 1200px;
+        margin: 0 auto;
         gap: var(--spacing-xl);
       }
 
@@ -234,9 +236,9 @@ const GlobalStylesProvider = ({ children }) => {
       }
 
       .hero-image {
-        width: 100%;
+        width: 70%;
         border-radius: 15px;
-        box-shadow: 0 15px 35px var(--shadow);
+        box-shadow: 0 0.5px 35px var(--shadow);
         object-fit: cover;
         height: 350px;
       }
