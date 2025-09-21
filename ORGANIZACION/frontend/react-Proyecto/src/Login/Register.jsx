@@ -38,6 +38,7 @@ export default function Register({ onBackToRoles }) {
     'S. Reparación de calzado',
     'S. Reparación de celulares y electrónicos',
     'S. Ambulantes de aseo y apoyo',
+    'Otros'
   ]
 
   useEffect(() => {
@@ -412,8 +413,8 @@ export default function Register({ onBackToRoles }) {
       }
 
       .back-button {
-        background: #9a1e22;
-        border: 2px solid #9a1e22;
+        background: #6b7280;
+        border: 2px solid #6b7280;
         color: white;
         padding: 0.5rem 1rem;
         border-radius: 0.5rem;
@@ -427,7 +428,7 @@ export default function Register({ onBackToRoles }) {
 
       .back-button:hover {
         background: transparent;
-        color: #9a1e22;
+        color: #6b7280;
       }
 
       @media (max-width: 768px) {
@@ -466,7 +467,7 @@ export default function Register({ onBackToRoles }) {
     }
   }, [])
 
-  // Validación de contraseña 
+  // Validación de contraseña mejorada
   const validatePassword = (pass) => {
     const requirements = {
       minLength: pass.length >= 8,
@@ -489,7 +490,7 @@ export default function Register({ onBackToRoles }) {
     return direccionRegex.test(address)
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     let errors = []
     const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/
 
@@ -564,38 +565,55 @@ export default function Register({ onBackToRoles }) {
     if (errors.length > 0) {
       setMessage(errors.join(' '))
     } else {
-      setMessage('¡Registro exitoso! Bienvenido a UrbanStand.')
-      console.log('Datos del registro:', {
-        firstName,
-        lastName,
-        TypeDoc,
-        numDoc,
-        email,
-        direccion,
-        genero,
-        vigencia,
-        rivi,
-        selectedProducts,
-      })
+      try {
+        const response = await fetch('http://localhost:3005/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            firstName,
+            lastName,
+            email,
+            password,
+            numDoc,
+            NumTel,
+            TypeDoc,
+            genero,
+            selectedProducts,
+            direccion,
+            rivi,
+          })
+        })
+        const data = await response.json()
 
-      // Limpiar formulario después del registro exitoso
-      setTimeout(() => {
-        setFirstName('')
-        setLastName('')
-        setEmail('')
-        setPassword('')
-        setConfirmPassword('')
-        setNumDoc('')
-        setDireccion('')
-        setGenero('')
-        setTypeDoc('CC')
-        setRivi(null)
-        setVigencia('')
-        setNumTel('')
-        setSelectedProducts([])
-        setTerms(false)
-        setMessage('')
-      }, 3000)
+        if (response.ok) {
+          // Éxito
+          setMessage('¡Registro exitoso! Bienvenido a UrbanStand.')
+          // Limpiar formulario después de 3 segundos
+          setTimeout(() => {
+            setFirstName('')
+            setLastName('')
+            setEmail('')
+            setPassword('')
+            setConfirmPassword('')
+            setNumDoc('')
+            setDireccion('')
+            setGenero('')
+            setTypeDoc('CC')
+            setRivi(null)
+            setVigencia('')
+            setNumTel('')
+            setTerms(false)
+            setSelectedProducts([])
+            setMessage('')
+          }, 3000)
+        } else {
+          // Error del servidor
+          setMessage(data.message || data.error || 'Error en el registro')
+        }
+      } catch (error) {
+        console.error('Error en registro:', error)
+        setMessage('Error en el registro. Por favor, inténtalo de nuevo más tarde.')
+      }
     }
   }
 
@@ -606,7 +624,7 @@ export default function Register({ onBackToRoles }) {
   const handleFileChange = (e) => {
     const file = e.target.files[0]
     if (file) {
-      setRivi(file)
+      setRivi(file.name)  // Solo guarda el nombre como string
     }
   }
 
@@ -635,14 +653,14 @@ export default function Register({ onBackToRoles }) {
   return (
     <div className="register-container">
       {/* Header */}
-            <header className="register-header">
-                <div className="register-header-content">
-                    <div className="logo">
-                        <img className="logo-img" src="../img/logo.png" alt="logo" />
-                        UrbanStand
-                    </div>
-                </div>
-            </header>
+      <header className="register-header">
+        <div className="register-header-content">
+          <div className="logo">
+            <img className="logo-img" src="../img/logo.png" alt="logo" />
+            UrbanStand
+          </div>
+        </div>
+      </header>
       <div className="register-content">
         <div className="register-box">
           {/* Botón de regreso */}
@@ -790,19 +808,19 @@ export default function Register({ onBackToRoles }) {
                   <input
                     type="radio"
                     name="vigencia"
-                    value="vigente"
-                    checked={vigencia === 'vigente'}
+                    value="activo"
+                    checked={vigencia === 'activo'}
                     onChange={(e) => setVigencia(e.target.value)}
                     className="register-radio"
                   />
-                  <span>Vigente</span>
+                  <span> Vigente</span>
                 </label>
                 <label className="register-radio-label">
                   <input
                     type="radio"
                     name="vigencia"
-                    value="vencido"
-                    checked={vigencia === 'vencido'}
+                    value="inactivo"
+                    checked={vigencia === 'inactivo'}
                     onChange={(e) => setVigencia(e.target.value)}
                     className="register-radio"
                   />
@@ -989,7 +1007,7 @@ export default function Register({ onBackToRoles }) {
                 <p className="register-checkbox-text">
                   He leído y acepto los
                   <a href="../POLÍTICA DE PRIVACIDAD Y TÉRMINOS Y CONDICIONES URBANSTAND.pdf"> Términos y condiciones </a>
-                   y la
+                  y la
                   <a href="../CONSENTIMIENTO INFORMADO PARA TRATAMIENTO DE DATOS PERSONALES URBANSTAND.pdf"> Política de Privacidad.</a>
                 </p>
               </label>
