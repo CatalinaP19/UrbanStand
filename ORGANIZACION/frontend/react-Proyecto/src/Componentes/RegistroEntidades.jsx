@@ -66,8 +66,8 @@ export default function RegistroEntidades({ onBackToRoles }) {
       }
 
       .back-button {
-        background: #6b7280;
-        border: 2px solid #6b7280;
+        background: #9a1e22;
+        border: 2px solid #9a1e22;
         color: white;
         padding: 0.5rem 1rem;
         border-radius: 0.5rem;
@@ -76,11 +76,12 @@ export default function RegistroEntidades({ onBackToRoles }) {
         font-weight: 500;
         transition: all 0.2s ease;
         margin-bottom: 1rem;
+        width: 100%;
       }
 
       .back-button:hover {
         background: transparent;
-        color: #6b7280;
+        color: #9a1e22;
       }
 
       .register-title {

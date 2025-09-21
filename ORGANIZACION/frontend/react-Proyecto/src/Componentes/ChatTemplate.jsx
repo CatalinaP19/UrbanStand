@@ -157,6 +157,7 @@ export default function ChatTemplate({
   return (
     <div style={{
       height: "100vh",
+      width: "60vh",
       display: "flex",
       flexDirection: "column",
       fontFamily: "system-ui, -apple-system, sans-serif",
@@ -278,7 +279,7 @@ export default function ChatTemplate({
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
-                  height: "50%",
+                  height: "100%",
                   textAlign: "center",
                   color: "#6b7280"
                 }}>
@@ -337,9 +338,19 @@ export default function ChatTemplate({
                         padding: "0.75rem",
                         borderRadius: "0.5rem",
                         boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
-                        border: "1px solid #e5e7eb"
+                        border: "1px solid #e5e7eb",
+                        wordWrap: "break-word",
+                        overflowWrap: "break-word",
+                        wordBreak: "break-word",
+                        hyphens: "auto",
+                        maxWidth: "100%",
+                        boxSizing: "border-box"
                       }}>
-                        <p style={{ margin: 0, fontSize: "0.875rem", color: "#374151", lineHeight: 1.5 }}>
+                        <p style={{ margin: 0, fontSize: "0.875rem", color: "#374151", lineHeight: 1.5,  whiteSpace: "pre-wrap",
+                          wordWrap: "break-word",
+                          overflowWrap: "break-word",
+                          wordBreak: "break-word"
+}}>
                           {message.text}
                         </p>
                       </div>

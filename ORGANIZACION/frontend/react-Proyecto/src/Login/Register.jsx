@@ -412,8 +412,8 @@ export default function Register({ onBackToRoles }) {
       }
 
       .back-button {
-        background: #6b7280;
-        border: 2px solid #6b7280;
+        background: #9a1e22;
+        border: 2px solid #9a1e22;
         color: white;
         padding: 0.5rem 1rem;
         border-radius: 0.5rem;
@@ -427,7 +427,7 @@ export default function Register({ onBackToRoles }) {
 
       .back-button:hover {
         background: transparent;
-        color: #6b7280;
+        color: #9a1e22;
       }
 
       @media (max-width: 768px) {
@@ -466,7 +466,7 @@ export default function Register({ onBackToRoles }) {
     }
   }, [])
 
-  // Validación de contraseña mejorada
+  // Validación de contraseña 
   const validatePassword = (pass) => {
     const requirements = {
       minLength: pass.length >= 8,

@@ -162,6 +162,7 @@ export default function Register_roles({ onRoleSelect }) {
           
           <div className="register-buttons-container">
             <button 
+            type="button" 
               onClick={() => handleRoleSelect('vendedor')}
               className="register-role-button"
             >

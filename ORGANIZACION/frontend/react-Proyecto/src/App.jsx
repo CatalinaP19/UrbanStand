@@ -9,6 +9,7 @@ import Register_roles from './Componentes/Register_roles'
 import VistaVendedor from './Componentes/VistaVendedor'
 import RegistroEntidades from './Componentes/RegistroEntidades'
 import VistaEntidades from './Componentes/VistaEntidades'
+import VistaCliente from './Componentes/VistaCliente'
 
 function App() {
   // Estado para controlar la vista actual
@@ -54,6 +55,8 @@ function App() {
         return <VistaVendedor />
       case 'vista2':
         return <VistaEntidades />
+      case 'vista3':
+        return <VistaCliente />
       default:
         return <UrbanStand />
     }
@@ -116,6 +119,14 @@ function App() {
             style={{ fontSize: 12, padding: '5px 10px' }}
           >
             Vista Entidades
+          </button>
+
+            <button
+            onClick={() => setCurrentView('vista3')}
+            className={`btn ${currentView === 'vista3' ? 'btn-primary' : 'btn-secondary'}`}
+            style={{ fontSize: 12, padding: '5px 10px' }}
+          >
+            Vista Clientes
           </button>
         </div>
 
