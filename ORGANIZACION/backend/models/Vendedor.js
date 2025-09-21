@@ -4,19 +4,19 @@ const bcrypt = require('bcryptjs');
 
 const VendedorSchema = new mongoose.Schema({
   // Información personal básica del vendedor
-  nombre: {
+  firstName: {
     type: String,
     required: [true, 'El nombre es requerido'],
     trim: true,
     maxlength: [100, 'El nombre no puede exceder 100 caracteres']
   },
-  apellido: {
+  lastName: {
     type: String,
     required: [true, 'El apellido es requerido'],
     trim: true,
     maxlength: [100, 'El apellido no puede exceder 100 caracteres']
   },
-  correo: {
+  email: {
     type: String,
     required: [true, 'El correo es requerido'],
     unique: true,
@@ -25,14 +25,14 @@ const VendedorSchema = new mongoose.Schema({
     maxlength: [150, 'El correo no puede exceder 150 caracteres'],
     match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Por favor ingresa un correo válido']
   },
-  contrasenia: {
+  password: {
     type: String,
     required: [true, 'La contraseña es requerida'],
     minlength: [6, 'La contraseña debe tener al menos 6 caracteres']
   },
 
   // Información de identificación
-  tipo_documento: {
+  TypeDoc: {
     type: String,
     required: [true, 'El tipo de documento es requerido'],
     enum: {
@@ -41,14 +41,14 @@ const VendedorSchema = new mongoose.Schema({
     },
     default: 'CC'
   },
-  numero_documento: {
+  numDoc: {
     type: String,
     required: [true, 'El número de documento es requerido'],
     unique: true,
     trim: true,
     maxlength: [10, 'El número de documento no puede exceder 10 caracteres']
   },
-  numero_celular: {
+  NumTel: {
     type: String,
     required: [true, 'El número de celular es requerido'],
     trim: true,
@@ -59,53 +59,56 @@ const VendedorSchema = new mongoose.Schema({
   genero: {
     type: String,
     enum: {
-      values: ['M', 'F', 'O'],
-      message: 'Género debe ser: M (Masculino), F (Femenino), u O (Otro)'
+      values: ['masculino', 'femenino', 'otro'],
+      message: 'Género debe ser: masculino, femenino, u otro'
     },
     required: [true, 'El género es requerido']
   },
 
   // Información laboral
-  direccion_puesto_trabajo: {
+  direccion: {
     type: String,
     required: [true, 'La dirección del puesto de trabajo es requerida'],
     trim: true
   },
-  categoria_producto: {
+  rivi: {
     type: String,
-    required: [true, 'La categoría de producto es requerida'],
-    enum: {
-      values: [
-        'Comidas preparadas',
-        'bebidas',
-        'confiteria',
-        'frutas y verduras',
-        'productos textiles',
-        'calzado',
-        'bisuteria y accesorios',
-        'jugeteria',
-        'articulos de temporada',
-        'cigarrillos y tabaco',
-        'electronicos y accesorios',
-        'arreglos florales',
-        'papeleria y utiles escolares',
-        'productos varios(para el hogar)',
-        'Productos de higiene y cuidado personal',
-        'S.lustrado de calzado',
-        'S.reparacion de calzado',
-        'S.reparacion de celulares y electrónicos',
-        'S.ambulantes de aseo y apoyo',
-        'otros'
-      ],
-      message: 'Categoría de producto no válida'
-    }
+    required: [true, 'La imagen del RIVI Y HEMI es requerida']
   },
+  selectedProducts: [{
+  type: String,
+  required: true,
+  enum: {
+    values: [
+      'Comidas preparadas',
+      'Bebidas',
+      'Confitería',
+      'Frutas y verduras',
+      'Productos textiles',
+      'Calzado',
+      'Bisutería y accesorios',
+      'Juguetería',
+      'Artículos de temporada',
+      'Cigarrillos y tabaco',
+      'Electrónicos y accesorios',
+      'Arreglos florales',
+      'Papelería y útiles escolares',
+      'Productos varios (Para el hogar)',
+      'S. Lustrado de calzado',
+      'S. Reparación de calzado',
+      'S. Reparación de celulares y electrónicos',
+      'S. Ambulantes de aseo y apoyo',
+      'Otros'
+    ],
+    message: 'Categoría de producto no válida'
+  }
+}],
 
   // Estado y control
-  estado_vendedor: {
+  vigencia: {
     type: String,
     enum: {
-      values: ['activo', 'inactivo', 'suspendido', 'eliminado'],
+      values: ['activo', 'inactivo'],
       message: 'Estado de vendedor no válido'
     },
     default: 'activo'
@@ -150,10 +153,10 @@ const VendedorSchema = new mongoose.Schema({
 });
 
 // Índices para optimizar consultas
-VendedorSchema.index({ correo: 1 });
-VendedorSchema.index({ numero_documento: 1 });
-VendedorSchema.index({ estado_vendedor: 1 });
-VendedorSchema.index({ categoria_producto: 1 });
+VendedorSchema.index({ email: 1 });
+VendedorSchema.index({ numDoc: 1 });
+VendedorSchema.index({ vigencia: 1 });
+VendedorSchema.index({ selectedProducts: 1 });
 VendedorSchema.index({
   "ubicacion_actual.latitud": 1,
   "ubicacion_actual.longitud": 1
@@ -162,12 +165,12 @@ VendedorSchema.index({
 // Middleware para encriptar contraseña antes de guardar
 VendedorSchema.pre('save', async function (next) {
   // Solo encriptar si la contraseña ha sido modificada o es nueva
-  if (!this.isModified('contrasenia')) return next();
+  if (!this.isModified('password')) return next();
 
   try {
     // Hash de la contraseña(representa la contraseña como unica pasandola de un texto plano a una cadena alfa numerica)
     const salt = await bcrypt.genSalt(12);
-    this.contrasenia = await bcrypt.hash(this.contrasenia, salt);
+    this.password = await bcrypt.hash(this.password, salt);
     next();
   } catch (error) {
     next(error);
@@ -175,8 +178,8 @@ VendedorSchema.pre('save', async function (next) {
 });
 
 // Método para comparar contraseñas
-VendedorSchema.methods.compararContrasenia = async function (contrasenia) {
-  return await bcrypt.compare(contrasenia, this.contrasenia);
+VendedorSchema.methods.compararContrasenia = async function (password) {
+  return await bcrypt.compare(password, this.password);
 };
 
 // Método para actualizar ubicación
@@ -195,7 +198,7 @@ VendedorSchema.statics.encontrarCercanos = function (latitud, longitud, radioKm 
   const radioGrados = radioKm / 111;
 
   return this.find({
-    estado_vendedor: 'activo',
+    vigencia: 'activo',
     'ubicacion_actual.latitud': {
       $exists: true,
       $gte: latitud - radioGrados,
@@ -206,13 +209,13 @@ VendedorSchema.statics.encontrarCercanos = function (latitud, longitud, radioKm 
       $gte: longitud - radioGrados,
       $lte: longitud + radioGrados
     }
-  }).select('-contrasenia');
+  }).select('-password');
 };
 
 // Método para obtener información pública del vendedor
 VendedorSchema.methods.toPublicJSON = function () {
   const vendedor = this.toObject();
-  delete vendedor.contrasenia;
+  delete vendedor.password;
   delete vendedor.__v;
   return vendedor;
 };
