@@ -30,23 +30,6 @@ export default function RegistroEntidades({ onBackToRoles }) {
         padding: 0;
       }
       
-      .register-header {
-        background: #faf3e0;
-        backdrop-filter: blur(10px);
-        padding: 1rem 2rem;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        position: sticky;
-        top: 0;
-        z-index: 50;
-      }
-
-      .register-header-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        max-width: 1200px;
-        margin: 0 auto;
-      }
 
       .register-content {
         display: flex;
@@ -363,10 +346,7 @@ export default function RegistroEntidades({ onBackToRoles }) {
           height: 40px;
           width: auto;
         }
-        
-        .register-header-content {
-          padding: 0 1rem;
-        }
+       
 
         .register-name-group {
           flex-direction: column;
@@ -500,15 +480,6 @@ export default function RegistroEntidades({ onBackToRoles }) {
 
     return (
         <div className="register-container">
-            {/* Header */}
-            <header className="register-header">
-                <div className="register-header-content">
-                    <div className="logo">
-                        <img className="logo-img" src="/img/logo.png" alt="logo" />
-                        UrbanStand
-                    </div>
-                </div>
-            </header>
 
             {/* Register Container */}
             <div className="register-content">

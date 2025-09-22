@@ -62,29 +62,9 @@ export default function Register({ onBackToRoles }) {
         min-height: 100vh;
       }
 
-        .register-header-content {
-          padding: 0 1rem;
-        }
-
-              .register-header-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        max-width: 1200px;
-        margin: 0 auto;
-      }
-
+        
             
-      .register-header {
-        background: #faf3e0;
-        backdrop-filter: blur(10px);
-        padding: 1rem 2rem;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        position: sticky;
-        top: 0;
-        z-index: 50;
-      }
-
+      
       .register-box {
         width: 100%;
         max-width: 32rem;
@@ -652,15 +632,6 @@ export default function Register({ onBackToRoles }) {
 
   return (
     <div className="register-container">
-      {/* Header */}
-      <header className="register-header">
-        <div className="register-header-content">
-          <div className="logo">
-            <img className="logo-img" src="../img/logo.png" alt="logo" />
-            UrbanStand
-          </div>
-        </div>
-      </header>
       <div className="register-content">
         <div className="register-box">
           {/* Botón de regreso */}

@@ -167,45 +167,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
 
   return (
     <div className="container">
-      {/* Header */}
-      <header className="header">
-        <div className="container">
-          <div className="header-content">
-            <div className="logo">
-              <img src="../img/logo.png" alt="logo" />
-              UrbanStand
-            </div>
-          </div>
-          <nav style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '2rem'
-          }}>
-            <button className="btn btn-primary">
-              Inicio
-            </button>
-            <a href="#" style={{
-              color: 'var(--secondary)',
-              textDecoration: 'none',
-              fontWeight: '500'
-            }}>Mapa</a>
-            <a href="#" style={{
-              color: 'var(--secondary)',
-              textDecoration: 'none',
-              fontWeight: '500'
-            }}>Perfil</a>
-            <a href="#" style={{
-              color: 'var(--secondary)',
-              textDecoration: 'none',
-              fontWeight: '500'
-            }}>Chat</a>
-            <Bell size={18} style={{ 
-              color: 'var(--secondary)', 
-              cursor: 'pointer' 
-            }} />
-          </nav>
-        </div>
-      </header>
+    
 
       {/* Hero Section */}
       <section className="hero">

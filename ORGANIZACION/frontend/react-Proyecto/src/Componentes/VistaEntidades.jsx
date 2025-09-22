@@ -411,30 +411,8 @@ export default function UrbanStandDashboard() {
           gap: 1rem;
         }
 
-        .dashboard-hero-title {
-          font-size: 1.8rem;
-        }
-
-        .dashboard-hero-icon {
-          width: 150px;
-          height: 80px;
-          font-size: 2rem;
-        }
-
-        .dashboard-charts-grid {
-          grid-template-columns: 1fr;
-        }
         
-        .dashboard-nav {
-          padding: 1rem;
-          flex-direction: column;
-          gap: 1rem;
-        }
-
-        .dashboard-nav-links {
-          flex-direction: column;
-          gap: 1rem;
-        }
+  
       }
     `;
     
@@ -447,20 +425,7 @@ export default function UrbanStandDashboard() {
 
   return (
     <div className="dashboard-container">
-      
-      {/* Navegación */}
-      <nav className="dashboard-nav">
-                <div className="logo">
-          <img className="logo-img" src="../img/logo.png" alt="logo" />
-          UrbanStand
-        </div>
-        <div className="dashboard-nav-links">
-          <button className="dashboard-nav-button">Inicio</button>
-          <button className="dashboard-nav-button">Estadísticas</button>
-          <button className="dashboard-nav-button">Perfil</button>
-          <button className="dashboard-logout-button">Cerrar sesión</button>
-        </div>
-      </nav>
+    
 
       {/* Contenido principal */}
       <div className="dashboard-content">

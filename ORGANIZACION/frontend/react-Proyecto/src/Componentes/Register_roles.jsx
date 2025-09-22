@@ -25,23 +25,7 @@ export default function Register_roles({ onRoleSelect }) {
         padding: 0;
       }
 
-      .register-header {
-        background: #faf3e0;
-        backdrop-filter: blur(10px);
-        padding: 1rem 2rem;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        position: sticky;
-        top: 0;
-        z-index: 50;
-      }
-
-      .register-header-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        max-width: 1200px;
-        margin: 0 auto;
-      }
+      
 
       .register-content {
         display: flex;
@@ -144,15 +128,6 @@ export default function Register_roles({ onRoleSelect }) {
 
   return (
     <div className="register-container">
-      {/* Header */}
-      <header className="register-header">
-        <div className="register-header-content">
-          <div className="logo">
-            <img className="logo-img" src="../img/logo.png" alt="logo" />
-            UrbanStand
-          </div>
-        </div>
-      </header>
 
       {/* Contenido de selección de roles */}
       <div className="register-content">
