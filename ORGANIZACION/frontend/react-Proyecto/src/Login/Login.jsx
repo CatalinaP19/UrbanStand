@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-export default function Login() {
+export default function Login({ onSuccessfulLogin, onGoToRegister }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [terms, setTerms] = useState(false);
@@ -34,8 +34,9 @@ export default function Login() {
   };
 
   const toggleMode = () => {
-    setIsRegistrationMode(!isRegistrationMode);
-    setMessage("");
+    if (onGoToRegister) {
+      onGoToRegister();
+    }
   };
 
   const togglePassword = () => {
@@ -45,15 +46,6 @@ export default function Login() {
 
   return (
     <div className="login-container">
-      {/* Header */}
-      <header className="login-header">
-        <div className="login-header-content">
-          <div className="logo">
-            <img className="logo-img" src="../img/logo.png" alt="logo" />
-            UrbanStand
-          </div>
-        </div>
-      </header>
 
       {/* Login Container */}
       <div className="login-content">

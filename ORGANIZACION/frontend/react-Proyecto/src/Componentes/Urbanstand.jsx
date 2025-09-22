@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const UrbanStand = () => {
+const UrbanStand = ({ onGoToLogin, onGoToRegister, onGoToVendorRegister, onGoToEntityRegister, onGoToClientView }) => {
   const [showMapModal, setShowMapModal] = useState(false);
   const [userInteracted, setUserInteracted] = useState(false);
   const [testimonialAvatar, setTestimonialAvatar] = useState('');
@@ -81,8 +81,8 @@ const UrbanStand = () => {
               </button>
             </div>
           `);
-        
-        marker.on('click', function() {
+
+        marker.on('click', function () {
           if (!userInteracted) {
             setUserInteracted(true);
             setTimeout(() => setShowMapModal(true), 100);
@@ -90,7 +90,7 @@ const UrbanStand = () => {
         });
       });
 
-      map.on('movestart', function() {
+      map.on('movestart', function () {
         if (!userInteracted) {
           setUserInteracted(true);
           map.stop();
@@ -98,14 +98,14 @@ const UrbanStand = () => {
         }
       });
 
-      map.on('zoomstart', function() {
+      map.on('zoomstart', function () {
         if (!userInteracted) {
           setUserInteracted(true);
           setShowMapModal(true);
         }
       });
 
-      map.on('click', function() {
+      map.on('click', function () {
         if (!userInteracted) {
           setUserInteracted(true);
           setShowMapModal(true);
@@ -114,9 +114,6 @@ const UrbanStand = () => {
     }
   };
 
-  const showLoginMessage = () => {
-    alert('¡Próximamente! Esta funcionalidad estará disponible cuando implementemos el sistema de autenticación.');
-  };
 
   const closeMapModal = () => {
     setShowMapModal(false);
@@ -135,27 +132,6 @@ const UrbanStand = () => {
 
   return (
     <>
-      <header className="header">
-        <div className="container">
-          <div className="header-content">
-            <div className="logo">
-              <img src="../img/logo.png" alt="logo" />
-              UrbanStand
-            </div>
-            <nav>
-              <ul className="nav-links">
-                <li><a href="#inicio" onClick={(e) => { e.preventDefault(); scrollToSection('#inicio'); }}>Inicio</a></li>
-                <li><a href="#acerca" onClick={(e) => { e.preventDefault(); scrollToSection('#acerca'); }}>Acerca</a></li>
-                <li><a href="#funcionalidades" onClick={(e) => { e.preventDefault(); scrollToSection('#funcionalidades'); }}>Funcionalidades</a></li>
-              </ul>
-            </nav>
-            <div className="auth-buttons">
-              <button className="btn btn-secondary" onClick={showLoginMessage}>Ingresar</button>
-              <button className="btn btn-primary" onClick={showLoginMessage}>Registrarse</button>
-            </div>
-          </div>
-        </div>
-      </header>
 
       <main className="container">
         {/* Hero Section */}
@@ -169,9 +145,9 @@ const UrbanStand = () => {
               </a>
             </div>
             <div>
-              <img className="hero-image" 
-                   src="https://www.elnuevosiglo.com.co/sites/default/files/2023-10/RS3592_IMG-20230814-WA0095.jpg" 
-                   alt="Vendedor ambulante atendiendo a un cliente" />
+              <img className="hero-image"
+                src="https://www.elnuevosiglo.com.co/sites/default/files/2023-10/RS3592_IMG-20230814-WA0095.jpg"
+                alt="Vendedor ambulante atendiendo a un cliente" />
             </div>
           </div>
         </section>
@@ -182,35 +158,35 @@ const UrbanStand = () => {
             <article className="user-card">
               <div className="user-icon">
                 <svg width="40" height="40" fill="white" viewBox="0 0 16 16">
-                  <path d="M4 10a1 1 0 0 1 2 0v2a1 1 0 0 1-2 0zm3 0a1 1 0 0 1 2 0v2a1 1 0 0 1-2 0zm3 0a1 1 0 1 1 2 0v2a1 1 0 0 1-2 0z"/>
-                  <path d="M5.757 1.071a.5.5 0 0 1 .172.686L3.383 6h9.234L10.07 1.757a.5.5 0 1 1 .858-.514L13.783 6H15.5a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-.623l-1.844 6.456a.75.75 0 0 1-.722.544H3.69a.75.75 0 0 1-.722-.544L1.123 8H.5a.5.5 0 0 1-.5-.5v-1A.5.5 0 0 1 .5 6h1.717L5.07 1.243a.5.5 0 0 1 .686-.172zM2.163 8l1.714 6h8.246l1.714-6z"/>
+                  <path d="M4 10a1 1 0 0 1 2 0v2a1 1 0 0 1-2 0zm3 0a1 1 0 0 1 2 0v2a1 1 0 0 1-2 0zm3 0a1 1 0 1 1 2 0v2a1 1 0 0 1-2 0z" />
+                  <path d="M5.757 1.071a.5.5 0 0 1 .172.686L3.383 6h9.234L10.07 1.757a.5.5 0 1 1 .858-.514L13.783 6H15.5a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-.623l-1.844 6.456a.75.75 0 0 1-.722.544H3.69a.75.75 0 0 1-.722-.544L1.123 8H.5a.5.5 0 0 1-.5-.5v-1A.5.5 0 0 1 .5 6h1.717L5.07 1.243a.5.5 0 0 1 .686-.172zM2.163 8l1.714 6h8.246l1.714-6z" />
                 </svg>
               </div>
               <h3>Cliente</h3>
               <p>Buscar productos y puestos cercanos</p>
-              <button className="btn btn-primary" onClick={showLoginMessage}>Acceder como...</button>
+              <button className="btn btn-primary" onClick={onGoToClientView}>Acceder como...</button>
             </article>
 
             <article className="user-card">
               <div className="user-icon">
                 <svg width="40" height="40" fill="white" viewBox="0 0 16 16">
-                  <path d="M2.97 1.35A1 1 0 0 1 3.73 1h8.54a1 1 0 0 1 .76.35l2.609 3.044A1.5 1.5 0 0 1 16 5.37v.255a2.375 2.375 0 0 1-4.25 1.458A2.37 2.37 0 0 1 9.875 8 2.37 2.37 0 0 1 8 7.083 2.37 2.37 0 0 1 6.125 8a2.37 2.37 0 0 1-1.875-.917A2.375 2.375 0 0 1 0 5.625V5.37a1.5 1.5 0 0 1 .361-.976zm1.78 4.275a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 1 0 2.75 0V5.37a.5.5 0 0 0-.12-.325L12.27 2H3.73L1.12 5.045A.5.5 0 0 0 1 5.37v.255a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0M1.5 8.5A.5.5 0 0 1 2 9v6h1v-5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v5h6V9a.5.5 0 0 1 1 0v6h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1V9a.5.5 0 0 1 .5-.5M4 15h3v-5H4zm5-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1zm3 0h-2v3h2z"/>
+                  <path d="M2.97 1.35A1 1 0 0 1 3.73 1h8.54a1 1 0 0 1 .76.35l2.609 3.044A1.5 1.5 0 0 1 16 5.37v.255a2.375 2.375 0 0 1-4.25 1.458A2.37 2.37 0 0 1 9.875 8 2.37 2.37 0 0 1 8 7.083 2.37 2.37 0 0 1 6.125 8a2.37 2.37 0 0 1-1.875-.917A2.375 2.375 0 0 1 0 5.625V5.37a1.5 1.5 0 0 1 .361-.976zm1.78 4.275a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 1 0 2.75 0V5.37a.5.5 0 0 0-.12-.325L12.27 2H3.73L1.12 5.045A.5.5 0 0 0 1 5.37v.255a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0M1.5 8.5A.5.5 0 0 1 2 9v6h1v-5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v5h6V9a.5.5 0 0 1 1 0v6h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1V9a.5.5 0 0 1 .5-.5M4 15h3v-5H4zm5-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1zm3 0h-2v3h2z" />
                 </svg>
               </div>
               <h3>Vendedor</h3>
               <p>Visibilidad, alertas y seguridad</p>
-              <button className="btn btn-primary" onClick={showLoginMessage}>Acceder como...</button>
+              <button className="btn btn-primary" onClick={onGoToVendorRegister}>Acceder como...</button>
             </article>
 
             <article className="user-card">
               <div className="user-icon">
                 <svg width="40" height="40" fill="white" viewBox="0 0 16 16">
-                  <path d="M11 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h1V7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7h1zm1 12h2V2h-2zm-3 0V7H7v7zm-5 0v-3H2v3z"/>
+                  <path d="M11 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h1V7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7h1zm1 12h2V2h-2zm-3 0V7H7v7zm-5 0v-3H2v3z" />
                 </svg>
               </div>
               <h3>Gobierno / Entidades</h3>
               <p>Estadísticas e informes para políticas públicas</p>
-              <button className="btn btn-primary" onClick={showLoginMessage}>Acceder como...</button>
+              <button className="btn btn-primary" onClick={onGoToEntityRegister}>Acceder como...</button>
             </article>
           </div>
         </section>
@@ -218,7 +194,7 @@ const UrbanStand = () => {
         {/* Map Section */}
         <section className="map-section">
           <h2 className="section-title">Explora Nuestros Puestos</h2>
-          <p style={{color: 'var(--text-secondary)', marginBottom: '30px'}}>Descubre vendedores cercanos a tu ubicación</p>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '30px' }}>Descubre vendedores cercanos a tu ubicación</p>
           <div className="map-container">
             <div id="map"></div>
           </div>
@@ -231,7 +207,7 @@ const UrbanStand = () => {
               <h3>🔒 Funcionalidad Premium</h3>
               <p>Para explorar el mapa completamente, interactuar con los vendedores y acceder a todas las funcionalidades, necesitas iniciar sesión.</p>
               <div className="modal-buttons">
-                <button className="btn btn-primary" onClick={showLoginMessage}>Iniciar Sesión</button>
+                <button className="btn btn-primary" onClick={onGoToLogin}>Iniciar Sesión</button>
                 <button className="btn close-modal" onClick={closeMapModal}>Cerrar</button>
               </div>
             </div>
@@ -245,7 +221,7 @@ const UrbanStand = () => {
               <h2 className="testimonial-title">Testimonios</h2>
               <p className="testimonial-subtitle">Lo que dicen nuestros usuarios</p>
             </div>
-            
+
             <div className="testimonial-card">
               <div className="testimonial-rating">
                 <span className="star">★</span>
@@ -254,18 +230,18 @@ const UrbanStand = () => {
                 <span className="star">★</span>
                 <span className="star">★</span>
               </div>
-              
+
               <img className="testimonial-avatar" src={testimonialAvatar} alt="Avatar del usuario" />
-              
+
               <div className="testimonial-text">Gracias a UrbanStand aumenté mis ventas en un 30%</div>
-              
+
               <div className="testimonial-author">
                 <div className="author-info">
                   <div className="author-name">Javier Rodríguez</div>
                   <div className="author-role">Vendedor ambulante</div>
                 </div>
               </div>
-              
+
               <div className="testimonial-stats">
                 <div className="stat-item">
                   <span className="stat-number">+30%</span>
@@ -290,7 +266,7 @@ const UrbanStand = () => {
           <div className="benefits-grid">
             <div className="benefit-card">
               <svg className="benefit-icon" viewBox="0 0 16 16" fill="currentColor">
-                <path d="M2.97 1.35A1 1 0 0 1 3.73 1h8.54a1 1 0 0 1 .76.35l2.609 3.044A1.5 1.5 0 0 1 16 5.37v.255a2.375 2.375 0 0 1-4.25 1.458A2.37 2.37 0 0 1 9.875 8 2.37 2.37 0 0 1 8 7.083 2.37 2.37 0 0 1 6.125 8a2.37 2.37 0 0 1-1.875-.917A2.375 2.375 0 0 1 0 5.625V5.37a1.5 1.5 0 0 1 .361-.976z"/>
+                <path d="M2.97 1.35A1 1 0 0 1 3.73 1h8.54a1 1 0 0 1 .76.35l2.609 3.044A1.5 1.5 0 0 1 16 5.37v.255a2.375 2.375 0 0 1-4.25 1.458A2.37 2.37 0 0 1 9.875 8 2.37 2.37 0 0 1 8 7.083 2.37 2.37 0 0 1 6.125 8a2.37 2.37 0 0 1-1.875-.917A2.375 2.375 0 0 1 0 5.625V5.37a1.5 1.5 0 0 1 .361-.976z" />
               </svg>
               <div className="benefit-title">Visibilidad de puestos</div>
               <div className="benefit-number">1,245</div>
@@ -298,7 +274,7 @@ const UrbanStand = () => {
 
             <div className="benefit-card">
               <svg className="benefit-icon" viewBox="0 0 16 16" fill="currentColor">
-                <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2M8 1.918l-.797.161A4 4 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4 4 0 0 0-3.203-3.92z"/>
+                <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2M8 1.918l-.797.161A4 4 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4 4 0 0 0-3.203-3.92z" />
               </svg>
               <div className="benefit-title">Alertas de seguridad</div>
               <div className="benefit-number">3,210</div>
@@ -306,7 +282,7 @@ const UrbanStand = () => {
 
             <div className="benefit-card">
               <svg className="benefit-icon" viewBox="0 0 16 16" fill="currentColor">
-                <path d="M11 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h1V7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7h1z"/>
+                <path d="M11 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h1V7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7h1z" />
               </svg>
               <div className="benefit-title">Estadísticas confiables</div>
               <div className="benefit-number">20</div>
@@ -314,7 +290,7 @@ const UrbanStand = () => {
 
             <div className="benefit-card">
               <svg className="benefit-icon" viewBox="0 0 16 16" fill="currentColor">
-                <path d="M9 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0m-9 8c0 1 1 1 1 1h10s1 0 1-1-1-4-6-4-6 3-6 4m13.5-8.09c1.387-1.425 4.855 1.07 0 4.277-4.854-3.207-1.387-5.702 0-4.276Z"/>
+                <path d="M9 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0m-9 8c0 1 1 1 1 1h10s1 0 1-1-1-4-6-4-6 3-6 4m13.5-8.09c1.387-1.425 4.855 1.07 0 4.277-4.854-3.207-1.387-5.702 0-4.276Z" />
               </svg>
               <div className="benefit-title">Conexión entre vendedores y clientes</div>
               <div className="benefit-number">∞</div>

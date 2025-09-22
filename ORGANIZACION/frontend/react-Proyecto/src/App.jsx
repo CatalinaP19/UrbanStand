@@ -72,9 +72,19 @@ function App() {
         return <UrbanStand
           onGoToLogin={handleGoToLogin}
           onGoToRegister={() => setCurrentView('register_roles')}
+          onGoToVendorRegister={() => setCurrentView('register')}
+          onGoToEntityRegister={() => setCurrentView('registroEntidades')}
+          onGoToClientView={() => {
+            setIsLoggedIn(true);
+            setUserRole('cliente');
+            setCurrentView('vista3');
+          }}
         />
       case 'login':
-        return <Login onSuccessfulLogin={handleSuccessfulLogin} />
+        return <Login
+          onSuccessfulLogin={handleSuccessfulLogin}
+          onGoToRegister={() => setCurrentView('register_roles')}
+        />
       case 'register':
         return <Register onBackToRoles={handleBackToRoles} onSuccessfulLogin={handleSuccessfulLogin} />
       case 'registroEntidades':

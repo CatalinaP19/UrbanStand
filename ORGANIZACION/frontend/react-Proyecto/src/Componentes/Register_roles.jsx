@@ -132,8 +132,8 @@ export default function Register_roles({ onRoleSelect }) {
       {/* Contenido de selección de roles */}
       <div className="register-content">
         <div className="register-box">
-          <h1 className="register-title">¡Regístrate!</h1>
-          <h3 className="register-subtitle">¿Qué rol cumples?</h3>
+          <h1 className="register-title">¡Bienvenido!</h1>
+          <h3 className="register-subtitle">Registrarme como...</h3>
           
           <div className="register-buttons-container">
             <button 
