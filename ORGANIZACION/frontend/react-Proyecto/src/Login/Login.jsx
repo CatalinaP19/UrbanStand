@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import apiService from "../services/apiService";
 
 export default function Login({ onSuccessfulLogin, onGoToRegister }) {
   const [email, setEmail] = useState("");
@@ -7,8 +8,9 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
   const [message, setMessage] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isRegistrationMode, setIsRegistrationMode] = useState(false);
+  const [role, setRole] = useState("vendedor");
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     let errors = "";
     const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
 
@@ -23,7 +25,69 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
     if (errors !== "") {
       setMessage(errors);
     } else {
-      setMessage(isRegistrationMode ? "Registro exitoso." : "Inicio de sesión exitoso.");
+      // Inicio de sesión
+      setMessage("Iniciando sesión...");
+      if (!isRegistrationMode && typeof onSuccessfulLogin === 'function') {
+        try {
+          if (role === 'entidad') {
+            // Login entidad contra backend
+            const loginResp = await apiService.entidad.login({
+              correo_institucional: email,
+              contrasenia: password,
+            });
+            if (loginResp?.token) apiService.saveAuth(loginResp.token, 'entidad');
+            // Recuperar perfil
+            let profile = {};
+            try {
+              profile = await apiService.entidad.profile();
+            } catch (_) {}
+            const entidadData = {
+              email,
+              nomEnti: profile?.nombre_entidad || profile?.nomEnti || profile?.nombre || undefined,
+            };
+            setMessage("Inicio de sesión exitoso.");
+            return onSuccessfulLogin('entidad', entidadData);
+          } else if (role === 'vendedor') {
+            // Intentar login vendedor contra backend; si falla, usar fallback localStorage
+            let vendorData = null;
+            try {
+              const loginResp = await apiService.vendedor.login({ email, password });
+              if (loginResp?.token) apiService.saveAuth(loginResp.token, 'vendedor');
+              const profile = await apiService.vendedor.profile();
+              vendorData = {
+                email,
+                firstName: profile?.firstName || profile?.nombre || undefined,
+                lastName: profile?.lastName || profile?.apellido || undefined,
+                genero: profile?.genero || undefined,
+              };
+            } catch (_) {
+              // Fallback: perfil local guardado en registro
+              let profile = {};
+              const key = (email || '').trim().toLowerCase();
+              try {
+                const allRaw = JSON.parse(localStorage.getItem('urbanstand_users') || '{}');
+                // Migración a minúsculas
+                const migrated = {};
+                if (allRaw && typeof allRaw === 'object') {
+                  Object.keys(allRaw).forEach(k => {
+                    migrated[k.trim().toLowerCase()] = allRaw[k];
+                  });
+                  localStorage.setItem('urbanstand_users', JSON.stringify(migrated));
+                }
+                profile = migrated[key] || {};
+              } catch (e) { /* ignore */ }
+              vendorData = { email, ...profile };
+            }
+            setMessage("Inicio de sesión exitoso.");
+            return onSuccessfulLogin('vendedor', vendorData);
+          }
+        } catch (error) {
+          console.error('Error de login:', error);
+          setMessage(error?.message || 'Error iniciando sesión');
+          return;
+        }
+      }
+      setMessage("Inicio de sesión exitoso.");
     }
   };
 
@@ -43,7 +107,6 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
     setIsPasswordVisible(!isPasswordVisible);
   };
 
-
   return (
     <div className="login-container">
 
@@ -55,6 +118,22 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
           </h2>
 
           <div className="login-form">
+            {/* Role Selection (solo para iniciar sesión) */}
+            {!isRegistrationMode && (
+              <div className="login-input-group">
+                <label className="login-label">
+                  Selecciona tu rol
+                </label>
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="login-input"
+                >
+                  <option value="vendedor">Vendedor</option>
+                  <option value="entidad">Entidad</option>
+                </select>
+              </div>
+            )}
             {/* Email Input */}
             <div className="login-input-group">
               <label className="login-label">

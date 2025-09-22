@@ -65,10 +65,21 @@ const GlobalStylesProvider = ({ children }) => {
         margin: 0;
         font-family: var(--font-family);
         background: var(--background);
-        color: var(--text-primary);
         line-height: 1.6;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* Make the app span the full viewport and avoid external body constraints */
+      html, body, #root {
+        height: 100%;
+        min-height: 100vh;
+        width: 100%;
+        background: var(--background);
+      }
+      body {
+        display: block; /* override any global 'display' coming from other CSS */
+        overflow-x: hidden;
       }
 
       /* ========================================

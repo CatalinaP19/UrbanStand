@@ -1,6 +1,15 @@
 import React, { useEffect } from 'react'
+import Navbar from './Navbar.jsx'
 
-export default function Register_roles({ onRoleSelect }) {
+export default function Register_roles({ 
+  onRoleSelect,
+  currentView = 'register_roles',
+  setCurrentView = () => {},
+  isLoggedIn = false,
+  userRole = '',
+  userData = null,
+  onLogout = () => {}
+}) {
 
   // Función para manejar la selección de rol
   const handleRoleSelect = (role) => {
@@ -91,14 +100,8 @@ export default function Register_roles({ onRoleSelect }) {
         transform: translateY(0);
       }
 
-      .logo {
-        font-size: 28px;
-        font-weight: bold;
-        color: #f97316;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
+      /* Sin estilos locales para header/nav: usamos los estilos globales
+         definidos en assets/GlobalStyles.css / GlobalStylesProvider.jsx */
 
       @media (max-width: 768px) {
         .register-content {
@@ -128,6 +131,15 @@ export default function Register_roles({ onRoleSelect }) {
 
   return (
     <div className="register-container">
+      {/* Navbar reutilizable */}
+      <Navbar 
+        currentView={currentView}
+        setCurrentView={setCurrentView}
+        isLoggedIn={isLoggedIn}
+        userRole={userRole}
+        userData={userData}
+        onLogout={onLogout}
+      />
 
       {/* Contenido de selección de roles */}
       <div className="register-content">

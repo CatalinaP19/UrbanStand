@@ -7,7 +7,7 @@ class ApiService {
 
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
-    
+
     const config = {
       headers: {
         'Content-Type': 'application/json',
@@ -24,12 +24,34 @@ class ApiService {
 
     try {
       console.log(`🔄 ${options.method || 'GET'} ${url}`);
-      
+
       const response = await fetch(url, config);
-      const data = await response.json();
+
+      // Detectar tipo de contenido
+      const contentType = response.headers.get('content-type') || '';
+      let data = null;
+      if (response.status === 204) {
+        data = null;
+      } else if (contentType.includes('application/json')) {
+        try {
+          data = await response.json();
+        } catch (_) {
+          data = null; // cuerpo vacío o JSON inválido
+        }
+      } else {
+        // No-JSON: intenta texto
+        try {
+          const text = await response.text();
+          data = text || null;
+        } catch (_) {
+          data = null;
+        }
+      }
 
       if (!response.ok) {
-        throw new Error(data.message || data.error || `HTTP ${response.status}`);
+        // Mejor extracción de mensaje de error
+        const msg = (data && (data.message || data.error || data.msg)) || `HTTP ${response.status}`;
+        throw new Error(msg);
       }
 
       console.log(`✅ ${options.method || 'GET'} ${url} - Success`);
@@ -65,6 +87,8 @@ class ApiService {
     register: (data) => this.post(API_CONFIG.ENTIDAD.REGISTER, data),
     login: (data) => this.post(API_CONFIG.ENTIDAD.LOGIN, data),
     profile: () => this.request(API_CONFIG.ENTIDAD.PROFILE),
+    estadisticas: (params) => this.get(API_CONFIG.ENTIDAD.ESTADISTICAS, params),
+    descargarReporte: (params) => this.download(API_CONFIG.ENTIDAD.REPORTES, params),
   };
 }
 

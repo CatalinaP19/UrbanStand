@@ -1,7 +1,7 @@
 import apiService from '../services/apiService'
 import React, { useState, useEffect } from 'react'
 
-export default function RegistroEntidades({ onBackToRoles }) {
+export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
 
   const [nomEnti, setNomEnti] = useState('')
   const [tipoE, setTipoE] = useState('')
@@ -385,7 +385,7 @@ export default function RegistroEntidades({ onBackToRoles }) {
 
   // Validación de la dirección
   const ValidateAddressEnti = (direccion) => {
-    const direccionRegex = /^(Calle|Carrera|Transversal|Diagonal|Avenida|Av\.?|Cr|Cl)\s?\d+[A-Za-z]?(?:\s?(Bis)?)?\s?#\d+[A-Za-z]?-?\d*$/i
+    const direccionRegex = /^(Calle|Carrera|Transversal|Diagonal|Avenida|Av\.?|Cr|Cl)\s?\d+[A-Za-z]{0,2}(?:\s?Bis)?(?:\s?(Sur|Este|Oeste))?\s?#\d+[A-Za-z]?-?\d*(?:,\s?.+)?$/i
     return direccionRegex.test(direccion)
   }
 
@@ -442,12 +442,13 @@ export default function RegistroEntidades({ onBackToRoles }) {
 
       setMessage('¡Registro exitoso! Redirigiendo al login...')
       setTimeout(() => {
-        onGoToLogin() // Necesitas pasar esta función desde App.js
+        if (typeof onGoToLogin === 'function') onGoToLogin()
       }, 2000)
 
     } catch (error) {
       console.error('Error en registro:', error)
-      setMessage(`Error: ${error.message}`)
+      const backendMsg = error?.message || 'No se pudo registrar la entidad.'
+      setMessage(`Error: ${backendMsg}`)
     }
   }
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import GlobalStylesProvider from './GlobalStylesProvider'
 
-import UrbanStand from './Componentes/UrbanStand'
+import UrbanStand from './Componentes/Urbanstand'
 import Login from './Login/Login'
 import Register from './Login/Register'
 import RegistroEntidades from './Componentes/RegistroEntidades'
@@ -27,7 +27,8 @@ function App() {
     } else if (role === 'entidad') {
       setCurrentView('registroEntidades') // Registro de entidades
     } else if (role === 'cliente') {
-      alert(`Has seleccionado: ${role}`)
+      // Cliente no requiere registro ni login: ir directo a la vista cliente
+      setCurrentView('vista3')
     }
   }
 
@@ -52,8 +53,6 @@ function App() {
       setCurrentView('vista1')
     } else if (role === 'entidad') {
       setCurrentView('vista2')
-    } else if (role === 'cliente') {
-      setCurrentView('vista3')
     }
   }
 
@@ -74,9 +73,9 @@ function App() {
           onGoToRegister={() => setCurrentView('register_roles')}
           onGoToVendorRegister={() => setCurrentView('register')}
           onGoToEntityRegister={() => setCurrentView('registroEntidades')}
+          onGoToEntityView={() => setCurrentView('vista2')}
           onGoToClientView={() => {
-            setIsLoggedIn(true);
-            setUserRole('cliente');
+            // Cliente no requiere login: solo navegar a la vista cliente
             setCurrentView('vista3');
           }}
         />
@@ -92,9 +91,29 @@ function App() {
       case 'chat':
         return <Chat />
       case 'register_roles':
-        return <Register_roles onRoleSelect={handleRoleSelection} onLoginClick={handleGoToLogin} />
+        return (
+          <Register_roles
+            onRoleSelect={handleRoleSelection}
+            currentView={currentView}
+            setCurrentView={setCurrentView}
+            isLoggedIn={isLoggedIn}
+            userRole={userRole}
+            userData={userData}
+            onLogout={handleLogout}
+          />
+        )
       case 'vista1':
-        return <VistaVendedor />
+        return (
+          <VistaVendedor
+            vendedorData={{
+              nombre: `${userData?.firstName ?? 'Vendedor'} ${userData?.lastName ?? ''}`.trim(),
+              tipoVendedor: 'Vendedor',
+              descripcion: 'Bienvenido a tu panel. Gestiona tu puesto y productos.',
+              genero: userData?.genero || ''
+            }}
+            userData={userData}
+          />
+        )
       case 'vista2':
         return <VistaEntidades />
       case 'vista3':

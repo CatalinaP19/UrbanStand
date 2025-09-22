@@ -243,7 +243,18 @@ export default function Navbar({
     if (userData?.nomEnti) {
       return userData.nomEnti
     }
+    if (userData?.email) {
+      return userData.email.split('@')[0]
+    }
     return 'Usuario'
+  }
+
+  // Avatar por género si está disponible
+  const getAvatarImage = () => {
+    const g = (userData?.genero || '').toString().toLowerCase()
+    if (g.includes('fem')) return '/img/PerfilFemale.png'
+    if (g.includes('masc')) return '/img/PerfilMale.png'
+    return null
   }
 
   return (
@@ -339,9 +350,13 @@ export default function Navbar({
             // Usuario logueado
             <>
               <div className="navbar-user">
-                <div className="navbar-user-avatar">
-                  {getUserInitial()}
-                </div>
+                {getAvatarImage() ? (
+                  <img src={getAvatarImage()} alt="avatar" className="navbar-user-avatar" style={{ objectFit: 'cover' }} />
+                ) : (
+                  <div className="navbar-user-avatar">
+                    {getUserInitial()}
+                  </div>
+                )}
                 <div className="navbar-user-info">
                   <div className="navbar-user-name">
                     {getUserName()}

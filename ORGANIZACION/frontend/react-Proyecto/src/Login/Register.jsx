@@ -606,6 +606,19 @@ export default function Register({ onBackToRoles, onSuccessfulLogin, onGoToLogin
           // Éxito
           setMessage('¡Registro exitoso! Redirigiendo al login...')
 
+          // Guardar perfil mínimo en localStorage para personalizar luego del login
+          try {
+            const existing = JSON.parse(localStorage.getItem('urbanstand_users') || '{}')
+            const key = (email || '').trim().toLowerCase()
+            existing[key] = {
+              role: 'vendedor',
+              firstName,
+              lastName,
+              genero,
+            }
+            localStorage.setItem('urbanstand_users', JSON.stringify(existing))
+          } catch (_) {}
+
           // Limpiar formulario y redirigir después de 2 segundos
           setTimeout(() => {
             if (onGoToLogin) {
@@ -614,6 +627,7 @@ export default function Register({ onBackToRoles, onSuccessfulLogin, onGoToLogin
               setEmail('')
               setPassword('')
               setConfirmPassword('')
+
               setNumDoc('')
               setDireccion('')
               setGenero('')

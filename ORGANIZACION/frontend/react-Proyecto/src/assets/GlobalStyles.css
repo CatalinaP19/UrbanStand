@@ -59,6 +59,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Ensure the background spans the whole app */
+html, body, #root, main {
+  background: var(--background);
+}
+
 /* ========================================
    COMPONENTES BASE REUTILIZABLES
    ======================================== */
@@ -684,6 +689,12 @@ body {
   color: var(--primary);
 }
 
+.login-eye-icon {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2;
+}
+
 .login-checkbox-container {
   display: flex;
   align-items: flex-start;
@@ -727,6 +738,50 @@ body {
   background: transparent;
   color: #ea580c;
   border-color: var(--primary);
+}
+
+.login-link {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.login-toggle-container {
+  margin-top: var(--spacing-md);
+}
+
+.login-toggle-button {
+  color: var(--primary);
+  text-align: center;
+  width: 100%;
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
+  background: transparent;
+  border: none;
+}
+
+.login-toggle-button:hover {
+  background: rgba(234, 88, 12, 0.08);
+}
+
+.login-message {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  text-align: center;
+  font-weight: 600;
+}
+
+.login-message-success {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.login-message-error {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
 }
 
 /* ========================================

@@ -9,14 +9,6 @@ const VistaVendedor = ({ vendedorData = null }) => {
     { id: 2, sender: 'Cliente', text: 'Hola, quiero ver tus productos', isOwn: true }
   ]);
 
-  // Datos por defecto si no se pasan props
-  const vendedor = vendedorData || {
-    nombre: 'Juan',
-    tipoVendedor: 'Vendedor',
-    descripcion: 'Vendo jugos naturales y empanadas desde hace 3 años.',
-    genero: 'hombre' // 'hombre' o 'mujer'
-  };
-
   // Inicializar mapa
   useEffect(() => {
     // Cargar Leaflet CSS si no está cargado
@@ -57,7 +49,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
 
       window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 18,
-        attribution: '© OpenStreetMap contributors'
+        attribution: ' OpenStreetMap contributors'
       }).addTo(map);
 
       // Mi ubicación (vendedor)
@@ -74,7 +66,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
         <div style="text-align: center; padding: 5px;">
           <h4 style="color: var(--primary); margin-bottom: 8px;">${vendedor.nombre}</h4>
           <p style="margin-bottom: 8px; color: #666; font-size: 12px;">${vendedor.descripcion}</p>
-          <div style="font-size: 11px; color: #999;">📍 Mi ubicación actual</div>
+          <div style="font-size: 11px; color: #999;"> Mi ubicación actual</div>
         </div>
       `);
 
@@ -128,7 +120,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
           <div style="text-align: center; padding: 5px;">
             <h4 style="color: var(--primary); margin-bottom: 8px;">${name}</h4>
             <p style="margin-bottom: 8px; color: #666; font-size: 12px;">${description}</p>
-            <div style="font-size: 11px; color: var(--accent); font-weight: bold;">🎯 Oportunidad de ventas</div>
+            <div style="font-size: 11px; color: var(--accent); font-weight: bold;"> Oportunidad de ventas</div>
           </div>
         `);
       });
@@ -155,11 +147,11 @@ const VistaVendedor = ({ vendedorData = null }) => {
 
   // Función para obtener la imagen del perfil según el género
   const getProfileImage = (genero) => {
-    if (genero && genero.toLowerCase() === 'mujer') {
-      return './img/PerfilFemale.png';
-    } else {
-      return './img/PerfilMale.png';
+    const g = (genero || '').toString().toLowerCase();
+    if (g.includes('fem')) {
+      return '/img/PerfilFemale.png';
     }
+    return '/img/PerfilMale.png';
   };
 
   // Imagen del perfil basada en género
