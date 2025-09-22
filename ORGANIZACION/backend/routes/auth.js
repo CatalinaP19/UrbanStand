@@ -125,7 +125,7 @@ router.post('/register', [
     const {
       firstName, lastName, email, password, numDoc,
       NumTel, TypeDoc, genero, selectedProducts,
-      direccion, rivi
+      direccion, rivi, vigencia
     } = req.body;
 
     // Verificar si ya existe un vendedor con ese correo o documento
@@ -157,7 +157,8 @@ router.post('/register', [
       genero,
       selectedProducts,
       direccion,
-      rivi
+      rivi,
+      vigencia
     });
 
     await nuevoVendedor.save();
