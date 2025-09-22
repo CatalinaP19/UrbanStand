@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
+import Swal from "sweetalert2"
 
-export default function Register({ onBackToRoles }) {
+export default function Register({ onBackToRoles, onSuccessfulLogin, onGoToLogin }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -40,6 +41,42 @@ export default function Register({ onBackToRoles }) {
     'S. Ambulantes de aseo y apoyo',
     'Otros'
   ]
+
+  const mostrarModal = () => {
+    Swal.fire({
+      title: "Consentimiento de Tratamiento de Datos",
+      html: `
+        <p style="text-align:justify;">
+          Autorizo de manera libre, previa, expresa, voluntaria e informada a
+          <strong>UrbanStand</strong> para que realice el tratamiento de mis datos
+          personales conforme a lo dispuesto en la Ley 1581 de 2012 y el Decreto 1377 de 2013.
+        </p>
+        <p style="text-align:justify;">
+          Entiendo que mis datos podrán ser utilizados únicamente para las finalidades
+          relacionadas con la prestación de los servicios de la plataforma, y que tengo derecho
+          a conocer, actualizar, rectificar o suprimir mis datos.
+        </p>
+        <p style="text-align:justify;">
+          Para más información, consulte nuestra <a href="../CONSENTIMIENTO INFORMADO PARA TRATAMIENTO DE DATOS PERSONALES URBANSTAND.pdf">Política de Privacidad</a>.
+        </p>
+      `,
+      icon: "info",
+      showCancelButton: true,
+      confirmButtonText: "Acepto",
+      cancelButtonText: "No acepto",
+      confirmButtonColor: "#9a1e22",
+      cancelButtonColor: "#6c757d",
+      width: "600px"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire("¡Consentimiento aceptado!", "", "success");
+        // Aquí puedes guardar el consentimiento en tu backend o localStorage
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        Swal.fire("No aceptaste el consentimiento", "", "error");
+        // Aquí puedes redirigir o bloquear el registro
+      }
+    });
+  };
 
   useEffect(() => {
     const style = document.createElement('style')
@@ -567,25 +604,29 @@ export default function Register({ onBackToRoles }) {
 
         if (response.ok) {
           // Éxito
-          setMessage('¡Registro exitoso! Bienvenido a UrbanStand.')
-          // Limpiar formulario después de 3 segundos
+          setMessage('¡Registro exitoso! Redirigiendo al login...')
+
+          // Limpiar formulario y redirigir después de 2 segundos
           setTimeout(() => {
-            setFirstName('')
-            setLastName('')
-            setEmail('')
-            setPassword('')
-            setConfirmPassword('')
-            setNumDoc('')
-            setDireccion('')
-            setGenero('')
-            setTypeDoc('CC')
-            setRivi(null)
-            setVigencia('')
-            setNumTel('')
-            setTerms(false)
-            setSelectedProducts([])
-            setMessage('')
-          }, 3000)
+            if (onGoToLogin) {
+              setFirstName('')
+              setLastName('')
+              setEmail('')
+              setPassword('')
+              setConfirmPassword('')
+              setNumDoc('')
+              setDireccion('')
+              setGenero('')
+              setTypeDoc('CC')
+              setRivi(null)
+              setVigencia('')
+              setNumTel('')
+              setTerms(false)
+              setSelectedProducts([])
+              setMessage('')
+              onGoToLogin()
+            }
+          }, 2000)
         } else {
           // Error del servidor
           setMessage(data.message || data.error || 'Error en el registro')
@@ -616,9 +657,11 @@ export default function Register({ onBackToRoles }) {
     setIsConfirmPasswordVisible(!isConfirmPasswordVisible)
   }
 
-  const goToLogin = () => {
-    alert('Redirigiendo a inicio de sesión…')
+ const goToLogin = () => {
+  if (onGoToLogin) {
+    onGoToLogin()
   }
+}
 
   const handleProductChange = (product, isChecked) => {
     if (isChecked) {
@@ -977,11 +1020,15 @@ export default function Register({ onBackToRoles }) {
                 />
                 <p className="register-checkbox-text">
                   He leído y acepto los
-                  <a href="../POLÍTICA DE PRIVACIDAD Y TÉRMINOS Y CONDICIONES URBANSTAND.pdf"> Términos y condiciones </a>
-                  y la
-                  <a href="../CONSENTIMIENTO INFORMADO PARA TRATAMIENTO DE DATOS PERSONALES URBANSTAND.pdf"> Política de Privacidad.</a>
+                  <a href="../POLÍTICA DE PRIVACIDAD Y TÉRMINOS Y CONDICIONES URBANSTAND.pdf"> Términos y condiciones
+                  </a>
                 </p>
               </label>
+            </div>
+            <div>
+              <button onClick={mostrarModal} className="btn btn-primary">
+                Ver Consentimiento
+              </button>
             </div>
 
             {/* Submit */}

@@ -86,9 +86,9 @@ function App() {
           onGoToRegister={() => setCurrentView('register_roles')}
         />
       case 'register':
-        return <Register onBackToRoles={handleBackToRoles} onSuccessfulLogin={handleSuccessfulLogin} />
+        return <Register onBackToRoles={handleBackToRoles} onSuccessfulLogin={handleSuccessfulLogin} onGoToLogin={handleGoToLogin} />
       case 'registroEntidades':
-        return <RegistroEntidades onBackToRoles={handleBackToRoles} onSuccessfulLogin={handleSuccessfulLogin} />
+        return <RegistroEntidades onBackToRoles={handleBackToRoles} onSuccessfulLogin={handleSuccessfulLogin} onGoToLogin={handleGoToLogin} />
       case 'chat':
         return <Chat />
       case 'register_roles':
@@ -104,26 +104,26 @@ function App() {
     }
   }
 
-  return (
-    <GlobalStylesProvider>
-      <div className="app">
-        {/* Mostrar Navbar solo en ciertas vistas */}
-        {!['login', 'register', 'register_roles', 'registroEntidades'].includes(currentView) && (
-          <Navbar
-            currentView={currentView}
-            setCurrentView={setCurrentView}
-            isLoggedIn={isLoggedIn}
-            userRole={userRole}
-            userData={userData}
-            onLogout={handleLogout}
-          />
-        )}
+ return (
+  <GlobalStylesProvider>
+    <div className="app">
+      {/* Mostrar Navbar solo en ciertas vistas */}
+      {!['register_roles'].includes(currentView) && (
+        <Navbar
+          currentView={currentView}
+          setCurrentView={setCurrentView}
+          isLoggedIn={isLoggedIn}
+          userRole={userRole}
+          userData={userData}
+          onLogout={handleLogout}
+        />
+      )}
 
-        {/* Renderizar la vista actual */}
-        {renderCurrentView()}
-      </div>
-    </GlobalStylesProvider>
-  )
+      {/* Renderizar la vista actual */}
+      {renderCurrentView()}
+    </div>
+  </GlobalStylesProvider>
+)
 }
 
 export default App

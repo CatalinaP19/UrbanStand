@@ -10,8 +10,6 @@
 }
 
 .register-header {
-     width: 100vw;
-  height: 100vh;
   background: #faf3e0;
   backdrop-filter: blur(10px);
   padding: 1rem 2rem;
@@ -22,30 +20,11 @@
 }
 
 .register-header-content {
-     width: 100vw;
-  height: 100vh;
   display: flex;
   justify-content: space-between;
   align-items: center;
   max-width: 1200px;
   margin: 0 auto;
-}
-
-.register-home-button {
-  background: #9a1e22;
-  border: 2px solid #9a1e22;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.register-home-button:hover {
-  background: transparent;
-  color: #9a1e22;
 }
 
 .register-content {
@@ -121,13 +100,6 @@
   gap: 8px;
 }
 
-.role-description {
-  font-size: 0.9rem;
-  color: #6b7280;
-  margin-top: 0.5rem;
-  text-align: center;
-}
-
 .back-button {
   background: #6b7280;
   border: 2px solid #6b7280;
@@ -148,14 +120,14 @@
 
 /* ===== ESTILOS VISTA CLIENTE ===== */
 .vista-cliente-container {
-margin-top:10vh;
-  min-height: 100vh;
-  background: #ef9541;
+  height: 100vh;
+  width: 100vw;
+  background: #faf3e0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .vista-cliente-header {
-  background: rgba(205, 94, 9, 0.95);
+  background: #9a1e22;
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   padding: 20px 0;
@@ -184,18 +156,18 @@ margin-top:10vh;
 
 .vista-cliente-nav-buttons {
   display: flex;
-  gap: 15px;
+  gap: 10px;
 }
 
 .vista-cliente-nav-button-active {
   padding: 12px 24px;
-  background: #059669 ;
+  background: #9a1e22;
   color: white;
-  border: none;
+  border: 1px solid white;
   border-radius: 12px;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
   transition: all 0.3s ease;
 }
 
@@ -228,16 +200,11 @@ margin-top:10vh;
 }
 
 .vista-cliente-map {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(16, 185, 129, 0.1) 50%, rgba(245, 101, 101, 0.1) 100%), 
-              radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%), 
-              radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%), 
-              conic-gradient(from 0deg at 50% 50%, #e5e7eb 0deg, #f3f4f6 90deg, #e5e7eb 180deg, #f9fafb 270deg, #e5e7eb 360deg);
+  background: rgb(242, 242, 242);
   position: relative;
   overflow: hidden;
   border-radius: 20px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 
-              0 25px 50px -12px rgba(0, 0, 0, 0.25), 
-              0 0 100px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   width: 100%;
   height: 100%;
@@ -293,6 +260,24 @@ margin-top:10vh;
   animation: radar 5s ease-out infinite;
 }
 
+.vista-cliente-user-location {
+  position: absolute;
+  top: 60%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 8;
+}
+
+.vista-cliente-user-pin {
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+  animation: userPulse 2s ease-in-out infinite;
+}
+
 .vista-cliente-vendor-pin {
   position: absolute;
   cursor: pointer;
@@ -307,8 +292,7 @@ margin-top:10vh;
 }
 
 .vista-cliente-vendor-pin.tracking {
-  animation: pulse 2s infinite;
-}
+     animation: pulse 2s infinite; }
 
 .vista-cliente-vendor-aura {
   position: absolute;
@@ -337,9 +321,7 @@ margin-top:10vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), 
-              0 0 0 3px rgba(255, 255, 255, 0.3), 
-              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
   border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
@@ -370,50 +352,8 @@ margin-top:10vh;
   animation: blink 2s infinite;
 }
 
-.vista-cliente-user-location {
-  position: absolute;
-  top: 60%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 8;
-}
-
-.vista-cliente-user-pin {
-  width: 20px;
-  height: 20px;
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-  border-radius: 50%;
-  border: 3px solid white;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-  animation: userPulse 2s ease-in-out infinite;
-}
-
-.vista-cliente-user-ring {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 40px;
-  height: 40px;
-  border: 2px solid rgba(59, 130, 246, 0.3);
-  border-radius: 50%;
-  animation: expandRing 3s ease-out infinite;
-}
-
-.vista-cliente-tracking-control {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 15px 20px;
-  border-radius: 15px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
+/* TU BOTÓN DETENER ORIGINAL - SIN CAMBIOS */
+.vista-cliente-tracking-control { position: relative; top: auto; left: auto; margin-bottom: 15px; }
 
 .vista-cliente-tracking-text {
   font-weight: 600;
@@ -670,164 +610,42 @@ margin-top:10vh;
 }
 
 /* ===== ANIMACIONES ===== */
-@keyframes radar {
-  0% { 
-    transform: scale(0); 
-    opacity: 1; 
-  }
-  100% { 
-    transform: scale(1); 
-    opacity: 0; 
-  }
+@keyframes radar { 0% { transform: scale(0); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
+@keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } }
+@keyframes breathe { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.1); } }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+@keyframes userPulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.2); } }
+@keyframes float { 0%, 100% { transform: translateY(0px) rotate(0deg); } 33% { transform: translateY(-10px) rotate(1deg); } 66% { transform: translateY(5px) rotate(-1deg); } }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .vista-cliente-grid { grid-template-columns: 1fr 350px; gap: 20px; }
+  .vista-cliente-main { padding: 20px 15px; }
+  .vista-cliente-container { margin-top: 0; }
 }
 
-@keyframes pulse {
-  0%, 100% { 
-    transform: scale(1); 
-    opacity: 1; 
-  }
-  50% { 
-    transform: scale(1.1); 
-    opacity: 0.8; 
-  }
-}
-
-@keyframes breathe {
-  0%, 100% { 
-    transform: translate(-50%, -50%) scale(1); 
-  }
-  50% { 
-    transform: translate(-50%, -50%) scale(1.1); 
-  }
-}
-
-@keyframes blink {
-  0%, 100% { 
-    opacity: 1; 
-  }
-  50% { 
-    opacity: 0.5; 
-  }
-}
-
-@keyframes userPulse {
-  0%, 100% { 
-    transform: translate(-50%, -50%) scale(1); 
-  }
-  50% { 
-    transform: translate(-50%, -50%) scale(1.2); 
-  }
-}
-
-@keyframes expandRing {
-  0% { 
-    transform: translate(-50%, -50%) scale(0.5); 
-    opacity: 1; 
-  }
-  100% { 
-    transform: translate(-50%, -50%) scale(1.5); 
-    opacity: 0; 
-  }
-}
-
-@keyframes float {
-  0%, 100% { 
-    transform: translateY(0px) rotate(0deg); 
-  }
-  33% { 
-    transform: translateY(-10px) rotate(1deg); 
-  }
-  66% { 
-    transform: translateY(5px) rotate(-1deg); 
-  }
-}
-
-/* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
-  .register-content {
-    padding: 1rem;
-  }
+  .register-content { padding: 1rem; }
+  .register-box { padding: 1.5rem; }
+  .register-title { font-size: 1.5rem; }
+  .register-subtitle { font-size: 1rem; }
   
-  .register-box {
-    padding: 1.5rem;
-  }
-  
-  .register-title {
-    font-size: 1.5rem;
-  }
-  
-  .register-subtitle {
-    font-size: 1rem;
-  }
-
-  .vista-cliente-grid {
-    grid-template-columns: 1fr;
-    height: auto;
-    gap: 20px;
-  }
-
-  .vista-cliente-map-container {
-    height: 50vh;
-    min-height: 300px;
-  }
-
-  .vista-cliente-title {
-    font-size: 24px;
-  }
-
-  .vista-cliente-nav-buttons {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .vista-cliente-nav-button,
-  .vista-cliente-nav-button-active {
-    padding: 8px 16px;
-    font-size: 14px;
-  }
-
-  .vista-cliente-main {
-    padding: 20px 10px;
-  }
-
-  .vista-cliente-panel-header {
-    padding: 20px;
-  }
-
-  .vista-cliente-panel-title {
-    font-size: 20px;
-  }
-
-  .vista-cliente-action-buttons {
-    flex-direction: column;
-  }
-
-  .vista-cliente-action-button {
-    justify-content: center;
-  }
-
-  .vista-cliente-tracking-control {
-    position: relative;
-    top: auto;
-    left: auto;
-    margin-bottom: 15px;
-  }
+  .vista-cliente-container { margin-top: 0; }
+  .vista-cliente-grid { grid-template-columns: 1fr; gap: 20px; height: auto; }
+  .vista-cliente-map-container { height: 50vh; min-height: 300px; order: 2; }
+  .vista-cliente-panel { order: 1; }
+  .vista-cliente-header-flex { flex-wrap: wrap; gap: 15px; }
+  .vista-cliente-nav-buttons { justify-content: center; }
+  .vista-cliente-main { padding: 15px 10px; }
 }
 
 @media (max-width: 480px) {
-  .vista-cliente-vendor-info {
-    flex-direction: column;
-    text-align: center;
-    gap: 10px;
-  }
-
-  .vista-cliente-vendor-stats {
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .vista-cliente-search-input {
-    padding: 12px 12px 12px 40px;
-    font-size: 14px;
-  }
+  .vista-cliente-title { font-size: 24px; }
+  .vista-cliente-nav-button, .vista-cliente-nav-button-active { padding: 8px 16px; font-size: 12px; }
+  .vista-cliente-main { padding: 10px 5px; }
+  .vista-cliente-map-container { min-height: 250px; }
+  .vista-cliente-vendor-info { flex-direction: column; text-align: center; gap: 10px; }
+  .vista-cliente-vendor-stats { justify-content: center; flex-wrap: wrap; }
+  .vista-cliente-action-buttons { flex-direction: column; }
+  .vista-cliente-action-button { width: 100%; justify-content: center; }
 }

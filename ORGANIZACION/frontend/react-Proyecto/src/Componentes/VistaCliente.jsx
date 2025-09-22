@@ -68,6 +68,8 @@ import './VistaCliente.css';
     }
   ];
 
+  {/*Buscador*/}
+
   const filteredVendedores = vendedores.filter(v => 
     v.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
     v.producto.toLowerCase().includes(searchTerm.toLowerCase())
@@ -88,18 +90,11 @@ import './VistaCliente.css';
     let interval;
     if (isTracking && trackingVendor) {
       interval = setInterval(() => {
-        // Simular movimiento del vendedor
-        setTrackingVendor(prev => ({
-          ...prev,
-          ubicacion: {
-            lat: prev.ubicacion.lat + (Math.random() - 0.5) * 0.0001,
-            lng: prev.ubicacion.lng + (Math.random() - 0.5) * 0.0001
-          }
-        }));
       }, 3000);
     }
     return () => clearInterval(interval);
   }, [isTracking, trackingVendor]);
+  
 
   const MapComponent = () => (
     <div ref={mapRef} className="vista-cliente-map">
@@ -141,7 +136,7 @@ import './VistaCliente.css';
               <span className="vista-cliente-pin-emoji">{vendor.avatar}</span>
             </div>
 
-            {/* Indicador de estado */}
+            {/* Estado: act o inact (punto verde)*/}
             {vendor.activo && <div className="vista-cliente-status-indicator" />}
           </div>
         );
@@ -157,27 +152,6 @@ import './VistaCliente.css';
 
   return (
     <div className="vista-cliente-container">
-      {/* Header */}
-      <div className="vista-cliente-header">
-        <div className="vista-cliente-header-content">
-         <div className="vista-cliente-header-flex">
-            
-          {/* Botón de regreso */}
-          <button
-            onClick={onBackToRoles}
-            className="back-button"
-          >
-            ← Volver a selección de roles
-          </button>
-
-            <h1 className="vista-cliente-title">Vendedores Bogotá</h1>
-            <div className="vista-cliente-nav-buttons">
-              <button className="vista-cliente-nav-button-active">Mapa</button>
-              <button className="vista-cliente-nav-button">Vendedores</button>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <div className="vista-cliente-main">
         <div className="vista-cliente-grid">
@@ -212,7 +186,7 @@ import './VistaCliente.css';
                 <Search size={20} className="vista-cliente-search-icon" />
                 <input
                   type="text"
-                  placeholder="Buscar por producto..."
+                  placeholder="Busca por producto o nombre"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="vista-cliente-search-input"
@@ -296,21 +270,6 @@ import './VistaCliente.css';
                         >
                           <Zap size={14} />
                           {trackingVendor?.id === vendor.id ? 'Rastreando...' : 'Rastrear'}
-                        </button>
-
-                        <button className="vista-cliente-action-button call">
-                          <Phone size={14} />
-                          Llamar
-                        </button>
-
-                        <button className="vista-cliente-action-button whatsapp">
-                          <MessageCircle size={14} />
-                          WhatsApp
-                        </button>
-
-                        <button className="vista-cliente-action-button order">
-                          <ShoppingCart size={14} />
-                          Pedir
                         </button>
                       </div>
                     </div>
