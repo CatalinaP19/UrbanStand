@@ -425,13 +425,13 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
     try {
       setMessage('Registrando entidad...')
       const registroData = {
-        nombre: nomEnti,
-        tipo: tipoE,
+        nomEnti: nomEnti,
+        tipoE: tipoE,
         sector: sector,
         nit: nit,
-        email: emailE,
-        telefono: NumTelE,
-        direccion: direccionE,
+        emailE: emailE,
+        NumTelE: NumTelE,
+        direccionE: direccionE,
         password: password
       }
       console.log('Enviando datos:', registroData)

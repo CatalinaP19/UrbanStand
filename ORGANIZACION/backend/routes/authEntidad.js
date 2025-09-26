@@ -52,8 +52,15 @@ const authenticateEntidadToken = (req, res, next) => {
 
 // Validación personalizada para dirección colombiana
 const validarDireccionColombia = (value) => {
-  const direccionRegex = /^(Calle|Carrera|Transversal|Diagonal|Avenida|Av\.?|Cr|Cl)\s?\d+[A-Za-z]?(?:\s?(Bis)?)?\s?#\d+[A-Za-z]?-?\d*$/i;
-  return direccionRegex.test(value);
+  if (!value || typeof value !== 'string') return false;
+  
+  const direccion = value.trim();
+  if (direccion.length < 5 || direccion.length > 200) return false;
+  
+  // Regex más flexible que acepta múltiples formatos de direcciones colombianas
+  const direccionRegex = /^(Calle|Carrera|Transversal|Diagonal|Avenida|Av\.?|Kr|Cr|Cl|Tv|Dg|Ac|Ak)\s*\d+[A-Za-z]*(?:\s*(?:Bis|Sur|Norte|Este|Oeste))?\s*(?:#|No\.?\s*)\s*\d+[A-Za-z]*(?:\s*[-–]\s*\d+[A-Za-z]*)?(?:\s*(?:Apt|Apto|Apartamento|Of|Oficina|Local|Int|Interior|Piso)\s*\d+[A-Za-z]*)?(?:\s*,?\s*.+)?$/i;
+  
+  return direccionRegex.test(direccion);
 };
 
 // REGISTRO DE ENTIDAD GUBERNAMENTAL
@@ -126,7 +133,7 @@ router.post('/register', [
 
     // Crear nueva entidad
     const nuevaEntidad = new EntidadGubernamental({
-      nomEnt,
+      nomEnti,
       tipoE,
       sector,
       nit,
@@ -152,9 +159,9 @@ router.post('/register', [
     const token = jwt.sign(
       { 
         entidadId: nuevaEntidad._id,
-        correo: nuevaEntidad.emailE,
-        nombre: nuevaEntidad.nomEnti,
-        tipo: nuevaEntidad.tipoE,
+        emailE: nuevaEntidad.emailE,
+        nomEnti: nuevaEntidad.nomEnti,
+        tipoE: nuevaEntidad.tipoE,
         sector: nuevaEntidad.sector,
         role: 'entidad'
       },
@@ -248,11 +255,11 @@ router.post('/login', [
     const token = jwt.sign(
       { 
         entidadId: entidad._id,
-        correo: entidad.emailE,
-        nombre: entidad.nomEnti,
-        tipo: entidad.tipoE,
+        emailE: entidad.emailE,
+        nomEnti: entidad.nomEnti,
+        tipoE: entidad.tipoE,
         sector: entidad.sector,
-        estado: entidad.estado_entidad,
+        estado: entidad.estado,
         role: 'entidad'
       },
       process.env.JWT_SECRET_ENTIDAD || process.env.JWT_SECRET,
