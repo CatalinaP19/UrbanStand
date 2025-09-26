@@ -2,6 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { MapPin, Bell, MessageCircle, X, Send, User, BarChart3, Edit3, Package } from 'lucide-react';
 
 const VistaVendedor = ({ vendedorData = null }) => {
+  // Garantizar datos por defecto cuando se usa la ruta directa
+  const vendedor = vendedorData ?? {
+    nombre: 'Vendedor',
+    tipoVendedor: 'Vendedor',
+    descripcion: 'Bienvenido a tu panel. Gestiona tu puesto y productos.',
+    genero: ''
+  };
   const [isChatOpen, setChatOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([

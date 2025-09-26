@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import Swal from "sweetalert2"
+import { useNavigate } from 'react-router-dom'
 
 export default function Register({ onBackToRoles, onSuccessfulLogin, onGoToLogin }) {
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -639,6 +641,8 @@ export default function Register({ onBackToRoles, onSuccessfulLogin, onGoToLogin
               setSelectedProducts([])
               setMessage('')
               onGoToLogin()
+            } else {
+              navigate('/login')
             }
           }, 2000)
         } else {
@@ -693,7 +697,13 @@ export default function Register({ onBackToRoles, onSuccessfulLogin, onGoToLogin
         <div className="register-box">
           {/* Botón de regreso */}
           <button
-            onClick={onBackToRoles}
+            onClick={() => {
+              if (typeof onBackToRoles === 'function') {
+                onBackToRoles()
+              } else {
+                navigate('/register-roles')
+              }
+            }}
             className="back-button"
           >
             ← Volver a selección de roles

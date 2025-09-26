@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import apiService from "../services/apiService";
+import { useNavigate } from "react-router-dom";
 
 export default function Login({ onSuccessfulLogin, onGoToRegister }) {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [terms, setTerms] = useState(false);
@@ -27,7 +29,7 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
     } else {
       // Inicio de sesión
       setMessage("Iniciando sesión...");
-      if (!isRegistrationMode && typeof onSuccessfulLogin === 'function') {
+      if (!isRegistrationMode) {
         try {
           if (role === 'entidad') {
             // Login entidad contra backend
@@ -46,7 +48,12 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
               nomEnti: profile?.nombre_entidad || profile?.nomEnti || profile?.nombre || undefined,
             };
             setMessage("Inicio de sesión exitoso.");
-            return onSuccessfulLogin('entidad', entidadData);
+            if (typeof onSuccessfulLogin === 'function') {
+              return onSuccessfulLogin('entidad', entidadData);
+            } else {
+              // fallback de navegación
+              return navigate('/entidades');
+            }
           } else if (role === 'vendedor') {
             // Intentar login vendedor contra backend; si falla, usar fallback localStorage
             let vendorData = null;
@@ -79,7 +86,12 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
               vendorData = { email, ...profile };
             }
             setMessage("Inicio de sesión exitoso.");
-            return onSuccessfulLogin('vendedor', vendorData);
+            if (typeof onSuccessfulLogin === 'function') {
+              return onSuccessfulLogin('vendedor', vendorData);
+            } else {
+              // fallback de navegación
+              return navigate('/vendedor');
+            }
           }
         } catch (error) {
           console.error('Error de login:', error);
@@ -100,6 +112,8 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
   const toggleMode = () => {
     if (onGoToRegister) {
       onGoToRegister();
+    } else {
+      navigate('/register-roles');
     }
   };
 

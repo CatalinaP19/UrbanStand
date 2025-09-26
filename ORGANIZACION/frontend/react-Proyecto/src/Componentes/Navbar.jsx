@@ -1,13 +1,14 @@
 import React, { useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 export default function Navbar({ 
-  currentView, 
-  setCurrentView, 
   isLoggedIn, 
   userRole, 
   userData, 
   onLogout 
 }) {
+  const navigate = useNavigate()
+  const location = useLocation()
 
   useEffect(() => {
     const style = document.createElement('style')
@@ -201,25 +202,18 @@ export default function Navbar({
 
   // Función para scroll suave a secciones dentro de UrbanStand
   const scrollToSection = (sectionId) => {
-    if (currentView !== 'urbanstand') {
-      setCurrentView('urbanstand')
-      // Esperar a que se renderice la vista antes de hacer scroll
+    if (location.pathname !== '/') {
+      navigate('/')
       setTimeout(() => {
         const target = document.querySelector(sectionId)
         if (target) {
-          target.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-          })
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' })
         }
-      }, 100)
+      }, 150)
     } else {
       const target = document.querySelector(sectionId)
       if (target) {
-        target.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        })
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }
     }
   }
@@ -263,7 +257,7 @@ export default function Navbar({
         {/* Logo */}
         <div 
           className="navbar-logo"
-          onClick={() => setCurrentView('urbanstand')}
+          onClick={() => navigate('/')}
         >
           <img src="../img/logo.png" alt="logo" />
           UrbanStand
@@ -275,7 +269,7 @@ export default function Navbar({
             // Navegación para usuarios no logueados
             <>
               <button
-                className={`navbar-link ${currentView === 'urbanstand' ? 'active' : ''}`}
+                className={`navbar-link ${location.pathname === '/' ? 'active' : ''}`}
                 onClick={() => scrollToSection('#inicio')}
               >
                 Inicio
@@ -297,29 +291,29 @@ export default function Navbar({
             // Navegación para usuarios logueados
             <>
               <button
-                className={`navbar-link ${currentView === 'urbanstand' ? 'active' : ''}`}
-                onClick={() => setCurrentView('urbanstand')}
+                className={`navbar-link ${location.pathname === '/' ? 'active' : ''}`}
+                onClick={() => navigate('/')}
               >
                 Inicio
               </button>
               <button
-                className={`navbar-link ${currentView === 'chat' ? 'active' : ''}`}
-                onClick={() => setCurrentView('chat')}
+                className={`navbar-link ${location.pathname === '/chat' ? 'active' : ''}`}
+                onClick={() => navigate('/chat')}
               >
                 Chat
               </button>
               {userRole === 'vendedor' && (
                 <button
-                  className={`navbar-link ${currentView === 'vista1' ? 'active' : ''}`}
-                  onClick={() => setCurrentView('vista1')}
+                  className={`navbar-link ${location.pathname === '/vendedor' ? 'active' : ''}`}
+                  onClick={() => navigate('/vendedor')}
                 >
                   Mi Puesto
                 </button>
               )}
               {userRole === 'entidad' && (
                 <button
-                  className={`navbar-link ${currentView === 'vista2' ? 'active' : ''}`}
-                  onClick={() => setCurrentView('vista2')}
+                  className={`navbar-link ${location.pathname === '/entidades' ? 'active' : ''}`}
+                  onClick={() => navigate('/entidades')}
                 >
                   Dashboard
                 </button>
@@ -335,13 +329,13 @@ export default function Navbar({
             <>
               <button
                 className="navbar-button navbar-button-secondary"
-                onClick={() => setCurrentView('login')}
+                onClick={() => navigate('/login')}
               >
                 Ingresar
               </button>
               <button
                 className="navbar-button navbar-button-primary"
-                onClick={() => setCurrentView('register_roles')}
+                onClick={() => navigate('/register-roles')}
               >
                 Registrarse
               </button>
