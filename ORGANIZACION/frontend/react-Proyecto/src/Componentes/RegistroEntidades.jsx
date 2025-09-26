@@ -421,17 +421,6 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
       return
     }
 
-    // Preparar datos para enviar al backend
-    const registroData = {
-      nombre_entidad: nomEnti,
-      tipo_entidad: tipoE,
-      sector: sector,
-      nit: nit,
-      correo_institucional: emailE,
-      telefono_institucional: NumTelE,
-      direccion_sede_principal: direccionE,
-      contrasenia: password
-    }
 
     try {
       setMessage('Registrando entidad...')

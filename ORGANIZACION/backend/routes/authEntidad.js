@@ -126,12 +126,12 @@ router.post('/register', [
 
     // Crear nueva entidad
     const nuevaEntidad = new EntidadGubernamental({
-      nombre_entidad,
-      tipo_entidad,
+      nomEnt,
+      tipoE,
       sector,
       nit,
-      correo_institucional,
-      telefono_institucional,
+      emailE,
+      NumTelE,
       direccion_sede_principal,
       contrasenia, // Se encriptará automáticamente por el middleware pre('save')
       configuracion_reportes: {
