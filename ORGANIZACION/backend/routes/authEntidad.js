@@ -59,13 +59,13 @@ const validarDireccionColombia = (value) => {
 // REGISTRO DE ENTIDAD GUBERNAMENTAL
 router.post('/register', [
   // Validaciones
-  body('nombre_entidad')
+  body('nomEnti')
     .notEmpty()
     .withMessage('El nombre de la entidad es requerido')
     .isLength({ min: 3, max: 100 })
     .withMessage('El nombre debe tener entre 3 y 100 caracteres'),
   
-  body('tipo_entidad')
+  body('tipoE')
     .isIn(['publica', 'privada', 'ong', 'universidad', 'otro'])
     .withMessage('Tipo de entidad debe ser: publica, privada, ong, universidad, u otro'),
     
@@ -79,22 +79,22 @@ router.post('/register', [
     .isLength({ min: 9, max: 15 })
     .withMessage('El NIT debe tener entre 9 y 15 caracteres'),
     
-  body('correo_institucional')
+  body('emailE')
     .isEmail()
     .withMessage('Debe ser un correo institucional válido')
     .normalizeEmail(),
     
-  body('telefono_institucional')
+  body('NumTelE')
     .matches(/^3\d{9}$/)
     .withMessage('El número telefónico debe ser válido para Colombia (formato: 3XXXXXXXXX)'),
     
-  body('direccion_sede_principal')
+  body('direccionE')
     .notEmpty()
     .withMessage('La dirección de la sede principal es requerida')
     .custom(validarDireccionColombia)
     .withMessage('La dirección debe ser válida para Colombia (ej: Calle 100 #15-55)'),
     
-  body('contrasenia')
+  body('password')
     .isLength({ min: 8 })
     .withMessage('La contraseña debe tener al menos 8 caracteres')
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
@@ -103,14 +103,14 @@ router.post('/register', [
 ], handleValidationErrors, async (req, res) => {
   try {
     const {
-      nombre_entidad, tipo_entidad, sector, nit, correo_institucional,
-      telefono_institucional, direccion_sede_principal, contrasenia
+      nomEnti, tipoE, sector, nit, emailE,
+      NumTelE, direccionE, password
     } = req.body;
 
     // Verificar si ya existe una entidad con ese correo o NIT
     const entidadExistente = await EntidadGubernamental.findOne({
       $or: [
-        { correo_institucional },
+        { emailE },
         { nit }
       ]
     });
@@ -118,7 +118,7 @@ router.post('/register', [
     if (entidadExistente) {
       return res.status(409).json({
         error: "Entidad ya registrada",
-        message: entidadExistente.correo_institucional === correo_institucional 
+        message: entidadExistente.emailE === emailE 
           ? "Ya existe una entidad con este correo institucional"
           : "Ya existe una entidad con este NIT"
       });
@@ -132,8 +132,8 @@ router.post('/register', [
       nit,
       emailE,
       NumTelE,
-      direccion_sede_principal,
-      contrasenia, // Se encriptará automáticamente por el middleware pre('save')
+      direccionE,
+      password, // Se encriptará automáticamente por el middleware pre('save')
       configuracion_reportes: {
         tipos_datos_autorizados: [
           'conteo_vendedores',
@@ -152,9 +152,9 @@ router.post('/register', [
     const token = jwt.sign(
       { 
         entidadId: nuevaEntidad._id,
-        correo: nuevaEntidad.correo_institucional,
-        nombre: nuevaEntidad.nombre_entidad,
-        tipo: nuevaEntidad.tipo_entidad,
+        correo: nuevaEntidad.emailE,
+        nombre: nuevaEntidad.nomEnti,
+        tipo: nuevaEntidad.tipoE,
         sector: nuevaEntidad.sector,
         role: 'entidad'
       },
@@ -177,7 +177,7 @@ router.post('/register', [
       const field = Object.keys(error.keyPattern)[0];
       return res.status(409).json({
         error: "Datos duplicados",
-        message: `Ya existe una entidad con este ${field === 'correo_institucional' ? 'correo institucional' : 'NIT'}`
+        message: `Ya existe una entidad con este ${field === 'emailE' ? 'correo institucional' : 'NIT'}`
       });
     }
     
@@ -190,19 +190,19 @@ router.post('/register', [
 
 // LOGIN DE ENTIDAD GUBERNAMENTAL
 router.post('/login', [
-  body('correo_institucional')
+  body('emailE')
     .isEmail()
     .withMessage('Debe ser un correo institucional válido')
     .normalizeEmail(),
-  body('contrasenia')
+  body('password')
     .notEmpty()
     .withMessage('La contraseña es requerida')
 ], handleValidationErrors, async (req, res) => {
   try {
-    const { correo_institucional, contrasenia } = req.body;
+    const { emailE, password } = req.body;
 
     // Buscar entidad por correo
-    const entidad = await EntidadGubernamental.findOne({ correo_institucional });
+    const entidad = await EntidadGubernamental.findOne({ emailE });
     if (!entidad) {
       return res.status(401).json({
         error: "Credenciales inválidas",
@@ -226,7 +226,7 @@ router.post('/login', [
     }
 
     // Verificar contraseña usando el método del modelo
-    const esContrasenaValida = await entidad.compararContrasenia(contrasenia);
+    const esContrasenaValida = await entidad.compararContrasenia(password);
     if (!esContrasenaValida) {
       return res.status(401).json({
         error: "Credenciales inválidas",
@@ -248,9 +248,9 @@ router.post('/login', [
     const token = jwt.sign(
       { 
         entidadId: entidad._id,
-        correo: entidad.correo_institucional,
-        nombre: entidad.nombre_entidad,
-        tipo: entidad.tipo_entidad,
+        correo: entidad.emailE,
+        nombre: entidad.nomEnti,
+        tipo: entidad.tipoE,
         sector: entidad.sector,
         estado: entidad.estado_entidad,
         role: 'entidad'
@@ -279,7 +279,7 @@ router.post('/login', [
 router.get('/profile', authenticateEntidadToken, async (req, res) => {
   try {
     const entidad = await EntidadGubernamental.findById(req.entidad.entidadId)
-      .select('-contrasenia');
+      .select('-password');
 
     if (!entidad) {
       return res.status(404).json({ 

@@ -424,6 +424,16 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
 
     try {
       setMessage('Registrando entidad...')
+      const registroData = {
+        nombre: nomEnti,
+        tipo: tipoE,
+        sector: sector,
+        nit: nit,
+        email: emailE,
+        telefono: NumTelE,
+        direccion: direccionE,
+        password: password
+      }
       console.log('Enviando datos:', registroData)
 
       const response = await apiService.entidad.register(registroData)

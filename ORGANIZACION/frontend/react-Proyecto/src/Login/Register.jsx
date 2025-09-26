@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Swal from "sweetalert2"
 import { useNavigate } from 'react-router-dom'
 
-export default function Register({ onBackToRoles, onSuccessfulLogin, onGoToLogin }) {
+export default function Register({ onBackToRoles,  onGoToLogin }) {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -619,7 +619,9 @@ export default function Register({ onBackToRoles, onSuccessfulLogin, onGoToLogin
               genero,
             }
             localStorage.setItem('urbanstand_users', JSON.stringify(existing))
-          } catch (_) {}
+          } catch (e) {
+            console.error('Error guardando perfil en localStorage:', e)
+          }
 
           // Limpiar formulario y redirigir después de 2 segundos
           setTimeout(() => {

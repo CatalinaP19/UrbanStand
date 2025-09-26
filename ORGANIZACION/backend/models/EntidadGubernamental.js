@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 
 const EntidadGubernamentalSchema = new mongoose.Schema({
   // Información básica de la entidad
-  nombre_entidad: {
+  nomEnti: {
     type: String,
     required: [true, 'El nombre de la entidad es requerido'],
     trim: true,
@@ -12,7 +12,7 @@ const EntidadGubernamentalSchema = new mongoose.Schema({
   },
   
   // Tipo de entidad
-  tipo_entidad: {
+  tipoE: {
     type: String,
     required: [true, 'El tipo de entidad es requerido'],
     enum: {
@@ -41,7 +41,7 @@ const EntidadGubernamentalSchema = new mongoose.Schema({
   },
 
   // Información de contacto
-  correo_institucional: {
+  emailE: {
     type: String,
     required: [true, 'El correo institucional es requerido'],
     unique: true,
@@ -51,7 +51,7 @@ const EntidadGubernamentalSchema = new mongoose.Schema({
     match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Por favor ingresa un correo válido']
   },
   
-  telefono_institucional: {
+  NumTelE: {
     type: String,
     required: [true, 'El número telefónico institucional es requerido'],
     trim: true,
@@ -60,7 +60,7 @@ const EntidadGubernamentalSchema = new mongoose.Schema({
   },
 
   // Dirección de la sede principal
-  direccion_sede_principal: {
+  direccionE: {
     type: String,
     required: [true, 'La dirección de la sede principal es requerida'],
     trim: true,
@@ -69,7 +69,7 @@ const EntidadGubernamentalSchema = new mongoose.Schema({
   },
 
   // Credenciales de acceso
-  contrasenia: {
+  password: {
     type: String,
     required: [true, 'La contraseña es requerida'],
     minlength: [8, 'La contraseña debe tener al menos 8 caracteres']
@@ -165,21 +165,21 @@ const EntidadGubernamentalSchema = new mongoose.Schema({
 });
 
 // Índices para optimizar consultas
-EntidadGubernamentalSchema.index({ correo_institucional: 1 });
+EntidadGubernamentalSchema.index({ emailE: 1 });
 EntidadGubernamentalSchema.index({ nit: 1 });
 EntidadGubernamentalSchema.index({ estado_entidad: 1 });
-EntidadGubernamentalSchema.index({ tipo_entidad: 1 });
+EntidadGubernamentalSchema.index({ tipoE: 1 });
 EntidadGubernamentalSchema.index({ sector: 1 });
 
 // Middleware para encriptar contraseña antes de guardar
 EntidadGubernamentalSchema.pre('save', async function (next) {
   // Solo encriptar si la contraseña ha sido modificada o es nueva
-  if (!this.isModified('contrasenia')) return next();
+  if (!this.isModified('password')) return next();
 
   try {
     // Hash de la contraseña
     const salt = await bcrypt.genSalt(12);
-    this.contrasenia = await bcrypt.hash(this.contrasenia, salt);
+    this.password = await bcrypt.hash(this.password, salt);
     next();
   } catch (error) {
     next(error);
@@ -187,8 +187,8 @@ EntidadGubernamentalSchema.pre('save', async function (next) {
 });
 
 // Método para comparar contraseñas
-EntidadGubernamentalSchema.methods.compararContrasenia = async function (contrasenia) {
-  return await bcrypt.compare(contrasenia, this.contrasenia);
+EntidadGubernamentalSchema.methods.compararContrasenia = async function (password) {
+  return await bcrypt.compare(password, this.password);
 };
 
 // Método para registrar acceso
@@ -268,7 +268,7 @@ EntidadGubernamentalSchema.statics.obtenerEstadisticasVendedores = async functio
 // Método para obtener información pública de la entidad (sin datos sensibles)
 EntidadGubernamentalSchema.methods.toPublicJSON = function () {
   const entidad = this.toObject();
-  delete entidad.contrasenia;
+  delete entidad.password;
   delete entidad.historial_descargas;
   delete entidad.ultima_sesion;
   delete entidad.__v;
