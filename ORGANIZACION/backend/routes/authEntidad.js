@@ -51,14 +51,14 @@ const authenticateEntidadToken = (req, res, next) => {
 };
 
 // Validación personalizada para dirección colombiana
-const validarDireccionColombia = (value) => {
+const ValidateAddressEnti = (value) => {
   if (!value || typeof value !== 'string') return false;
   
   const direccion = value.trim();
   if (direccion.length < 5 || direccion.length > 200) return false;
   
   // Regex más flexible que acepta múltiples formatos de direcciones colombianas
-  const direccionRegex = /^(Calle|Carrera|Transversal|Diagonal|Avenida|Av\.?|Kr|Cr|Cl|Tv|Dg|Ac|Ak)\s*\d+[A-Za-z]*(?:\s*(?:Bis|Sur|Norte|Este|Oeste))?\s*(?:#|No\.?\s*)\s*\d+[A-Za-z]*(?:\s*[-–]\s*\d+[A-Za-z]*)?(?:\s*(?:Apt|Apto|Apartamento|Of|Oficina|Local|Int|Interior|Piso)\s*\d+[A-Za-z]*)?(?:\s*,?\s*.+)?$/i;
+  const direccionRegex = /^(Calle|Carrera|Transversal|Diagonal|Avenida|Autopista|Circunvalar|Av\.?|Kr\.?|Cr\.?|Cl\.?|Tv\.?|Dg\.?|Ac\.?|Ak\.?|Cra\.?)\s*\d+[A-Za-z]*(?:\s*(?:Bis|Sur|Norte|Este|Oeste|A|B|C))?\s*(?:#|No\.?|Nro\.?|N°)\s*\d+[A-Za-z]*(?:\s*[-–]\s*\d+[A-Za-z]*)?(?:\s*(?:Apt|Apto|Apartamento|Of|Oficina|Local|Int|Interior|Piso|Torre|Bloque|Casa|Lote)\s*[A-Za-z0-9]+)?/i;
   
   return direccionRegex.test(direccion);
 };

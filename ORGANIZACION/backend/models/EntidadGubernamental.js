@@ -48,7 +48,7 @@ const EntidadGubernamentalSchema = new mongoose.Schema({
     lowercase: true,
     trim: true,
     maxlength: [150, 'El correo no puede exceder 150 caracteres'],
-    match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Por favor ingresa un correo válido']
+    match: [/^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?@[a-zA-Z0-9]([a-zA-Z0-9.-]*[a-zA-Z0-9])?\.(gov|edu|org|mil|gob)(\.[a-zA-Z]{2,3})?$/, 'Debe ser un correo institucional válido (.gov, .edu, .org, .mil, .gob)']
   },
   
   NumTelE: {
@@ -65,7 +65,7 @@ const EntidadGubernamentalSchema = new mongoose.Schema({
     required: [true, 'La dirección de la sede principal es requerida'],
     trim: true,
     maxlength: [200, 'La dirección no puede exceder 200 caracteres']
-    // Nota: La validación de dirección se puede implementar en el frontend o middleware
+    
   },
 
   // Credenciales de acceso
