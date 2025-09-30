@@ -186,7 +186,7 @@ const UrbanStand = ({ onGoToLogin, onGoToRegister, onGoToVendorRegister, onGoToE
               </div>
               <h3>Gobierno / Entidades</h3>
               <p>Estadísticas e informes para políticas públicas</p>
-              <button className="btn btn-primary" onClick={onGoToEntityView || onGoToEntityRegister}>Acceder como...</button>
+              <button className="btn btn-primary" onClick={onGoToEntityRegister}>Acceder como...</button>
             </article>
           </div>
         </section>

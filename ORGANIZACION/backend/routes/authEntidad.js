@@ -6,7 +6,6 @@ const EntidadGubernamental = require('../models/EntidadGubernamental');
 const Vendedor = require('../models/Vendedor');
 
 const router = express.Router();
-
 // Middleware para validar errores
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
@@ -50,17 +49,25 @@ const authenticateEntidadToken = (req, res, next) => {
   });
 };
 
-// Validación personalizada para dirección colombiana
+// validacion direccion colombiana
 const ValidateAddressEnti = (value) => {
-  if (!value || typeof value !== 'string') return false;
+  if (!value || typeof value !== 'string') {
+    throw new Error('La dirección es requerida');
+  }
   
   const direccion = value.trim();
-  if (direccion.length < 5 || direccion.length > 200) return false;
+  if (direccion.length < 5 || direccion.length > 200) {
+    throw new Error('La dirección debe tener entre 5 y 200 caracteres');
+  }
   
-  // Regex más flexible que acepta múltiples formatos de direcciones colombianas
+  // Regex para direcciones colombianas
   const direccionRegex = /^(Calle|Carrera|Transversal|Diagonal|Avenida|Autopista|Circunvalar|Av\.?|Kr\.?|Cr\.?|Cl\.?|Tv\.?|Dg\.?|Ac\.?|Ak\.?|Cra\.?)\s*\d+[A-Za-z]*(?:\s*(?:Bis|Sur|Norte|Este|Oeste|A|B|C))?\s*(?:#|No\.?|Nro\.?|N°)\s*\d+[A-Za-z]*(?:\s*[-–]\s*\d+[A-Za-z]*)?(?:\s*(?:Apt|Apto|Apartamento|Of|Oficina|Local|Int|Interior|Piso|Torre|Bloque|Casa|Lote)\s*[A-Za-z0-9]+)?/i;
   
-  return direccionRegex.test(direccion);
+  if (!direccionRegex.test(direccion)) {
+    throw new Error('La dirección debe tener un formato válido para Colombia (ej: Calle 100 #15-55)');
+  }
+  
+  return true;
 };
 
 // REGISTRO DE ENTIDAD GUBERNAMENTAL
@@ -98,7 +105,7 @@ router.post('/register', [
   body('direccionE')
     .notEmpty()
     .withMessage('La dirección de la sede principal es requerida')
-    .custom(validarDireccionColombia)
+    .custom(ValidateAddressEnti)
     .withMessage('La dirección debe ser válida para Colombia (ej: Calle 100 #15-55)'),
     
   body('password')

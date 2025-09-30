@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import Navbar from './Navbar.jsx'
+import { useNavigate } from 'react-router-dom'
 
 export default function Register_roles({ 
   onRoleSelect,
@@ -20,6 +20,22 @@ export default function Register_roles({
       onRoleSelect(role);
     }
   }
+
+  const navigate = useNavigate();
+
+  // Navegación directa para roles específicos cuando no hay manejador del padre
+  useEffect(() => {
+    // No side-effects on mount
+  }, []);
+
+  // Reemplazamos el manejador para añadir navegación cuando rol === 'entidad'
+  const originalHandleRoleSelect = handleRoleSelect;
+  const enhancedHandleRoleSelect = (role) => {
+    originalHandleRoleSelect(role);
+    if (role === 'entidad') {
+      navigate('/registro-entidades');
+    }
+  };
 
   useEffect(() => {
     const style = document.createElement('style')
@@ -131,16 +147,6 @@ export default function Register_roles({
 
   return (
     <div className="register-container">
-      {/* Navbar reutilizable */}
-      <Navbar 
-        currentView={currentView}
-        setCurrentView={setCurrentView}
-        isLoggedIn={isLoggedIn}
-        userRole={userRole}
-        userData={userData}
-        onLogout={onLogout}
-      />
-
       {/* Contenido de selección de roles */}
       <div className="register-content">
         <div className="register-box">
@@ -150,7 +156,7 @@ export default function Register_roles({
           <div className="register-buttons-container">
             <button 
             type="button" 
-              onClick={() => handleRoleSelect('vendedor')}
+              onClick={() => enhancedHandleRoleSelect('vendedor')}
               className="register-role-button"
             >
               Vendedor
@@ -158,7 +164,7 @@ export default function Register_roles({
 
             <button 
               type="button" 
-              onClick={() => handleRoleSelect('cliente')} 
+              onClick={() => enhancedHandleRoleSelect('cliente')} 
               className="register-role-button"
             >
               Cliente
@@ -166,7 +172,7 @@ export default function Register_roles({
 
             <button 
               type="button" 
-              onClick={() => handleRoleSelect('entidad')} 
+              onClick={() => enhancedHandleRoleSelect('entidad')} 
               className="register-role-button"
             >
               Entidad

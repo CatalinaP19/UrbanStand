@@ -90,6 +90,16 @@ class ApiService {
     estadisticas: (params) => this.get(API_CONFIG.ENTIDAD.ESTADISTICAS, params),
     descargarReporte: (params) => this.download(API_CONFIG.ENTIDAD.REPORTES, params),
   };
+
+  async get(endpoint, params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    const url = queryString ? `${endpoint}?${queryString}` : endpoint;
+    return this.request(url);
+  }
+
+  async download(endpoint, data) {
+    return this.post(endpoint, data);
+  }
 }
 
 const apiService = new ApiService();

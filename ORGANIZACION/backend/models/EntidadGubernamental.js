@@ -10,7 +10,7 @@ const EntidadGubernamentalSchema = new mongoose.Schema({
     trim: true,
     maxlength: [100, 'El nombre de la entidad no puede exceder 100 caracteres']
   },
-  
+
   // Tipo de entidad
   tipoE: {
     type: String,
@@ -48,9 +48,9 @@ const EntidadGubernamentalSchema = new mongoose.Schema({
     lowercase: true,
     trim: true,
     maxlength: [150, 'El correo no puede exceder 150 caracteres'],
-    match: [/^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?@[a-zA-Z0-9]([a-zA-Z0-9.-]*[a-zA-Z0-9])?\.(gov|edu|org|mil|gob)(\.[a-zA-Z]{2,3})?$/, 'Debe ser un correo institucional válido (.gov, .edu, .org, .mil, .gob)']
+   match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Debe ser un correo electrónico válido']
   },
-  
+
   NumTelE: {
     type: String,
     required: [true, 'El número telefónico institucional es requerido'],
@@ -65,7 +65,7 @@ const EntidadGubernamentalSchema = new mongoose.Schema({
     required: [true, 'La dirección de la sede principal es requerida'],
     trim: true,
     maxlength: [200, 'La dirección no puede exceder 200 caracteres']
-    
+
   },
 
   // Credenciales de acceso
@@ -212,36 +212,36 @@ EntidadGubernamentalSchema.methods.registrarDescarga = function (tipoReporte, pa
 // Método estático para obtener estadísticas agregadas de vendedores
 EntidadGubernamentalSchema.statics.obtenerEstadisticasVendedores = async function (filtros = {}) {
   const Vendedor = mongoose.model('Vendedor');
-  
+
   // Construir pipeline de agregación
   const pipeline = [];
-  
+
   // Filtros básicos
   const matchStage = {
     estado_vendedor: { $ne: 'eliminado' }
   };
-  
+
   if (filtros.localidad) {
     matchStage.id_localidad = new mongoose.Types.ObjectId(filtros.localidad);
   }
-  
+
   if (filtros.genero) {
     matchStage.genero = filtros.genero;
   }
-  
+
   if (filtros.categoria) {
     matchStage.categoria_producto = filtros.categoria;
   }
-  
+
   if (filtros.fechaInicio && filtros.fechaFin) {
     matchStage.fecha_registro = {
       $gte: new Date(filtros.fechaInicio),
       $lte: new Date(filtros.fechaFin)
     };
   }
-  
+
   pipeline.push({ $match: matchStage });
-  
+
   // Agregaciones para estadísticas
   pipeline.push({
     $group: {
@@ -261,7 +261,7 @@ EntidadGubernamentalSchema.statics.obtenerEstadisticasVendedores = async functio
       }
     }
   });
-  
+
   return Vendedor.aggregate(pipeline);
 };
 
@@ -281,7 +281,7 @@ EntidadGubernamentalSchema.methods.obtenerResumenActividad = function () {
   const descargasRecientes = this.historial_descargas.filter(
     descarga => descarga.fecha_descarga > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
   ).length;
-  
+
   return {
     total_descargas: totalDescargas,
     descargas_ultimo_mes: descargasRecientes,
