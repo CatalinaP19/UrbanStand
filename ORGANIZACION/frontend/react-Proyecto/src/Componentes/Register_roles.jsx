@@ -28,11 +28,17 @@ export default function Register_roles({
     // No side-effects on mount
   }, []);
 
-  // Reemplazamos el manejador para añadir navegación cuando rol === 'entidad'
+  // Manejador mejorado para redirigir según el rol seleccionado
   const originalHandleRoleSelect = handleRoleSelect;
   const enhancedHandleRoleSelect = (role) => {
     originalHandleRoleSelect(role);
-    if (role === 'entidad') {
+    
+    // Redirigir según el rol seleccionado
+    if (role === 'vendedor') {
+      navigate('/register');
+    } else if (role === 'cliente') {
+      navigate('/cliente');
+    } else if (role === 'entidad') {
       navigate('/registro-entidades');
     }
   };

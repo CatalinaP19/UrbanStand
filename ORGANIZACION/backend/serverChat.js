@@ -7,8 +7,13 @@ const path = require("path");
 
 const app = express();
 
-// Middlewares
-app.use(cors());
+// Middlewares con CORS configurado
+app.use(cors({
+  origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:3000", "http://127.0.0.1:5173"],
+  credentials: true,
+  methods: ["GET", "POST", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 app.use(express.json());
 
 // Configurar base de datos SQLite
@@ -86,11 +91,15 @@ app.get("/", (req, res) => {
 // Crear servidor HTTP
 const server = http.createServer(app);
 
-// Configurar Socket.IO
+// Configurar Socket.IO con CORS completo
 const io = new Server(server, {
   cors: {
+    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:3000", "http://127.0.0.1:5173"],
     methods: ["GET", "POST", "DELETE"],
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"]
   },
+  transports: ['websocket', 'polling']
 });
 
 // Eventos de Socket.IO

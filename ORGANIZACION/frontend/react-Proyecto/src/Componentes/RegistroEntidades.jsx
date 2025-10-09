@@ -1,7 +1,9 @@
 import apiService from '../services/apiService'
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
+  const navigate = useNavigate()
 
   const [nomEnti, setNomEnti] = useState('')
   const [tipoE, setTipoE] = useState('')
@@ -472,7 +474,13 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
       <div className="register-content">
         <div className="register-box">
           <button
-            onClick={onBackToRoles}
+            onClick={() => {
+              if (typeof onBackToRoles === 'function') {
+                onBackToRoles()
+              } else {
+                navigate('/register-roles')
+              }
+            }}
             className="back-button"
           >
             ← Volver a selección de roles
