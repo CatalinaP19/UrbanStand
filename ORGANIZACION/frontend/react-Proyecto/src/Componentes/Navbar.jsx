@@ -1,14 +1,19 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
+
 import { useNavigate, useLocation } from 'react-router-dom'
 
-export default function Navbar({ 
-  isLoggedIn, 
-  userRole, 
-  userData, 
-  onLogout 
+export default function Navbar({
+  isLoggedIn,
+  userRole,
+  userData,
+  onLogout
 }) {
   const navigate = useNavigate()
   const location = useLocation()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const ignoreScrollUntilRef = useRef(0)
+  const openScrollYRef = useRef(0)
+  const navRef = useRef(null)
 
   useEffect(() => {
     const style = document.createElement('style')
@@ -16,11 +21,11 @@ export default function Navbar({
       .navbar {
         background: #faf3e0;
         backdrop-filter: blur(10px);
-        padding: 1rem 2rem;
+        padding: 0.75rem 1.5rem;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         position: sticky;
         top: 0;
-        z-index: 100;
+        z-index: 2000;
         width: 100%;
         box-sizing: border-box;
       }
@@ -34,7 +39,7 @@ export default function Navbar({
       }
 
       .navbar-logo {
-        font-size: 28px;
+        font-size: 24px;
         font-weight: bold;
         color: #f97316;
         display: flex;
@@ -44,25 +49,25 @@ export default function Navbar({
       }
 
       .navbar-logo img {
-        height: 40px;
+        height: 36px;
         width: auto;
       }
 
       .navbar-nav {
         display: flex;
         align-items: center;
-        gap: 2rem;
+        gap: 1.25rem;
       }
 
       .navbar-link {
         background: transparent;
         border: none;
         cursor: pointer;
-        font-size: 1rem;
+        font-size: 0.95rem;
         font-weight: 500;
         color: #374151;
         text-decoration: none;
-        padding: 0.5rem 1rem;
+        padding: 0.4rem 0.75rem;
         border-radius: 0.5rem;
         transition: all 0.2s ease;
       }
@@ -169,39 +174,124 @@ export default function Navbar({
         color: #dc2626;
       }
 
+      /* Toggle button (hidden on desktop) */
+      .navbar-toggle {
+        display: none;
+        background: transparent;
+        border: 2px solid #f97316;
+        color: #f97316;
+        padding: 0.4rem 0.6rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+      }
+
       @media (max-width: 768px) {
         .navbar {
           padding: 1rem;
         }
-        
+        .navbar-content { flex-wrap: wrap; position: relative; }
+        .navbar-toggle { display: inline-flex; align-items: center; justify-content: center; }
+        /* Backdrop deshabilitado */
+        .navbar-backdrop { display: none !important; }
+        /* Animated mobile menu (sin parpadeos) */
         .navbar-nav {
-          gap: 1rem;
-        }
-        
-        .navbar-link {
-          font-size: 0.9rem;
-          padding: 0.4rem 0.8rem;
-        }
-        
-        .navbar-user-info {
-          display: none;
-        }
-        
-        .navbar-actions {
+          width: 100%;
+          display: block;
+          position: absolute;
+          left: 0; right: 0; top: calc(100% + 0.25rem);
+          overflow: hidden;
+          opacity: 0;
+          visibility: hidden;
+          pointer-events: none;
           gap: 0.5rem;
+          transform: translateY(-6px);
+          transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+          will-change: opacity, transform;
         }
+        .navbar.open .navbar-nav {
+          display: block;
+          margin-top: 0;
+          opacity: 1;
+          visibility: visible;
+          pointer-events: auto;
+          transform: translateY(0);
+          background: rgba(255,255,255,0.94);
+          border: 1px solid #eee;
+          border-radius: 12px;
+          padding: 0.5rem;
+          box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+        .navbar.open .navbar-nav > * { display: block; margin-bottom: 0.25rem; }
+        .navbar.open .navbar-nav .navbar-link,
+        .navbar.open .navbar-nav .navbar-button {
+          width: 100%;
+          text-align: left;
+          justify-content: flex-start;
+        }
+        .navbar.open .navbar-nav .navbar-link + .navbar-link { margin-top: 0.15rem; }
+        .navbar.open .navbar-nav .navbar-button { margin-top: 0.35rem; }
+        .navbar-link { font-size: 0.9rem; padding: 0.4rem 0.8rem; }
+        .navbar-user-info { display: none; }
+        .navbar-actions { gap: 0.5rem; }
       }
     `
-    
     document.head.appendChild(style)
-    
+
     return () => {
       document.head.removeChild(style)
     }
   }, [])
 
+  // Lock body scroll when menu is open (mobile UX)
+  useEffect(() => {
+    if (menuOpen) {
+      const prev = document.body.style.overflow
+      document.body.dataset.prevOverflow = prev
+      document.body.style.overflow = 'hidden'
+    } else {
+      if (document.body.dataset.prevOverflow !== undefined) {
+        document.body.style.overflow = document.body.dataset.prevOverflow
+        delete document.body.dataset.prevOverflow
+      } else {
+        document.body.style.overflow = ''
+      }
+    }
+  }, [menuOpen])
+
+  // Cerrar menú en cambios de ruta
+  useEffect(() => {
+    if (menuOpen) {
+      setMenuOpen(false)
+      // Notificar a componentes (Leaflet) para recálculo de layout
+      setTimeout(() => window.dispatchEvent(new Event('resize')), 50)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname])
+
+  // Nota: No cerramos el menú en scroll para evitar parpadeo cuando se abre a media página.
+
+  // Cerrar menú al hacer click fuera de la navbar
+  useEffect(() => {
+    const onDocPointer = (e) => {
+      if (!menuOpen) return
+      if (Date.now() < ignoreScrollUntilRef.current) return
+      const root = navRef.current
+      if (root && !root.contains(e.target)) {
+        setMenuOpen(false)
+        setTimeout(() => window.dispatchEvent(new Event('resize')), 50)
+      }
+    }
+    document.addEventListener('mousedown', onDocPointer)
+    document.addEventListener('touchstart', onDocPointer, { passive: true })
+    return () => {
+      document.removeEventListener('mousedown', onDocPointer)
+      document.removeEventListener('touchstart', onDocPointer)
+    }
+  }, [menuOpen])
+
   // Función para scroll suave a secciones dentro de UrbanStand
   const scrollToSection = (sectionId) => {
+    setMenuOpen(false)
     if (location.pathname !== '/') {
       navigate('/')
       setTimeout(() => {
@@ -220,30 +310,18 @@ export default function Navbar({
 
   // Obtener inicial del usuario para avatar
   const getUserInitial = () => {
-    if (userData?.firstName) {
-      return userData.firstName.charAt(0).toUpperCase()
-    }
-    if (userData?.nomEnti) {
-      return userData.nomEnti.charAt(0).toUpperCase()
-    }
+    if (userData?.firstName) return userData.firstName.charAt(0).toUpperCase()
+    if (userData?.nomEnti) return userData.nomEnti.charAt(0).toUpperCase()
     return userRole ? userRole.charAt(0).toUpperCase() : 'U'
   }
 
-  // Obtener nombre del usuario
   const getUserName = () => {
-    if (userData?.firstName && userData?.lastName) {
-      return `${userData.firstName} ${userData.lastName}`
-    }
-    if (userData?.nomEnti) {
-      return userData.nomEnti
-    }
-    if (userData?.email) {
-      return userData.email.split('@')[0]
-    }
+    if (userData?.firstName && userData?.lastName) return `${userData.firstName} ${userData.lastName}`
+    if (userData?.nomEnti) return userData.nomEnti
+    if (userData?.email) return userData.email.split('@')[0]
     return 'Usuario'
   }
 
-  // Avatar por género si está disponible
   const getAvatarImage = () => {
     const g = (userData?.genero || '').toString().toLowerCase()
     if (g.includes('fem')) return '/img/PerfilFemale.png'
@@ -252,21 +330,51 @@ export default function Navbar({
   }
 
   return (
-    <nav className="navbar">
+    <nav ref={navRef} className={`navbar ${menuOpen ? 'open' : ''}`}>
+      {/* Mobile backdrop */}
+      <div
+        className="navbar-backdrop"
+        onClick={() => {
+          setMenuOpen(false)
+          setTimeout(() => window.dispatchEvent(new Event('resize')), 50)
+        }}
+      />
+
       <div className="navbar-content">
         {/* Logo */}
-        <div 
+        <div
           className="navbar-logo"
-          onClick={() => navigate('/')}
+          onClick={() => { setMenuOpen(false); navigate('/') }}
         >
           <img src="../img/logo.png" alt="logo" />
           UrbanStand
         </div>
 
+        {/* Mobile toggle */}
+        <button
+          className="navbar-toggle"
+          aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
+          onClick={() => {
+            const willOpen = !menuOpen
+            if (willOpen) {
+              openScrollYRef.current = window.scrollY
+              ignoreScrollUntilRef.current = Date.now() + 300
+              setMenuOpen(true)
+              setTimeout(() => window.dispatchEvent(new Event('resize')), 80)
+            } else {
+              setMenuOpen(false)
+              // Esperar a que termine la animación de cierre para evitar parpadeos
+              setTimeout(() => window.dispatchEvent(new Event('resize')), 300)
+            }
+          }}
+        >
+          ☰
+        </button>
+
         {/* Navigation Links */}
         <div className="navbar-nav">
           {!isLoggedIn ? (
-            // Navegación para usuarios no logueados
+            // Botones para usuarios no logueados
             <>
               <button
                 className={`navbar-link ${location.pathname === '/' ? 'active' : ''}`}
@@ -274,59 +382,28 @@ export default function Navbar({
               >
                 Inicio
               </button>
-              <button
-                className="navbar-link"
-                onClick={() => scrollToSection('#acerca')}
-              >
-                Acerca
-              </button>
-              <button
-                className="navbar-link"
-                onClick={() => scrollToSection('#funcionalidades')}
-              >
-                Funcionalidades
-              </button>
-            </>
-          ) : (
-            // Navegación para usuarios logueados
-            <>
-              <button
-                className={`navbar-link ${location.pathname === '/' ? 'active' : ''}`}
-                onClick={() => navigate('/')}
-              >
-                Inicio
-              </button>
-              <button
-                className={`navbar-link ${location.pathname === '/chat' ? 'active' : ''}`}
-                onClick={() => navigate('/chat')}
-              >
-                Chat
-              </button>
-              {userRole === 'vendedor' && (
-                <button
-                  className={`navbar-link ${location.pathname === '/vendedor' ? 'active' : ''}`}
-                  onClick={() => navigate('/vendedor')}
-                >
-                  Mi Puesto
-                </button>
-              )}
-              {userRole === 'entidad' && (
-                <button
-                  className={`navbar-link ${location.pathname === '/entidades' ? 'active' : ''}`}
-                  onClick={() => navigate('/entidades')}
-                >
-                  Dashboard
-                </button>
-              )}
-            </>
-          )}
-        </div>
 
-        {/* Actions */}
-        <div className="navbar-actions">
-          {!isLoggedIn ? (
-            // Botones para usuarios no logueados
-            <>
+              <button
+                className="navbar-link"
+                onClick={() => scrollToSection('.map-section')}
+              >
+                Explora
+              </button>
+
+              <button
+                className="navbar-link"
+                onClick={() => scrollToSection('.testimonial-section')}
+              >
+                Testimonios
+              </button>
+
+              <button
+                className="navbar-link"
+                onClick={() => scrollToSection('.benefits-section')}
+              >
+                Beneficios
+              </button>
+
               <button
                 className="navbar-button navbar-button-secondary"
                 onClick={() => navigate('/login')}

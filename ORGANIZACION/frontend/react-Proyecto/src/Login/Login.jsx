@@ -19,7 +19,6 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
     if (!emailRegex.test(email)) {
       errors += "El email no es válido. ";
     }
-
     if (password.length < 8) {
       errors += "La contraseña debe tener al menos 8 caracteres. ";
     }
@@ -34,8 +33,8 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
           if (role === 'entidad') {
             // Login entidad contra backend
             const loginResp = await apiService.entidad.login({
-              correo_institucional: email,
-              contrasenia: password,
+              emailE: email,
+              password,
             });
             if (loginResp?.token) apiService.saveAuth(loginResp.token, 'entidad');
             // Recuperar perfil

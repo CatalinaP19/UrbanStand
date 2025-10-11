@@ -40,6 +40,34 @@ const UrbanStand = ({ onGoToLogin, onGoToRegister, onGoToVendorRegister, onGoToE
     setTestimonialAvatar(avatarImages[randomIndex]);
   }, []);
 
+  useEffect(() => {
+    const onResize = () => {
+      if (window.__urbanstandMap) {
+        window.__urbanstandMap.invalidateSize(false);
+      }
+    };
+    window.addEventListener('resize', onResize);
+  
+    // Observer de visibilidad del elemento del mapa
+    let observer = null;
+    const el = document.getElementById('map');
+    if (el && 'IntersectionObserver' in window) {
+      observer = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting && window.__urbanstandMap) {
+            setTimeout(() => window.__urbanstandMap.invalidateSize(false), 50);
+          }
+        });
+      }, { threshold: 0.1 });
+      observer.observe(el);
+    }
+  
+    return () => {
+      window.removeEventListener('resize', onResize);
+      if (observer) observer.disconnect();
+    };
+  }, []);
+
   const initMap = () => {
     if (typeof window !== 'undefined' && window.L) {
       const mapElement = document.getElementById('map');
@@ -54,6 +82,9 @@ const UrbanStand = ({ onGoToLogin, onGoToRegister, onGoToVendorRegister, onGoToE
         boxZoom: true,
         keyboard: true
       });
+      // Exponer referencia global y asegurar recálculo de tamaño inicial
+      window.__urbanstandMap = map;
+      setTimeout(() => map.invalidateSize(false), 100);
 
       window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 16,
