@@ -308,24 +308,44 @@ export default function Navbar({
     }
   }
 
+  // Fallback de sesión local si no llegan props o están vacías
+  const getSessionFromLocal = () => {
+    try {
+      const token = localStorage.getItem('token')
+      const role = localStorage.getItem('userType') || undefined
+      const current = JSON.parse(localStorage.getItem('urbanstand_current_user') || 'null')
+      return {
+        isLoggedIn: Boolean(token) || Boolean(current),
+        role: current?.role || role,
+        data: current || null,
+      }
+    } catch (_) { return { isLoggedIn: false, role: undefined, data: null } }
+  }
+
+  const session = getSessionFromLocal()
+  const effectiveLogged = Boolean(isLoggedIn ?? session.isLoggedIn)
+  const effectiveRole = userRole ?? session.role
+  const effectiveData = userData ?? session.data
+
   // Obtener inicial del usuario para avatar
   const getUserInitial = () => {
-    if (userData?.firstName) return userData.firstName.charAt(0).toUpperCase()
-    if (userData?.nomEnti) return userData.nomEnti.charAt(0).toUpperCase()
-    return userRole ? userRole.charAt(0).toUpperCase() : 'U'
+    if (effectiveData?.firstName) return effectiveData.firstName.charAt(0).toUpperCase()
+    if (effectiveData?.nomEnti) return effectiveData.nomEnti.charAt(0).toUpperCase()
+    return effectiveRole ? effectiveRole.charAt(0).toUpperCase() : 'U'
   }
 
   const getUserName = () => {
-    if (userData?.firstName && userData?.lastName) return `${userData.firstName} ${userData.lastName}`
-    if (userData?.nomEnti) return userData.nomEnti
-    if (userData?.email) return userData.email.split('@')[0]
+    if (effectiveData?.firstName && effectiveData?.lastName) return `${effectiveData.firstName} ${effectiveData.lastName}`
+    if (effectiveData?.nomEnti) return effectiveData.nomEnti
+    if (effectiveData?.email) return effectiveData.email.split('@')[0]
     return 'Usuario'
   }
 
   const getAvatarImage = () => {
-    const g = (userData?.genero || '').toString().toLowerCase()
+    const g = (effectiveData?.genero || '').toString().toLowerCase()
     if (g.includes('fem')) return '/img/PerfilFemale.png'
-    if (g.includes('masc')) return '/img/PerfilMale.png'
+    if (g.includes('mas')) return '/img/PerfilMale.png'
+    if (g.includes('otr')) return '/img/PerfilOther.png'
     return null
   }
 
@@ -373,7 +393,7 @@ export default function Navbar({
 
         {/* Navigation Links */}
         <div className="navbar-nav">
-          {!isLoggedIn ? (
+          {!effectiveLogged ? (
             // Botones para usuarios no logueados
             <>
               <button
@@ -433,7 +453,7 @@ export default function Navbar({
                     {getUserName()}
                   </div>
                   <div className="navbar-user-role">
-                    {userRole}
+                    {effectiveRole}
                   </div>
                 </div>
               </div>

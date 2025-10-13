@@ -1,14 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Bell, MessageCircle, X, Send, User, BarChart3, Edit3, Package } from 'lucide-react';
+import apiService from '../services/apiService';
 
 const VistaVendedor = ({ vendedorData = null }) => {
+  // Cargar usuario actual desde localStorage si no llega por props
+  const storedUser = (() => {
+    try {
+      if (typeof window !== 'undefined') {
+        return JSON.parse(localStorage.getItem('urbanstand_current_user') || 'null');
+      }
+    } catch (_) { /* ignore */ }
+    return null;
+  })();
+
   // Garantizar datos por defecto cuando se usa la ruta directa
-  const vendedor = vendedorData ?? {
-    nombre: 'Vendedor',
+  const initialVendedor = vendedorData ?? {
+    nombre: storedUser?.firstName || 'Vendedor',
     tipoVendedor: 'Vendedor',
     descripcion: 'Bienvenido a tu panel. Gestiona tu puesto y productos.',
-    genero: ''
+    genero: storedUser?.genero || ''
   };
+
+  const [vendedor, setVendedor] = useState(initialVendedor);
+
   const [isChatOpen, setChatOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([
@@ -37,6 +51,83 @@ const VistaVendedor = ({ vendedorData = null }) => {
     } else {
       setTimeout(initMap, 100);
     }
+  }, []);
+
+  // Hidratar desde localStorage/API si no vino por props
+  useEffect(() => {
+    if (vendedorData) return; // ya viene por props
+
+    const loadFromLocal = () => {
+      try {
+        const raw = localStorage.getItem('urbanstand_current_user');
+        if (!raw) return false;
+        const cu = JSON.parse(raw);
+        if (!cu) return false;
+        setVendedor(prev => ({
+          ...prev,
+          nombre: cu.firstName || prev.nombre,
+          genero: cu.genero || prev.genero,
+        }));
+        return Boolean(cu.firstName || cu.genero);
+      } catch (_) { return false; }
+    };
+
+    // 1) Intento inmediato localStorage
+    const okNow = loadFromLocal();
+    if (okNow) return;
+
+    // 2) Reintento corto (por si la navegación fue muy rápida tras el login)
+    const t = setTimeout(() => {
+      const okLater = loadFromLocal();
+      if (!okLater) {
+        // 2b) Fallback: leer primer usuario guardado en 'urbanstand_users'
+        try {
+          const all = JSON.parse(localStorage.getItem('urbanstand_users') || '{}');
+          const keys = Object.keys(all || {});
+          if (keys.length > 0) {
+            const u = all[keys[0]] || {};
+            if (u.firstName || u.genero) {
+              setVendedor(prev => ({
+                ...prev,
+                nombre: u.firstName || prev.nombre,
+                genero: u.genero || prev.genero,
+              }));
+              // también sincroniza current_user para próximas veces
+              localStorage.setItem('urbanstand_current_user', JSON.stringify({
+                role: 'vendedor',
+                firstName: u.firstName,
+                lastName: u.lastName,
+                genero: u.genero,
+              }));
+              return; // evitar ir directo a API si ya tenemos datos
+            }
+          }
+        } catch (_) { /* ignore */ }
+        // 3) Fallback: cargar desde API
+        (async () => {
+          try {
+            const profile = await apiService.vendedor.profile();
+            const first = profile?.firstName || profile?.nombre || '';
+            const last = profile?.lastName || profile?.apellido || '';
+            const genero = profile?.genero || profile?.gender || '';
+            const nombre = first || 'Vendedor';
+            setVendedor(prev => ({ ...prev, nombre, genero }));
+            try {
+              localStorage.setItem('urbanstand_current_user', JSON.stringify({
+                role: 'vendedor',
+                email: profile?.email,
+                firstName: first,
+                lastName: last,
+                genero,
+              }));
+            } catch (_) { /* ignore */ }
+          } catch (_) { /* ignore */ }
+        })();
+      }
+    }, 150);
+
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const initMap = () => {
@@ -155,9 +246,10 @@ const VistaVendedor = ({ vendedorData = null }) => {
   // Función para obtener la imagen del perfil según el género
   const getProfileImage = (genero) => {
     const g = (genero || '').toString().toLowerCase();
-    if (g.includes('fem')) {
-      return '/img/PerfilFemale.png';
-    }
+    if (g.includes('fem')) return '/img/PerfilFemale.png';
+    if (g.includes('mas')) return '/img/PerfilMale.png';
+    if (g.includes('otr')) return '/img/PerfilOther.png';
+    // Por defecto masculino si no hay género
     return '/img/PerfilMale.png';
   };
 
@@ -174,7 +266,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
           <div className="hero-text">
             <h1>
               <span className="highlight">Panel de</span><br />
-              Vendedor
+              {vendedor.nombre}
             </h1>
             <p>
               Gestiona tu negocio, conecta con clientes y optimiza tus ventas

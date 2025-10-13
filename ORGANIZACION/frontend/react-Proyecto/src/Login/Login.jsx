@@ -46,6 +46,14 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
               email,
               nomEnti: profile?.nombre_entidad || profile?.nomEnti || profile?.nombre || undefined,
             };
+            // Guardar usuario actual para Navbar
+            try {
+              localStorage.setItem('urbanstand_current_user', JSON.stringify({
+                role: 'entidad',
+                email,
+                nomEnti: entidadData.nomEnti,
+              }));
+            } catch (_) { /* ignore */ }
             setMessage("Inicio de sesión exitoso.");
             if (typeof onSuccessfulLogin === 'function') {
               return onSuccessfulLogin('entidad', entidadData);
@@ -84,6 +92,17 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
               } catch (e) { /* ignore */ }
               vendorData = { email, ...profile };
             }
+            // Guardar usuario actual para personalizar la vista del vendedor
+            try {
+              const current = {
+                role: 'vendedor',
+                email,
+                firstName: vendorData?.firstName,
+                lastName: vendorData?.lastName,
+                genero: vendorData?.genero,
+              };
+              localStorage.setItem('urbanstand_current_user', JSON.stringify(current));
+            } catch (e) { /* ignore */ }
             setMessage("Inicio de sesión exitoso.");
             if (typeof onSuccessfulLogin === 'function') {
               return onSuccessfulLogin('vendedor', vendorData);
