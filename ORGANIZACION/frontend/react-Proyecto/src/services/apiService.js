@@ -16,8 +16,9 @@ class ApiService {
       ...options,
     };
 
+
     // Agregar token si existe
-    const token = localStorage.getItem('token');
+    const token = options.token || localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -73,20 +74,19 @@ class ApiService {
   saveAuth(token, userType = 'vendedor') {
     localStorage.setItem('token', token);
     localStorage.setItem('userType', userType);
+    return token; // ✅ Retorna el token
   }
 
-  // APIs para vendedores
   vendedor = {
     register: (data) => this.post(API_CONFIG.VENDEDOR.REGISTER, data),
     login: (data) => this.post(API_CONFIG.VENDEDOR.LOGIN, data),
-    profile: () => this.request(API_CONFIG.VENDEDOR.PROFILE),
+    profile: (token) => this.request(API_CONFIG.VENDEDOR.PROFILE, { headers: { Authorization: `Bearer ${token}` } }),
   };
 
-  // APIs para entidades
   entidad = {
     register: (data) => this.post(API_CONFIG.ENTIDAD.REGISTER, data),
     login: (data) => this.post(API_CONFIG.ENTIDAD.LOGIN, data),
-    profile: () => this.request(API_CONFIG.ENTIDAD.PROFILE),
+    profile: (token) => this.request(API_CONFIG.ENTIDAD.PROFILE, { headers: { Authorization: `Bearer ${token}` } }),
     estadisticas: (params) => this.get(API_CONFIG.ENTIDAD.ESTADISTICAS, params),
     descargarReporte: (params) => this.download(API_CONFIG.ENTIDAD.REPORTES, params),
   };

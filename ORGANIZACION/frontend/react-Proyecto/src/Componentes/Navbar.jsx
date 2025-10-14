@@ -391,7 +391,6 @@ export default function Navbar({
           ☰
         </button>
 
-        {/* Navigation Links */}
         <div className="navbar-nav">
           {!effectiveLogged ? (
             // Botones para usuarios no logueados
@@ -438,8 +437,54 @@ export default function Navbar({
               </button>
             </>
           ) : (
-            // Usuario logueado
+            // Usuario logueado - NUEVA NAVEGACIÓN
             <>
+              <button
+                className={`navbar-link ${location.pathname === '/vendedor' || location.pathname === '/entidades' ? 'active' : ''}`}
+                onClick={() => {
+                  setMenuOpen(false);
+                  if (effectiveRole === 'vendedor') {
+                    navigate('/vendedor');
+                  } else if (effectiveRole === 'entidad') {
+                    navigate('/entidades');
+                  }
+                }}
+              >
+                Inicio
+              </button>
+
+              {effectiveRole === 'vendedor' && (
+                <>
+                  <button
+                    className={`navbar-link ${location.pathname === '/vendedor/mapa' ? 'active' : ''}`}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      // Por ahora scroll al mapa en la misma página
+                      const mapSection = document.getElementById('vendor-map');
+                      if (mapSection) {
+                        mapSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }
+                    }}
+                  >
+                    Mapa
+                  </button>
+
+                  <button
+                    className={`navbar-link ${location.pathname === '/vendedor/perfil' ? 'active' : ''}`}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      // Por ahora scroll al perfil en la misma página
+                      const profileSection = document.querySelector('.navbar-user');
+                      if (profileSection) {
+                        profileSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }
+                    }}
+                  >
+                    Perfil
+                  </button>
+                </>
+              )}
+
               <div className="navbar-user">
                 {getAvatarImage() ? (
                   <img src={getAvatarImage()} alt="avatar" className="navbar-user-avatar" style={{ objectFit: 'cover' }} />
@@ -457,6 +502,7 @@ export default function Navbar({
                   </div>
                 </div>
               </div>
+
               <button
                 className="navbar-logout"
                 onClick={onLogout}

@@ -55,14 +55,24 @@ const VendedorSchema = new mongoose.Schema({
     maxlength: [10, 'El número de celular no puede exceder 1 caracteres']
   },
 
-  // Información demográfica
   genero: {
     type: String,
+    required: [true, 'El género es requerido'],
+    set: function (valor) {
+      // Normalizar a minúsculas
+      const v = (valor || '').toLowerCase().trim();
+
+      // Mapear variantes comunes
+      if (v.includes('masc') || v === 'male' || v === 'm') return 'masculino';
+      if (v.includes('fem') || v === 'female' || v === 'f') return 'femenino';
+      if (v.includes('otr') || v === 'other' || v === 'o' || v === 'no binario') return 'otro';
+
+      return v; // Si no coincide con nada, devolver el valor original
+    },
     enum: {
       values: ['masculino', 'femenino', 'otro'],
       message: 'Género debe ser: masculino, femenino, u otro'
-    },
-    required: [true, 'El género es requerido']
+    }
   },
 
   // Información laboral
@@ -76,33 +86,33 @@ const VendedorSchema = new mongoose.Schema({
     required: [true, 'La imagen del RIVI Y HEMI es requerida']
   },
   selectedProducts: [{
-  type: String,
-  required: true,
-  enum: {
-    values: [
-      'Comidas preparadas',
-      'Bebidas',
-      'Confitería',
-      'Frutas y verduras',
-      'Productos textiles',
-      'Calzado',
-      'Bisutería y accesorios',
-      'Juguetería',
-      'Artículos de temporada',
-      'Cigarrillos y tabaco',
-      'Electrónicos y accesorios',
-      'Arreglos florales',
-      'Papelería y útiles escolares',
-      'Productos varios (Para el hogar)',
-      'S. Lustrado de calzado',
-      'S. Reparación de calzado',
-      'S. Reparación de celulares y electrónicos',
-      'S. Ambulantes de aseo y apoyo',
-      'Otros'
-    ],
-    message: 'Categoría de producto no válida'
-  }
-}],
+    type: String,
+    required: true,
+    enum: {
+      values: [
+        'Comidas preparadas',
+        'Bebidas',
+        'Confitería',
+        'Frutas y verduras',
+        'Productos textiles',
+        'Calzado',
+        'Bisutería y accesorios',
+        'Juguetería',
+        'Artículos de temporada',
+        'Cigarrillos y tabaco',
+        'Electrónicos y accesorios',
+        'Arreglos florales',
+        'Papelería y útiles escolares',
+        'Productos varios (Para el hogar)',
+        'S. Lustrado de calzado',
+        'S. Reparación de calzado',
+        'S. Reparación de celulares y electrónicos',
+        'S. Ambulantes de aseo y apoyo',
+        'Otros'
+      ],
+      message: 'Categoría de producto no válida'
+    }
+  }],
 
   // Estado y control
   vigencia: {

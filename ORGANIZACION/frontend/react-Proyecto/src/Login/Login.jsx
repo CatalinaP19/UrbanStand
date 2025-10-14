@@ -11,8 +11,15 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isRegistrationMode, setIsRegistrationMode] = useState(false);
   const [role, setRole] = useState("vendedor");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
+    // ✅ Prevenir múltiples submits
+    if (isSubmitting) {
+      console.log('⏳ Ya hay un login en proceso, ignorando...');
+      return;
+    }
+
     let errors = "";
     const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
 
@@ -25,28 +32,39 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
 
     if (errors !== "") {
       setMessage(errors);
-    } else {
-      // Inicio de sesión
-      setMessage("Iniciando sesión...");
-      if (!isRegistrationMode) {
-        try {
-          if (role === 'entidad') {
-            // Login entidad contra backend
-            const loginResp = await apiService.entidad.login({
-              emailE: email,
-              password,
-            });
-            if (loginResp?.token) apiService.saveAuth(loginResp.token, 'entidad');
-            // Recuperar perfil
-            let profile = {};
-            try {
-              profile = await apiService.entidad.profile();
-            } catch (_) {}
+      return; // ✅ Salir sin bloquear
+    }
+
+    setIsSubmitting(true); // ✅ Bloquear SOLO si las validaciones pasaron
+    setMessage("Iniciando sesión...");
+
+    if (!isRegistrationMode) {
+      try {
+        if (role === 'entidad') {
+          const loginResp = await apiService.entidad.login({
+            emailE: email,
+            password,
+          });
+
+          if (loginResp?.token) {
+            const token = apiService.saveAuth(loginResp.token, 'entidad');
+            console.log('🔑 Token guardado:', token);
+            console.log('🔑 Token en localStorage:', localStorage.getItem('token'));
+            const profileResponse = await apiService.entidad.profile(token);
+            const profile = profileResponse?.vendedor || profileResponse;
+
             const entidadData = {
               email,
               nomEnti: profile?.nombre_entidad || profile?.nomEnti || profile?.nombre || undefined,
             };
-            // Guardar usuario actual para Navbar
+
+            try {
+              const allEntidades = JSON.parse(localStorage.getItem('urbanstand_entidades') || '{}');
+              const emailKey = email.trim().toLowerCase();
+              allEntidades[emailKey] = entidadData;
+              localStorage.setItem('urbanstand_entidades', JSON.stringify(allEntidades));
+            } catch (e) { /* ignore */ }
+
             try {
               localStorage.setItem('urbanstand_current_user', JSON.stringify({
                 role: 'entidad',
@@ -54,75 +72,100 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
                 nomEnti: entidadData.nomEnti,
               }));
             } catch (_) { /* ignore */ }
+
             setMessage("Inicio de sesión exitoso.");
             if (typeof onSuccessfulLogin === 'function') {
               return onSuccessfulLogin('entidad', entidadData);
             } else {
-              // fallback de navegación
               return navigate('/entidades');
             }
-          } else if (role === 'vendedor') {
-            // Intentar login vendedor contra backend; si falla, usar fallback localStorage
-            let vendorData = null;
-            try {
-              const loginResp = await apiService.vendedor.login({ email, password });
-              if (loginResp?.token) apiService.saveAuth(loginResp.token, 'vendedor');
-              const profile = await apiService.vendedor.profile();
+          }
+        } else if (role === 'vendedor') {
+          let vendorData = null;
+          try {
+            const loginResp = await apiService.vendedor.login({ email, password });
+            console.log('📦 Respuesta completa del backend:', loginResp);
+
+            if (loginResp?.token) {
+              const token = apiService.saveAuth(loginResp.token, 'vendedor');
+              console.log('🔑 Token guardado:', token);
+              console.log('🔑 Token en localStorage:', localStorage.getItem('token'));
+
+              const profileResponse = await apiService.vendedor.profile(token);
+              console.log('👤 Perfil recibido:', profileResponse);
+
+              const profile = profileResponse?.vendedor || profileResponse;
+              console.log('🔍 Campos del perfil:', {
+                firstName: profile?.firstName,
+                lastName: profile?.lastName,
+                genero: profile?.genero,
+                email: profile?.email
+              });
+
               vendorData = {
                 email,
                 firstName: profile?.firstName || profile?.nombre || undefined,
                 lastName: profile?.lastName || profile?.apellido || undefined,
                 genero: profile?.genero || undefined,
               };
-            } catch (_) {
-              // Fallback: perfil local guardado en registro
-              let profile = {};
-              const key = (email || '').trim().toLowerCase();
+
+              console.log('💾 Datos a guardar en localStorage:', vendorData);
+
               try {
-                const allRaw = JSON.parse(localStorage.getItem('urbanstand_users') || '{}');
-                // Migración a minúsculas
-                const migrated = {};
-                if (allRaw && typeof allRaw === 'object') {
-                  Object.keys(allRaw).forEach(k => {
-                    migrated[k.trim().toLowerCase()] = allRaw[k];
-                  });
-                  localStorage.setItem('urbanstand_users', JSON.stringify(migrated));
-                }
-                profile = migrated[key] || {};
+                const allUsers = JSON.parse(localStorage.getItem('urbanstand_users') || '{}');
+                const emailKey = email.trim().toLowerCase();
+                allUsers[emailKey] = vendorData;
+                localStorage.setItem('urbanstand_users', JSON.stringify(allUsers));
               } catch (e) { /* ignore */ }
-              vendorData = { email, ...profile };
             }
-            // Guardar usuario actual para personalizar la vista del vendedor
+          } catch (innerError) {
+            console.log('⚠️ Error en login/profile, usando fallback local');
+            let profile = {};
+            const key = (email || '').trim().toLowerCase();
             try {
-              const current = {
-                role: 'vendedor',
-                email,
-                firstName: vendorData?.firstName,
-                lastName: vendorData?.lastName,
-                genero: vendorData?.genero,
-              };
-              localStorage.setItem('urbanstand_current_user', JSON.stringify(current));
+              const allRaw = JSON.parse(localStorage.getItem('urbanstand_users') || '{}');
+              const migrated = {};
+              if (allRaw && typeof allRaw === 'object') {
+                Object.keys(allRaw).forEach(k => {
+                  migrated[k.trim().toLowerCase()] = allRaw[k];
+                });
+                localStorage.setItem('urbanstand_users', JSON.stringify(migrated));
+              }
+              profile = migrated[key] || {};
             } catch (e) { /* ignore */ }
-            setMessage("Inicio de sesión exitoso.");
-            if (typeof onSuccessfulLogin === 'function') {
-              return onSuccessfulLogin('vendedor', vendorData);
-            } else {
-              // fallback de navegación
-              return navigate('/vendedor');
-            }
+            vendorData = { email, ...profile };
           }
-        } catch (error) {
-          console.error('Error de login:', error);
-          setMessage(error?.message || 'Error iniciando sesión');
-          return;
+
+          try {
+            const current = {
+              role: 'vendedor',
+              email,
+              firstName: vendorData?.firstName,
+              lastName: vendorData?.lastName,
+              genero: vendorData?.genero,
+            };
+            localStorage.setItem('urbanstand_current_user', JSON.stringify(current));
+          } catch (e) { /* ignore */ }
+
+          setMessage("Inicio de sesión exitoso.");
+          if (typeof onSuccessfulLogin === 'function') {
+            return onSuccessfulLogin('vendedor', vendorData);
+          } else {
+            return navigate('/vendedor');
+          }
         }
+      } catch (error) {
+        console.error('❌ Error de login:', error);
+        setMessage(error?.message || 'Error iniciando sesión');
+      } finally {
+        setIsSubmitting(false); // ✅ Siempre desbloquear al finalizar
       }
-      setMessage("Inicio de sesión exitoso.");
     }
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !isSubmitting) {
+      e.preventDefault(); // ✅ Prevenir submit del form
       handleSubmit();
     }
   };
@@ -236,8 +279,10 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
               <button
                 onClick={handleSubmit}
                 className="login-submit-button"
+                disabled={isSubmitting || !terms}
+                style={{ opacity: isSubmitting ? 0.5 : 1, cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
               >
-                {isRegistrationMode ? "Registrarse" : "Entrar"}
+                {isSubmitting ? "Procesando..." : (isRegistrationMode ? "Registrarse" : "Entrar")}
               </button>
             </div>
 

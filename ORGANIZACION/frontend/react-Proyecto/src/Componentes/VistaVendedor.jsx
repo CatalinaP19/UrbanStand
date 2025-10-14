@@ -106,12 +106,24 @@ const VistaVendedor = ({ vendedorData = null }) => {
         // 3) Fallback: cargar desde API
         (async () => {
           try {
-            const profile = await apiService.vendedor.profile();
+            // ✅ Obtener el token con validación
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+              // Sin token, ya se cargó desde localStorage o props
+              return;
+            }
+
+            const profileResponse = await apiService.vendedor.profile(token);
+            const profile = profileResponse?.vendedor || profileResponse;
+
             const first = profile?.firstName || profile?.nombre || '';
             const last = profile?.lastName || profile?.apellido || '';
             const genero = profile?.genero || profile?.gender || '';
             const nombre = first || 'Vendedor';
+
             setVendedor(prev => ({ ...prev, nombre, genero }));
+
             try {
               localStorage.setItem('urbanstand_current_user', JSON.stringify({
                 role: 'vendedor',
@@ -121,13 +133,15 @@ const VistaVendedor = ({ vendedorData = null }) => {
                 genero,
               }));
             } catch (_) { /* ignore */ }
-          } catch (_) { /* ignore */ }
+          } catch (err) {
+            console.error('Error cargando perfil desde API:', err);
+          }
         })();
       }
     }, 150);
 
     return () => clearTimeout(t);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const initMap = () => {
@@ -186,7 +200,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
             iconAnchor: [10, 10]
           })
         }).addTo(map);
-        
+
         marker.bindPopup(`
           <div style="text-align: center; padding: 5px;">
             <h4 style="color: var(--secondary); margin-bottom: 8px;">${name}</h4>
@@ -213,7 +227,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
           fillOpacity: 0.2,
           radius: 200
         }).addTo(map);
-        
+
         circle.bindPopup(`
           <div style="text-align: center; padding: 5px;">
             <h4 style="color: var(--primary); margin-bottom: 8px;">${name}</h4>
@@ -227,11 +241,11 @@ const VistaVendedor = ({ vendedorData = null }) => {
 
   const sendMessage = () => {
     if (message.trim()) {
-      setMessages([...messages, { 
-        id: Date.now(), 
-        sender: 'Tú', 
-        text: message, 
-        isOwn: true 
+      setMessages([...messages, {
+        id: Date.now(),
+        sender: 'Tú',
+        text: message,
+        isOwn: true
       }]);
       setMessage('');
     }
@@ -243,14 +257,13 @@ const VistaVendedor = ({ vendedorData = null }) => {
     }
   };
 
-  // Función para obtener la imagen del perfil según el género
   const getProfileImage = (genero) => {
     const g = (genero || '').toString().toLowerCase();
     if (g.includes('fem')) return '/img/PerfilFemale.png';
     if (g.includes('mas')) return '/img/PerfilMale.png';
     if (g.includes('otr')) return '/img/PerfilOther.png';
-    // Por defecto masculino si no hay género
-    return '/img/PerfilMale.png';
+    // Por defecto Other si no hay género
+    return '/img/PerfilOther.png';
   };
 
   // Imagen del perfil basada en género
@@ -258,7 +271,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
 
   return (
     <div className="container">
-    
+
 
       {/* Hero Section */}
       <section className="hero">
@@ -273,7 +286,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
             </p>
           </div>
           <div style={{ flex: '1', textAlign: 'center' }}>
-            <img 
+            <img
               src="/img/vendedor.png"
               alt="Vendedor ambulante"
               className="hero-image"
@@ -312,7 +325,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
               fontSize: '0.9rem'
             }}>Tu ubicación y vendedores cercanos</p>
           </div>
-          
+
           <div style={{
             height: '500px',
             backgroundColor: '#f0f0f0',
@@ -423,7 +436,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
             }}>
               {vendedor.descripcion}
             </p>
-            
+
             <div style={{
               display: 'flex',
               gap: 'var(--spacing-sm)',
@@ -462,7 +475,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
                 Mis productos
               </button>
             </div>
-            
+
             <button style={{
               background: '#f0f0f0',
               border: 'none',
@@ -494,7 +507,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
               fontSize: '1.1rem',
               textAlign: 'center'
             }}>Resumen de Hoy</h3>
-            
+
             <div style={{
               display: 'grid',
               gridTemplateColumns: '1fr 1fr',
@@ -517,7 +530,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
                   color: 'var(--text-secondary)'
                 }}>Ventas</div>
               </div>
-              
+
               <div style={{
                 padding: '0.75rem',
                 backgroundColor: 'rgba(8, 92, 82, 0.1)',
@@ -534,7 +547,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
                   color: 'var(--text-secondary)'
                 }}>Ingresos</div>
               </div>
-              
+
               <div style={{
                 padding: '0.75rem',
                 backgroundColor: 'rgba(154, 30, 34, 0.1)',
@@ -551,7 +564,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
                   color: 'var(--text-secondary)'
                 }}>Clientes</div>
               </div>
-              
+
               <div style={{
                 padding: '0.75rem',
                 backgroundColor: 'rgba(255, 121, 1, 0.1)',
@@ -615,125 +628,125 @@ const VistaVendedor = ({ vendedorData = null }) => {
           overflow: 'hidden',
           zIndex: 1000
         }}
-      >
-        {/* Chat Header */}
-        <div style={{
-          background: 'var(--accent)',
-          color: '#fff',
-          padding: '12px 15px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start'
-        }}>
-          <div>
-            <div style={{
-              fontWeight: 'bold',
-              fontSize: '14px'
-            }}>Chat - Vendedores</div>
-            <div style={{
-              fontSize: '12px',
-              opacity: '0.9'
-            }}>Localidad Kennedy</div>
-          </div>
-          <button
-            onClick={() => setChatOpen(false)}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: '#fff',
-              fontSize: '20px',
-              cursor: 'pointer',
-              padding: '0',
-              lineHeight: '1'
-            }}
-          >
-            <X size={18} />
-          </button>
-        </div>
-
-        {/* Chat Messages */}
-        <div style={{
-          flex: 1,
-          padding: '15px',
-          overflowY: 'auto',
-          backgroundColor: 'var(--background)'
-        }}>
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
+        >
+          {/* Chat Header */}
+          <div style={{
+            background: 'var(--accent)',
+            color: '#fff',
+            padding: '12px 15px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start'
+          }}>
+            <div>
+              <div style={{
+                fontWeight: 'bold',
+                fontSize: '14px'
+              }}>Chat - Vendedores</div>
+              <div style={{
+                fontSize: '12px',
+                opacity: '0.9'
+              }}>Localidad Kennedy</div>
+            </div>
+            <button
+              onClick={() => setChatOpen(false)}
               style={{
-                marginBottom: '12px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: msg.isOwn ? 'flex-end' : 'flex-start'
+                background: 'transparent',
+                border: 'none',
+                color: '#fff',
+                fontSize: '20px',
+                cursor: 'pointer',
+                padding: '0',
+                lineHeight: '1'
               }}
             >
-              <div style={{
-                maxWidth: '80%',
-                padding: '8px 12px',
-                borderRadius: 'var(--radius-xl)',
-                backgroundColor: msg.isOwn ? '#DCF8C6' : 'var(--surface)',
-                border: '1px solid #e0e0e0',
-                fontSize: '14px'
-              }}>
-                <div style={{
-                  fontWeight: 'bold',
-                  marginBottom: '2px',
-                  fontSize: '12px'
-                }}>
-                  {msg.sender}:
-                </div>
-                <div>{msg.text}</div>
-              </div>
-            </div>
-          ))}
-        </div>
+              <X size={18} />
+            </button>
+          </div>
 
-        {/* Chat Input */}
-        <div style={{
-          display: 'flex',
-          padding: '15px',
-          backgroundColor: 'var(--surface)',
-          borderTop: '1px solid #e0e0e0'
-        }}>
-          <input
-            type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Escribe un mensaje..."
-            style={{
-              flex: 1,
-              padding: '10px 12px',
-              border: '1px solid #ddd',
-              borderRadius: 'var(--radius-xl)',
-              outline: 'none',
-              fontSize: '14px',
-              transition: 'all var(--transition-fast)'
-            }}
-          />
-          <button
-            onClick={sendMessage}
-            style={{
-              marginLeft: '10px',
-              background: 'var(--accent)',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 'var(--radius-full)',
-              width: '40px',
-              height: '40px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all var(--transition-fast)'
-            }}
-          >
-            <Send size={16} />
-          </button>
+          {/* Chat Messages */}
+          <div style={{
+            flex: 1,
+            padding: '15px',
+            overflowY: 'auto',
+            backgroundColor: 'var(--background)'
+          }}>
+            {messages.map((msg) => (
+              <div
+                key={msg.id}
+                style={{
+                  marginBottom: '12px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: msg.isOwn ? 'flex-end' : 'flex-start'
+                }}
+              >
+                <div style={{
+                  maxWidth: '80%',
+                  padding: '8px 12px',
+                  borderRadius: 'var(--radius-xl)',
+                  backgroundColor: msg.isOwn ? '#DCF8C6' : 'var(--surface)',
+                  border: '1px solid #e0e0e0',
+                  fontSize: '14px'
+                }}>
+                  <div style={{
+                    fontWeight: 'bold',
+                    marginBottom: '2px',
+                    fontSize: '12px'
+                  }}>
+                    {msg.sender}:
+                  </div>
+                  <div>{msg.text}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Chat Input */}
+          <div style={{
+            display: 'flex',
+            padding: '15px',
+            backgroundColor: 'var(--surface)',
+            borderTop: '1px solid #e0e0e0'
+          }}>
+            <input
+              type="text"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Escribe un mensaje..."
+              style={{
+                flex: 1,
+                padding: '10px 12px',
+                border: '1px solid #ddd',
+                borderRadius: 'var(--radius-xl)',
+                outline: 'none',
+                fontSize: '14px',
+                transition: 'all var(--transition-fast)'
+              }}
+            />
+            <button
+              onClick={sendMessage}
+              style={{
+                marginLeft: '10px',
+                background: 'var(--accent)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 'var(--radius-full)',
+                width: '40px',
+                height: '40px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all var(--transition-fast)'
+              }}
+            >
+              <Send size={16} />
+            </button>
+          </div>
         </div>
-      </div>
-    )}
+      )}
 
       {/* Footer */}
       <footer style={{
