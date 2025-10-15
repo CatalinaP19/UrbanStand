@@ -450,9 +450,26 @@ export default function UrbanStandDashboard() {
               onChange={(e) => setSelectedLocation(e.target.value)}
             >
               <option>Todas</option>
-              <option>Localidad 1</option>
-              <option>Localidad 2</option>
-              <option>Localidad 3</option>
+              <option>Usaquén</option>
+              <option>Chapinero</option>
+              <option>Santa Fe</option>
+              <option>San Cristóbal</option>
+              <option>Usme</option>
+              <option>Tunjuelito</option>
+              <option>Bosa</option>
+              <option>Kennedy</option>
+              <option>Fontibón</option>
+              <option>Engativá</option>
+              <option>Suba</option>
+              <option>Barrios Unidos</option>
+              <option>Teusaquillo</option>
+              <option>Los Mártires</option>
+              <option>Antonio Nariño</option>
+              <option>Puente Aranda</option>
+              <option>La Candelaria</option>
+              <option>Rafael Uribe Uribe</option>
+              <option>Ciudad Bolívar</option>
+              <option>Sumapaz</option>
             </select>
           </div>
 

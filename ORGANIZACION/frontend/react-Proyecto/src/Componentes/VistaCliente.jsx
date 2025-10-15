@@ -2,13 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MapPin, Search, Eye, Phone, MessageCircle, Star, Navigation, Zap, Clock, ShoppingCart } from 'lucide-react';
 import './VistaCliente.css';
 
- export default function VistaCliente ({ onBackToRoles }) {
+export default function VistaCliente ({ onBackToRoles }) {
   const [selectedVendor, setSelectedVendor] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isTracking, setIsTracking] = useState(false);
   const [trackingVendor, setTrackingVendor] = useState(null);
   const [userLocation, setUserLocation] = useState({ lat: 4.6097, lng: -74.0817 });
   const mapRef = useRef(null);
+  const leafletMapRef = useRef(null);
+  const markersRef = useRef([]);
+  const circlesRef = useRef([]);
+
   const vendedores = [
     {
       id: 1,
@@ -94,61 +98,383 @@ import './VistaCliente.css';
     }
     return () => clearInterval(interval);
   }, [isTracking, trackingVendor]);
-  
 
-  const MapComponent = () => (
-    <div ref={mapRef} className="vista-cliente-map">
-      {/* Efectos de fondo animados */}
-      <div className="vista-cliente-map-bg" />
+  // Inicializar Leaflet
+  useEffect(() => {
+    const loadLeaflet = () => {
+      // Cargar CSS de Leaflet
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(link);
+
+      // Cargar JS de Leaflet
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      script.async = true;
+      script.onload = initMap;
+      document.head.appendChild(script);
+    };
+
+    const initMap = () => {
+      if (!mapRef.current || !window.L) return;
+
+      // Inicializar mapa con opciones personalizadas
+      const map = window.L.map(mapRef.current, {
+        zoomControl: false,
+        tap: false,
+        dragging: true,
+        scrollWheelZoom: true,
+        doubleClickZoom: true,
+        boxZoom: true,
+        keyboard: true
+      }).setView([userLocation.lat, userLocation.lng], 15);
+
+      // Agregar capa de OpenStreetMap
+      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+      }).addTo(map);
+
+      // Deshabilitar propagación de eventos en el contenedor del mapa
+      const container = map.getContainer();
+      container.style.cursor = 'default';
+      container.style.pointerEvents = 'auto';
       
-      {/* Ondas de radar cuando está rastreando */}
-      {isTracking && (
-        <div className="vista-cliente-radar-container">
-          {[1, 2, 3].map(i => (
-            <div 
-              key={i} 
-              className={`vista-cliente-radar-ring vista-cliente-radar-ring-${i}`}
-            />
-          ))}
-        </div>
-      )}
+      // Prevenir eventos de clic en el contenedor del mapa
+      window.L.DomEvent.disableClickPropagation(container);
+      window.L.DomEvent.disableScrollPropagation(container);
 
-      {/* Vendedores en el mapa */}
-      {filteredVendedores.map((vendor, index) => {
-        const isSelected = selectedVendor?.id === vendor.id;
-        const isBeingTracked = trackingVendor?.id === vendor.id;
-        
-        return (
-          <div
-            key={vendor.id}
-            onClick={() => setSelectedVendor(vendor)}
-            className={`vista-cliente-vendor-pin ${isSelected ? 'selected' : ''} ${isBeingTracked ? 'tracking' : ''}`}
-            style={{
-              top: `${20 + index * 15}%`,
-              left: `${30 + index * 12}%`
-            }}
-          >
-            {/* Aura del vendedor */}
-            <div className={`vista-cliente-vendor-aura ${vendor.activo ? 'active' : 'inactive'}`} />
-            
-            {/* Pin del vendedor */}
-            <div className={`vista-cliente-pin ${vendor.activo ? 'active' : 'inactive'}`}>
-              <span className="vista-cliente-pin-emoji">{vendor.avatar}</span>
+      leafletMapRef.current = map;
+
+      // Marcador del usuario (punto azul)
+      const userIcon = window.L.divIcon({
+        className: 'custom-user-marker',
+        html: `
+          <div style="
+            width: 20px;
+            height: 20px;
+            background-color: #3b82f6;
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+          "></div>
+        `,
+        iconSize: [20, 20],
+        iconAnchor: [10, 10]
+      });
+
+      window.L.marker([userLocation.lat, userLocation.lng], { icon: userIcon })
+        .addTo(map)
+        .bindPopup('Tu ubicación');
+
+      // Círculo alrededor del usuario
+      window.L.circle([userLocation.lat, userLocation.lng], {
+        color: '#3b82f6',
+        fillColor: '#3b82f6',
+        fillOpacity: 0.1,
+        radius: 50
+      }).addTo(map);
+
+      updateVendorMarkers(map);
+    };
+
+    if (window.L) {
+      initMap();
+    } else {
+      loadLeaflet();
+    }
+
+    return () => {
+      if (leafletMapRef.current) {
+        leafletMapRef.current.remove();
+        leafletMapRef.current = null;
+      }
+    };
+  }, []); // Solo ejecutar una vez al montar
+
+  // Actualizar marcadores cuando cambian los filtros o el tracking
+  useEffect(() => {
+    if (leafletMapRef.current && window.L) {
+      updateVendorMarkers(leafletMapRef.current);
+    }
+  }, [searchTerm, trackingVendor]);
+
+  const updateVendorMarkers = (map) => {
+    // Limpiar marcadores y círculos anteriores
+    markersRef.current.forEach(marker => map.removeLayer(marker));
+    circlesRef.current.forEach(circle => map.removeLayer(circle));
+    markersRef.current = [];
+    circlesRef.current = [];
+
+    filteredVendedores.forEach((vendor) => {
+      // Crear icono personalizado con emoji
+      const vendorIcon = window.L.divIcon({
+        className: 'custom-vendor-marker',
+        html: `
+          <div style="position: relative;">
+            <div style="
+              width: 40px;
+              height: 40px;
+              background-color: ${vendor.activo ? '#10b981' : '#6b7280'};
+              border: 3px solid white;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 20px;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+              ${trackingVendor?.id === vendor.id ? 'animation: bounce 1s infinite;' : ''}
+            ">
+              ${vendor.avatar}
             </div>
-
-            {/* Estado: act o inact (punto verde)*/}
-            {vendor.activo && <div className="vista-cliente-status-indicator" />}
+            ${vendor.activo ? `
+              <div style="
+                position: absolute;
+                top: -2px;
+                right: -2px;
+                width: 12px;
+                height: 12px;
+                background-color: #10b981;
+                border: 2px solid white;
+                border-radius: 50%;
+              "></div>
+            ` : ''}
           </div>
-        );
-      })}
+          <style>
+            @keyframes bounce {
+              0%, 100% { transform: translateY(0); }
+              50% { transform: translateY(-10px); }
+            }
+          </style>
+        `,
+        iconSize: [40, 40],
+        iconAnchor: [20, 40],
+        popupAnchor: [0, -40]
+      });
 
-      {/* Ubicación del usuario */}
-      <div className="vista-cliente-user-location">
-        <div className="vista-cliente-user-pin" />
-        <div className="vista-cliente-user-ring" />
-      </div>
-    </div>
-  );
+      const marker = window.L.marker([vendor.ubicacion.lat, vendor.ubicacion.lng], { 
+        icon: vendorIcon,
+        riseOnHover: true
+      });
+
+      marker
+        .addTo(map)
+        .bindPopup(`
+          <div style="font-family: system-ui, sans-serif; min-width: 150px;">
+            <strong style="font-size: 14px;">${vendor.nombre}</strong><br/>
+            <span style="color: #6b7280;">${vendor.producto}</span><br/>
+            <span style="color: #10b981; font-weight: 500;">${vendor.precio}</span>
+          </div>
+        `);
+
+      // Manejador de eventos personalizado para el marcador
+      marker.on('click', (e) => {
+        const event = e.originalEvent || e;
+        if (event) {
+          event.stopPropagation();
+          event.preventDefault();
+        }
+        
+        // Actualizar el vendedor seleccionado
+        setSelectedVendor(prevVendor => 
+          prevVendor?.id === vendor.id ? null : vendor
+        );
+        
+        // Abrir el popup si no está abierto
+        if (!marker.isPopupOpen()) {
+          marker.openPopup();
+        }
+      });
+      
+      // Prevenir cierre del popup al hacer clic en él
+      marker.on('popupopen', () => {
+        const popup = marker.getPopup();
+        if (popup) {
+          const popupElement = popup.getElement();
+          if (popupElement) {
+            popupElement.style.pointerEvents = 'auto';
+            popupElement.addEventListener('click', (e) => {
+              e.stopPropagation();
+            });
+          }
+        }
+      });
+
+      markersRef.current.push(marker);
+
+      // Círculo de radar si está siendo rastreado
+      if (trackingVendor?.id === vendor.id) {
+        const circle = window.L.circle([vendor.ubicacion.lat, vendor.ubicacion.lng], {
+          color: '#10b981',
+          fillColor: '#10b981',
+          fillOpacity: 0.1,
+          radius: 100
+        }).addTo(map);
+        circlesRef.current.push(circle);
+
+        // Centrar mapa en el vendedor rastreado
+        map.setView([vendor.ubicacion.lat, vendor.ubicacion.lng], 16);
+      }
+    });
+  };
+
+  const MapComponent = React.memo(({ onMarkerClick, trackingVendor, userLocation, filteredVendedores }) => {
+    const mapRef = useRef(null);
+    const leafletMapRef = useRef(null);
+    const markersRef = useRef([]);
+    const circlesRef = useRef([]);
+
+    useEffect(() => {
+      if (!mapRef.current || !window.L) return;
+
+      // Inicializar mapa
+      const map = window.L.map(mapRef.current, {
+        zoomControl: false,
+        tap: false,
+        dragging: true,
+        scrollWheelZoom: true,
+        doubleClickZoom: true,
+        boxZoom: true,
+        keyboard: true
+      }).setView([userLocation.lat, userLocation.lng], 15);
+
+      // Agregar capa de OpenStreetMap
+      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+      }).addTo(map);
+
+      // Configuración de eventos del mapa
+      const container = map.getContainer();
+      container.style.cursor = 'default';
+      container.style.pointerEvents = 'auto';
+      
+      window.L.DomEvent.disableClickPropagation(container);
+      window.L.DomEvent.disableScrollPropagation(container);
+
+      leafletMapRef.current = map;
+
+      // Función para actualizar marcadores
+      const updateMarkers = () => {
+        // Limpiar marcadores y círculos anteriores
+        markersRef.current.forEach(marker => map.removeLayer(marker));
+        circlesRef.current.forEach(circle => map.removeLayer(circle));
+        markersRef.current = [];
+        circlesRef.current = [];
+
+        filteredVendedores.forEach((vendor) => {
+          const vendorIcon = window.L.divIcon({
+            className: 'custom-vendor-marker',
+            html: `
+              <div style="position: relative;">
+                <div style="
+                  width: 40px;
+                  height: 40px;
+                  background-color: ${vendor.activo ? '#10b981' : '#6b7280'};
+                  border: 3px solid white;
+                  border-radius: 50%;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 20px;
+                  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                  ${trackingVendor?.id === vendor.id ? 'animation: bounce 1s infinite;' : ''}
+                ">
+                  ${vendor.avatar}
+                </div>
+                ${vendor.activo ? `
+                  <div style="
+                    position: absolute;
+                    top: -2px;
+                    right: -2px;
+                    width: 12px;
+                    height: 12px;
+                    background-color: #10b981;
+                    border: 2px solid white;
+                    border-radius: 50%;
+                  "></div>
+                ` : ''}
+              </div>
+              <style>
+                @keyframes bounce {
+                  0%, 100% { transform: translateY(0); }
+                  50% { transform: translateY(-10px); }
+                }
+              </style>
+            `,
+            iconSize: [40, 40],
+            iconAnchor: [20, 40],
+            popupAnchor: [0, -40]
+          });
+
+          const marker = window.L.marker([vendor.ubicacion.lat, vendor.ubicacion.lng], { 
+            icon: vendorIcon,
+            riseOnHover: true
+          });
+
+          marker
+            .addTo(map)
+            .bindPopup(`
+              <div style="font-family: system-ui, sans-serif; min-width: 150px;">
+                <strong style="font-size: 14px;">${vendor.nombre}</strong><br/>
+                <span style="color: #6b7280;">${vendor.producto}</span><br/>
+                <span style="color: #10b981; font-weight: 500;">${vendor.precio}</span>
+              </div>
+            `);
+
+          // Manejador de eventos del marcador
+          marker.on('click', (e) => {
+            if (e.originalEvent) {
+              e.originalEvent.stopPropagation();
+              e.originalEvent.preventDefault();
+            }
+            onMarkerClick(vendor);
+          });
+
+          markersRef.current.push(marker);
+
+          // Círculo de radar si está siendo rastreado
+          if (trackingVendor?.id === vendor.id) {
+            const circle = window.L.circle([vendor.ubicacion.lat, vendor.ubicacion.lng], {
+              color: '#10b981',
+              fillColor: '#10b981',
+              fillOpacity: 0.1,
+              radius: 100
+            }).addTo(map);
+            circlesRef.current.push(circle);
+            map.setView([vendor.ubicacion.lat, vendor.ubicacion.lng], 16);
+          }
+        });
+      };
+
+      // Inicializar marcadores
+      updateMarkers();
+
+      // Limpieza al desmontar
+      return () => {
+        if (leafletMapRef.current) {
+          leafletMapRef.current.remove();
+          leafletMapRef.current = null;
+        }
+      };
+    }, [filteredVendedores, trackingVendor, userLocation, onMarkerClick]);
+
+    return (
+      <div 
+        ref={mapRef} 
+        className="vista-cliente-map" 
+        style={{ width: '100%', height: '100%' }}
+      />
+    );
+  });
+
+  // Manejador de clic en marcador
+  const handleMarkerClick = (vendor) => {
+    setSelectedVendor(prevVendor => 
+      prevVendor?.id === vendor.id ? null : vendor
+    );
+  };
 
   return (
     <div className="vista-cliente-container">
@@ -158,7 +484,12 @@ import './VistaCliente.css';
           
           {/* Mapa */}
           <div className="vista-cliente-map-container">
-            <MapComponent />
+            <MapComponent 
+              onMarkerClick={handleMarkerClick}
+              trackingVendor={trackingVendor}
+              userLocation={userLocation}
+              filteredVendedores={filteredVendedores}
+            />
             
             {/* Controles del mapa */}
             {isTracking && (
@@ -199,7 +530,12 @@ import './VistaCliente.css';
               {filteredVendedores.map((vendor) => (
                 <div
                   key={vendor.id}
-                  onClick={() => setSelectedVendor(vendor)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedVendor(prevVendor => 
+                      prevVendor?.id === vendor.id ? null : vendor
+                    );
+                  }}
                   className={`vista-cliente-vendor-card ${
                     selectedVendor?.id === vendor.id ? 'selected' : ''
                   }`}
