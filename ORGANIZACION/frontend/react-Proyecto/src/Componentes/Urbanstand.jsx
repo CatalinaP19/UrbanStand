@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const UrbanStand = ({ onGoToLogin, onGoToRegister, onGoToVendorRegister, onGoToEntityRegister, onGoToClientView, onGoToEntityView }) => {
   const [showMapModal, setShowMapModal] = useState(false);
   const [userInteracted, setUserInteracted] = useState(false);
   const [testimonialAvatar, setTestimonialAvatar] = useState('');
-
+  const navigate = useNavigate();
   const avatarImages = [
     "https://protoinfrastack.ivondy.com/media/vO8SMrOMuVyUDTYiuaTgSAbWYwAwTd7C3oCs.png",
     "https://protoinfrastack.ivondy.com/media/VdbygmIJK95vt1MRtSjawaXu6z430NAguXHX.png",
@@ -47,7 +48,7 @@ const UrbanStand = ({ onGoToLogin, onGoToRegister, onGoToVendorRegister, onGoToE
       }
     };
     window.addEventListener('resize', onResize);
-  
+
     // Observer de visibilidad del elemento del mapa
     let observer = null;
     const el = document.getElementById('map');
@@ -61,7 +62,7 @@ const UrbanStand = ({ onGoToLogin, onGoToRegister, onGoToVendorRegister, onGoToE
       }, { threshold: 0.1 });
       observer.observe(el);
     }
-  
+
     return () => {
       window.removeEventListener('resize', onResize);
       if (observer) observer.disconnect();
@@ -195,7 +196,18 @@ const UrbanStand = ({ onGoToLogin, onGoToRegister, onGoToVendorRegister, onGoToE
               </div>
               <h3>Cliente</h3>
               <p>Buscar productos y puestos cercanos</p>
-              <button className="btn btn-primary" onClick={onGoToClientView}>Acceder como...</button>
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  if (onGoToClientView) {
+                    onGoToClientView();
+                  } else {
+                    navigate('/cliente');
+                  }
+                }}
+              >
+                Acceder como...
+              </button>
             </article>
 
             <article className="user-card">

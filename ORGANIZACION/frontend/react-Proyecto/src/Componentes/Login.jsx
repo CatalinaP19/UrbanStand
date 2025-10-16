@@ -1,9 +1,11 @@
 import React, { useState } from "react";
-import apiService from "../services/apiService";
+import apiService from "../services/apiService.js";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContex.jsx";
 
 export default function Login({ onSuccessfulLogin, onGoToRegister }) {
   const navigate = useNavigate();
+  const { login: authLogin } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [terms, setTerms] = useState(false);
@@ -73,12 +75,15 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
               }));
             } catch (_) { /* ignore */ }
 
+            // Usar el contexto de autenticación
+            authLogin(entidadData, loginResp.token, 'entidad');
+
             setMessage("Inicio de sesión exitoso.");
             if (typeof onSuccessfulLogin === 'function') {
-              return onSuccessfulLogin('entidad', entidadData);
-            } else {
-              return navigate('/entidades');
+              onSuccessfulLogin('entidad', entidadData);
             }
+            navigate('/entidades');
+            return;
           }
         } else if (role === 'vendedor') {
           let vendorData = null;
@@ -147,12 +152,16 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
             localStorage.setItem('urbanstand_current_user', JSON.stringify(current));
           } catch (e) { /* ignore */ }
 
+          // Usar el contexto de autenticación
+          const token = localStorage.getItem('token');
+          authLogin(vendorData, token, 'vendedor');
+
           setMessage("Inicio de sesión exitoso.");
           if (typeof onSuccessfulLogin === 'function') {
-            return onSuccessfulLogin('vendedor', vendorData);
-          } else {
-            return navigate('/vendedor');
+            onSuccessfulLogin('vendedor', vendorData);
           }
+          navigate('/vendedor');
+          return;
         }
       } catch (error) {
         console.error('❌ Error de login:', error);

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 
 import { useNavigate, useLocation } from 'react-router-dom'
-
+import { useAuth } from '../context/AuthContex'
 export default function Navbar({
   isLoggedIn,
   userRole,
@@ -14,7 +14,7 @@ export default function Navbar({
   const ignoreScrollUntilRef = useRef(0)
   const openScrollYRef = useRef(0)
   const navRef = useRef(null)
-
+  const { logout } = useAuth()
   useEffect(() => {
     const style = document.createElement('style')
     style.textContent = `
@@ -505,7 +505,10 @@ export default function Navbar({
 
               <button
                 className="navbar-logout"
-                onClick={onLogout}
+                onClick={() => {
+                  logout();
+                  navigate('/login');
+                }}
               >
                 Cerrar Sesión
               </button>
