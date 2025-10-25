@@ -1,6 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from 'recharts';
 
 export default function UrbanStandDashboard() {
+  // Referencias para las gráficas
+  const barChartRef = useRef(null);
+  const pieChartRef = useRef(null);
+
   // Estados para los filtros
   const [selectedLocation, setSelectedLocation] = useState('Todas');
   const [selectedGender, setSelectedGender] = useState('Todos');
@@ -22,34 +39,558 @@ export default function UrbanStandDashboard() {
     { localidad: 'Localidad 5', genero: 'Hombres', activos: 30, inactivos: 290, total: 300 }
   ];
 
-  // Variable para cambiar la gráfica según el género seleccionado
-  const getChartData = () => {
+  // Datos para gráfica de barras con Recharts
+  const getBarChartData = () => {
+    const baseData = [
+      { localidad: 'Usaquén', vendedores: 80 },
+      { localidad: 'Chapinero', vendedores: 65 },
+      { localidad: 'Santa Fe', vendedores: 50 },
+      { localidad: 'San Cristóbal', vendedores: 90 },
+      { localidad: 'Usme', vendedores: 70 },
+      { localidad: 'Tunjuelito', vendedores: 85 },
+      { localidad: 'Bosa', vendedores:  25},
+      { localidad: 'Kennedy', vendedores: 55 },
+      { localidad: 'Fontibón', vendedores: 45 },
+      { localidad: 'Engativá', vendedores: 75 },
+      { localidad: 'Suba', vendedores: 50 },
+      { localidad: 'Barrios Unidos', vendedores: 65 },
+      { localidad: 'Teusaquillo', vendedores: 45 },
+      { localidad: 'Los Mártires', vendedores: 85 },
+      { localidad: 'Antonio Nariño', vendedores: 80 },
+      { localidad: 'Puente Aranda', vendedores: 35 },
+      { localidad: 'La Candelaria', vendedores: 50 },
+      { localidad: 'Rafael Uribe Uribe', vendedores: 90 },
+      { localidad: 'Ciudad Bolívar', vendedores: 95 },
+      { localidad: 'Sumapaz', vendedores: 70 }
+    ];
+
+    if (selectedLocation === 'Usaquén') {
+      return [
+      { localidad: 'Usaquén', vendedores: 80 },
+      { localidad: 'Chapinero', vendedores: 10 },
+      { localidad: 'Santa Fe', vendedores: 10 },
+      { localidad: 'San Cristóbal', vendedores: 10 },
+      { localidad: 'Usme', vendedores: 10 },
+      { localidad: 'Tunjuelito', vendedores: 10 },
+      { localidad: 'Bosa', vendedores:  10 },
+      { localidad: 'Kennedy', vendedores: 10 },
+      { localidad: 'Fontibón', vendedores: 10 },
+      { localidad: 'Engativá', vendedores: 10 },
+      { localidad: 'Suba', vendedores: 10 },
+      { localidad: 'Barrios Unidos', vendedores: 10 },
+      { localidad: 'Teusaquillo', vendedores: 10 },
+      { localidad: 'Los Mártires', vendedores: 10 },
+      { localidad: 'Antonio Nariño', vendedores: 10 },
+      { localidad: 'Puente Aranda', vendedores: 10 },
+      { localidad: 'La Candelaria', vendedores: 10 },
+      { localidad: 'Rafael Uribe Uribe', vendedores: 10 },
+      { localidad: 'Ciudad Bolívar', vendedores: 10 },
+      { localidad: 'Sumapaz', vendedores: 10 }
+      ];
+    } else if (selectedLocation === 'Chapinero') {
+      return [
+        { localidad: 'Usaquén', vendedores: 10 },
+      { localidad: 'Chapinero', vendedores: 65 },
+      { localidad: 'Santa Fe', vendedores: 10 },
+      { localidad: 'San Cristóbal', vendedores: 10 },
+      { localidad: 'Usme', vendedores: 10 },
+      { localidad: 'Tunjuelito', vendedores: 10 },
+      { localidad: 'Bosa', vendedores:  10 },
+      { localidad: 'Kennedy', vendedores: 10 },
+      { localidad: 'Fontibón', vendedores: 10 },
+      { localidad: 'Engativá', vendedores: 10 },
+      { localidad: 'Suba', vendedores: 10 },
+      { localidad: 'Barrios Unidos', vendedores: 10 },
+      { localidad: 'Teusaquillo', vendedores: 10 },
+      { localidad: 'Los Mártires', vendedores: 10 },
+      { localidad: 'Antonio Nariño', vendedores: 10 },
+      { localidad: 'Puente Aranda', vendedores: 10 },
+      { localidad: 'La Candelaria', vendedores: 10 },
+      { localidad: 'Rafael Uribe Uribe', vendedores: 10 },
+      { localidad: 'Ciudad Bolívar', vendedores: 10 },
+      { localidad: 'Sumapaz', vendedores: 10 }
+      ];
+    } else if (selectedLocation === 'Santa Fe') {
+      return [
+        { localidad: 'Usaquén', vendedores: 10 },
+      { localidad: 'Chapinero', vendedores: 10 },
+      { localidad: 'Santa Fe', vendedores: 50 },
+      { localidad: 'San Cristóbal', vendedores: 10 },
+      { localidad: 'Usme', vendedores: 10 },
+      { localidad: 'Tunjuelito', vendedores: 10 },
+      { localidad: 'Bosa', vendedores:  10 },
+      { localidad: 'Kennedy', vendedores: 10 },
+      { localidad: 'Fontibón', vendedores: 10 },
+      { localidad: 'Engativá', vendedores: 10 },
+      { localidad: 'Suba', vendedores: 10 },
+      { localidad: 'Barrios Unidos', vendedores: 10 },
+      { localidad: 'Teusaquillo', vendedores: 10 },
+      { localidad: 'Los Mártires', vendedores: 10 },
+      { localidad: 'Antonio Nariño', vendedores: 10 },
+      { localidad: 'Puente Aranda', vendedores: 10 },
+      { localidad: 'La Candelaria', vendedores: 10 },
+      { localidad: 'Rafael Uribe Uribe', vendedores: 10 },
+      { localidad: 'Ciudad Bolívar', vendedores: 10 },
+      { localidad: 'Sumapaz', vendedores: 10 }
+      ];
+    }else if (selectedLocation === 'San Cristóbal') {
+      return [
+        { localidad: 'Usaquén', vendedores: 10 },
+      { localidad: 'Chapinero', vendedores: 10 },
+      { localidad: 'Santa Fe', vendedores: 10 },
+      { localidad: 'San Cristóbal', vendedores: 90 },
+      { localidad: 'Usme', vendedores: 10 },
+      { localidad: 'Tunjuelito', vendedores: 10 },
+      { localidad: 'Bosa', vendedores:  10 },
+      { localidad: 'Kennedy', vendedores: 10 },
+      { localidad: 'Fontibón', vendedores: 10 },
+      { localidad: 'Engativá', vendedores: 10 },
+      { localidad: 'Suba', vendedores: 10 },
+      { localidad: 'Barrios Unidos', vendedores: 10 },
+      { localidad: 'Teusaquillo', vendedores: 10 },
+      { localidad: 'Los Mártires', vendedores: 10 },
+      { localidad: 'Antonio Nariño', vendedores: 10 },
+      { localidad: 'Puente Aranda', vendedores: 10 },
+      { localidad: 'La Candelaria', vendedores: 10 },
+      { localidad: 'Rafael Uribe Uribe', vendedores: 10 },
+      { localidad: 'Ciudad Bolívar', vendedores: 10 },
+      { localidad: 'Sumapaz', vendedores: 10 }
+      ];
+    }else if (selectedLocation === 'Usme') {
+      return [
+        { localidad: 'Usaquén', vendedores: 10 },
+      { localidad: 'Chapinero', vendedores: 10 },
+      { localidad: 'Santa Fe', vendedores: 10 },
+      { localidad: 'San Cristóbal', vendedores: 10 },
+      { localidad: 'Usme', vendedores: 70 },
+      { localidad: 'Tunjuelito', vendedores: 10 },
+      { localidad: 'Bosa', vendedores:  10 },
+      { localidad: 'Kennedy', vendedores: 10 },
+      { localidad: 'Fontibón', vendedores: 10 },
+      { localidad: 'Engativá', vendedores: 10 },
+      { localidad: 'Suba', vendedores: 10 },
+      { localidad: 'Barrios Unidos', vendedores: 10 },
+      { localidad: 'Teusaquillo', vendedores: 10 },
+      { localidad: 'Los Mártires', vendedores: 10 },
+      { localidad: 'Antonio Nariño', vendedores: 10 },
+      { localidad: 'Puente Aranda', vendedores: 10 },
+      { localidad: 'La Candelaria', vendedores: 10 },
+      { localidad: 'Rafael Uribe Uribe', vendedores: 10 },
+      { localidad: 'Ciudad Bolívar', vendedores: 10 },
+      { localidad: 'Sumapaz', vendedores: 10 }
+      ];
+    }else if (selectedLocation === 'Tunjuelito') {
+      return [
+        { localidad: 'Usaquén', vendedores: 10 },
+      { localidad: 'Chapinero', vendedores: 10 },
+      { localidad: 'Santa Fe', vendedores: 10 },
+      { localidad: 'San Cristóbal', vendedores: 10 },
+      { localidad: 'Usme', vendedores: 10 },
+      { localidad: 'Tunjuelito', vendedores: 85 },
+      { localidad: 'Bosa', vendedores:  10 },
+      { localidad: 'Kennedy', vendedores: 10 },
+      { localidad: 'Fontibón', vendedores: 10 },
+      { localidad: 'Engativá', vendedores: 10 },
+      { localidad: 'Suba', vendedores: 10 },
+      { localidad: 'Barrios Unidos', vendedores: 10 },
+      { localidad: 'Teusaquillo', vendedores: 10 },
+      { localidad: 'Los Mártires', vendedores: 10 },
+      { localidad: 'Antonio Nariño', vendedores: 10 },
+      { localidad: 'Puente Aranda', vendedores: 10 },
+      { localidad: 'La Candelaria', vendedores: 10 },
+      { localidad: 'Rafael Uribe Uribe', vendedores: 10 },
+      { localidad: 'Ciudad Bolívar', vendedores: 10 },
+      { localidad: 'Sumapaz', vendedores: 10 }
+      ];
+    }else if (selectedLocation === 'Bosa') {
+      return [
+        { localidad: 'Usaquén', vendedores: 10 },
+      { localidad: 'Chapinero', vendedores: 10 },
+      { localidad: 'Santa Fe', vendedores: 10 },
+      { localidad: 'San Cristóbal', vendedores: 10 },
+      { localidad: 'Usme', vendedores: 10 },
+      { localidad: 'Tunjuelito', vendedores: 10 },
+      { localidad: 'Bosa', vendedores:  25 },
+      { localidad: 'Kennedy', vendedores: 10 },
+      { localidad: 'Fontibón', vendedores: 10 },
+      { localidad: 'Engativá', vendedores: 10 },
+      { localidad: 'Suba', vendedores: 10 },
+      { localidad: 'Barrios Unidos', vendedores: 10 },
+      { localidad: 'Teusaquillo', vendedores: 10 },
+      { localidad: 'Los Mártires', vendedores: 10 },
+      { localidad: 'Antonio Nariño', vendedores: 10 },
+      { localidad: 'Puente Aranda', vendedores: 10 },
+      { localidad: 'La Candelaria', vendedores: 10 },
+      { localidad: 'Rafael Uribe Uribe', vendedores: 10 },
+      { localidad: 'Ciudad Bolívar', vendedores: 10 },
+      { localidad: 'Sumapaz', vendedores: 10 }
+      ];
+    }else if (selectedLocation === 'Kennedy') {
+      return [
+        { localidad: 'Usaquén', vendedores: 10 },
+      { localidad: 'Chapinero', vendedores: 10 },
+      { localidad: 'Santa Fe', vendedores: 10 },
+      { localidad: 'San Cristóbal', vendedores: 10 },
+      { localidad: 'Usme', vendedores: 10 },
+      { localidad: 'Tunjuelito', vendedores: 10 },
+      { localidad: 'Bosa', vendedores:  10 },
+      { localidad: 'Kennedy', vendedores: 55 },
+      { localidad: 'Fontibón', vendedores: 10 },
+      { localidad: 'Engativá', vendedores: 10 },
+      { localidad: 'Suba', vendedores: 10 },
+      { localidad: 'Barrios Unidos', vendedores: 10 },
+      { localidad: 'Teusaquillo', vendedores: 10 },
+      { localidad: 'Los Mártires', vendedores: 10 },
+      { localidad: 'Antonio Nariño', vendedores: 10 },
+      { localidad: 'Puente Aranda', vendedores: 10 },
+      { localidad: 'La Candelaria', vendedores: 10 },
+      { localidad: 'Rafael Uribe Uribe', vendedores: 10 },
+      { localidad: 'Ciudad Bolívar', vendedores: 10 },
+      { localidad: 'Sumapaz', vendedores: 10 }
+      ];
+    }else if (selectedLocation === 'Fontibón') {
+      return [
+        { localidad: 'Usaquén', vendedores: 10 },
+      { localidad: 'Chapinero', vendedores: 10 },
+      { localidad: 'Santa Fe', vendedores: 10 },
+      { localidad: 'San Cristóbal', vendedores: 10 },
+      { localidad: 'Usme', vendedores: 10 },
+      { localidad: 'Tunjuelito', vendedores: 10 },
+      { localidad: 'Bosa', vendedores:  10 },
+      { localidad: 'Kennedy', vendedores: 10 },
+      { localidad: 'Fontibón', vendedores: 45 },
+      { localidad: 'Engativá', vendedores: 10 },
+      { localidad: 'Suba', vendedores: 10 },
+      { localidad: 'Barrios Unidos', vendedores: 10 },
+      { localidad: 'Teusaquillo', vendedores: 10 },
+      { localidad: 'Los Mártires', vendedores: 10 },
+      { localidad: 'Antonio Nariño', vendedores: 10 },
+      { localidad: 'Puente Aranda', vendedores: 10 },
+      { localidad: 'La Candelaria', vendedores: 10 },
+      { localidad: 'Rafael Uribe Uribe', vendedores: 10 },
+      { localidad: 'Ciudad Bolívar', vendedores: 10 },
+      { localidad: 'Sumapaz', vendedores: 10 }
+      ];
+    }else if (selectedLocation === 'Engativá') {
+      return [
+        { localidad: 'Usaquén', vendedores: 10 },
+      { localidad: 'Chapinero', vendedores: 10 },
+      { localidad: 'Santa Fe', vendedores: 10 },
+      { localidad: 'San Cristóbal', vendedores: 10 },
+      { localidad: 'Usme', vendedores: 10 },
+      { localidad: 'Tunjuelito', vendedores: 10 },
+      { localidad: 'Bosa', vendedores:  10 },
+      { localidad: 'Kennedy', vendedores: 10 },
+      { localidad: 'Fontibón', vendedores: 10 },
+      { localidad: 'Engativá', vendedores: 75 },
+      { localidad: 'Suba', vendedores: 10 },
+      { localidad: 'Barrios Unidos', vendedores: 10 },
+      { localidad: 'Teusaquillo', vendedores: 10 },
+      { localidad: 'Los Mártires', vendedores: 10 },
+      { localidad: 'Antonio Nariño', vendedores: 10 },
+      { localidad: 'Puente Aranda', vendedores: 10 },
+      { localidad: 'La Candelaria', vendedores: 10 },
+      { localidad: 'Rafael Uribe Uribe', vendedores: 10 },
+      { localidad: 'Ciudad Bolívar', vendedores: 10 },
+      { localidad: 'Sumapaz', vendedores: 10 }
+      ];
+    }else if (selectedLocation === 'Suba') {
+      return [
+        { localidad: 'Usaquén', vendedores: 10 },
+      { localidad: 'Chapinero', vendedores: 10 },
+      { localidad: 'Santa Fe', vendedores: 10 },
+      { localidad: 'San Cristóbal', vendedores: 10 },
+      { localidad: 'Usme', vendedores: 10 },
+      { localidad: 'Tunjuelito', vendedores: 10 },
+      { localidad: 'Bosa', vendedores:  10 },
+      { localidad: 'Kennedy', vendedores: 10 },
+      { localidad: 'Fontibón', vendedores: 10 },
+      { localidad: 'Engativá', vendedores: 10 },
+      { localidad: 'Suba', vendedores: 50 },
+      { localidad: 'Barrios Unidos', vendedores: 10 },
+      { localidad: 'Teusaquillo', vendedores: 10 },
+      { localidad: 'Los Mártires', vendedores: 10 },
+      { localidad: 'Antonio Nariño', vendedores: 10 },
+      { localidad: 'Puente Aranda', vendedores: 10 },
+      { localidad: 'La Candelaria', vendedores: 10 },
+      { localidad: 'Rafael Uribe Uribe', vendedores: 10 },
+      { localidad: 'Ciudad Bolívar', vendedores: 10 },
+      { localidad: 'Sumapaz', vendedores: 10 }
+      ];
+    }else if (selectedLocation === 'Barrios Unidos') {
+      return [
+        { localidad: 'Usaquén', vendedores: 10 },
+      { localidad: 'Chapinero', vendedores: 10 },
+      { localidad: 'Santa Fe', vendedores: 10 },
+      { localidad: 'San Cristóbal', vendedores: 10 },
+      { localidad: 'Usme', vendedores: 10 },
+      { localidad: 'Tunjuelito', vendedores: 10 },
+      { localidad: 'Bosa', vendedores:  10 },
+      { localidad: 'Kennedy', vendedores: 10 },
+      { localidad: 'Fontibón', vendedores: 10 },
+      { localidad: 'Engativá', vendedores: 10 },
+      { localidad: 'Suba', vendedores: 10 },
+      { localidad: 'Barrios Unidos', vendedores: 65 },
+      { localidad: 'Teusaquillo', vendedores: 10 },
+      { localidad: 'Los Mártires', vendedores: 10 },
+      { localidad: 'Antonio Nariño', vendedores: 10 },
+      { localidad: 'Puente Aranda', vendedores: 10 },
+      { localidad: 'La Candelaria', vendedores: 10 },
+      { localidad: 'Rafael Uribe Uribe', vendedores: 10 },
+      { localidad: 'Ciudad Bolívar', vendedores: 10 },
+      { localidad: 'Sumapaz', vendedores: 10 }
+      ];
+    }else if (selectedLocation === 'Teusaquillo') {
+      return [
+        { localidad: 'Usaquén', vendedores: 10 },
+      { localidad: 'Chapinero', vendedores: 10 },
+      { localidad: 'Santa Fe', vendedores: 10 },
+      { localidad: 'San Cristóbal', vendedores: 10 },
+      { localidad: 'Usme', vendedores: 10 },
+      { localidad: 'Tunjuelito', vendedores: 10 },
+      { localidad: 'Bosa', vendedores:  10 },
+      { localidad: 'Kennedy', vendedores: 10 },
+      { localidad: 'Fontibón', vendedores: 10 },
+      { localidad: 'Engativá', vendedores: 10 },
+      { localidad: 'Suba', vendedores: 10 },
+      { localidad: 'Barrios Unidos', vendedores: 10 },
+      { localidad: 'Teusaquillo', vendedores: 45 },
+      { localidad: 'Los Mártires', vendedores: 10 },
+      { localidad: 'Antonio Nariño', vendedores: 10 },
+      { localidad: 'Puente Aranda', vendedores: 10 },
+      { localidad: 'La Candelaria', vendedores: 10 },
+      { localidad: 'Rafael Uribe Uribe', vendedores: 10 },
+      { localidad: 'Ciudad Bolívar', vendedores: 10 },
+      { localidad: 'Sumapaz', vendedores: 10 }
+      ];
+    }else if (selectedLocation === 'Los Mártires') {
+      return [
+        { localidad: 'Usaquén', vendedores: 10 },
+      { localidad: 'Chapinero', vendedores: 10 },
+      { localidad: 'Santa Fe', vendedores: 10 },
+      { localidad: 'San Cristóbal', vendedores: 10 },
+      { localidad: 'Usme', vendedores: 10 },
+      { localidad: 'Tunjuelito', vendedores: 10 },
+      { localidad: 'Bosa', vendedores:  10 },
+      { localidad: 'Kennedy', vendedores: 10 },
+      { localidad: 'Fontibón', vendedores: 10 },
+      { localidad: 'Engativá', vendedores: 10 },
+      { localidad: 'Suba', vendedores: 10 },
+      { localidad: 'Barrios Unidos', vendedores: 10 },
+      { localidad: 'Teusaquillo', vendedores: 10 },
+      { localidad: 'Los Mártires', vendedores: 85 },
+      { localidad: 'Antonio Nariño', vendedores: 10 },
+      { localidad: 'Puente Aranda', vendedores: 10 },
+      { localidad: 'La Candelaria', vendedores: 10 },
+      { localidad: 'Rafael Uribe Uribe', vendedores: 10 },
+      { localidad: 'Ciudad Bolívar', vendedores: 10 },
+      { localidad: 'Sumapaz', vendedores: 10 }
+      ];
+    }else if (selectedLocation === 'Antonio Nariño') {
+      return [
+        { localidad: 'Usaquén', vendedores: 10 },
+      { localidad: 'Chapinero', vendedores: 10 },
+      { localidad: 'Santa Fe', vendedores: 10 },
+      { localidad: 'San Cristóbal', vendedores: 10 },
+      { localidad: 'Usme', vendedores: 10 },
+      { localidad: 'Tunjuelito', vendedores: 10 },
+      { localidad: 'Bosa', vendedores:  10 },
+      { localidad: 'Kennedy', vendedores: 10 },
+      { localidad: 'Fontibón', vendedores: 10 },
+      { localidad: 'Engativá', vendedores: 10 },
+      { localidad: 'Suba', vendedores: 10 },
+      { localidad: 'Barrios Unidos', vendedores: 10 },
+      { localidad: 'Teusaquillo', vendedores: 10 },
+      { localidad: 'Los Mártires', vendedores: 10 },
+      { localidad: 'Antonio Nariño', vendedores: 85 },
+      { localidad: 'Puente Aranda', vendedores: 10 },
+      { localidad: 'La Candelaria', vendedores: 10 },
+      { localidad: 'Rafael Uribe Uribe', vendedores: 10 },
+      { localidad: 'Ciudad Bolívar', vendedores: 10 },
+      { localidad: 'Sumapaz', vendedores: 10 }
+      ];
+    }else if (selectedLocation === 'Puente Aranda') {
+      return [
+        { localidad: 'Usaquén', vendedores: 10 },
+      { localidad: 'Chapinero', vendedores: 10 },
+      { localidad: 'Santa Fe', vendedores: 10 },
+      { localidad: 'San Cristóbal', vendedores: 10 },
+      { localidad: 'Usme', vendedores: 10 },
+      { localidad: 'Tunjuelito', vendedores: 10 },
+      { localidad: 'Bosa', vendedores:  10 },
+      { localidad: 'Kennedy', vendedores: 10 },
+      { localidad: 'Fontibón', vendedores: 10 },
+      { localidad: 'Engativá', vendedores: 10 },
+      { localidad: 'Suba', vendedores: 10 },
+      { localidad: 'Barrios Unidos', vendedores: 10 },
+      { localidad: 'Teusaquillo', vendedores: 10 },
+      { localidad: 'Los Mártires', vendedores: 10 },
+      { localidad: 'Antonio Nariño', vendedores: 10 },
+      { localidad: 'Puente Aranda', vendedores: 35 },
+      { localidad: 'La Candelaria', vendedores: 10 },
+      { localidad: 'Rafael Uribe Uribe', vendedores: 10 },
+      { localidad: 'Ciudad Bolívar', vendedores: 10 },
+      { localidad: 'Sumapaz', vendedores: 10 }
+      ];
+    }else if (selectedLocation === 'La Candelaria') {
+      return [
+        { localidad: 'Usaquén', vendedores: 10 },
+      { localidad: 'Chapinero', vendedores: 10 },
+      { localidad: 'Santa Fe', vendedores: 10 },
+      { localidad: 'San Cristóbal', vendedores: 10 },
+      { localidad: 'Usme', vendedores: 10 },
+      { localidad: 'Tunjuelito', vendedores: 10 },
+      { localidad: 'Bosa', vendedores:  10 },
+      { localidad: 'Kennedy', vendedores: 10 },
+      { localidad: 'Fontibón', vendedores: 10 },
+      { localidad: 'Engativá', vendedores: 10 },
+      { localidad: 'Suba', vendedores: 10 },
+      { localidad: 'Barrios Unidos', vendedores: 10 },
+      { localidad: 'Teusaquillo', vendedores: 10 },
+      { localidad: 'Los Mártires', vendedores: 10 },
+      { localidad: 'Antonio Nariño', vendedores: 10 },
+      { localidad: 'Puente Aranda', vendedores: 10 },
+      { localidad: 'La Candelaria', vendedores: 50 },
+      { localidad: 'Rafael Uribe Uribe', vendedores: 10 },
+      { localidad: 'Ciudad Bolívar', vendedores: 10 },
+      { localidad: 'Sumapaz', vendedores: 10 }
+      ];
+    }else if (selectedLocation === 'Rafael Uribe Uribe') {
+      return [
+        { localidad: 'Usaquén', vendedores: 10 },
+      { localidad: 'Chapinero', vendedores: 10 },
+      { localidad: 'Santa Fe', vendedores: 10 },
+      { localidad: 'San Cristóbal', vendedores: 10 },
+      { localidad: 'Usme', vendedores: 10 },
+      { localidad: 'Tunjuelito', vendedores: 10 },
+      { localidad: 'Bosa', vendedores:  10 },
+      { localidad: 'Kennedy', vendedores: 10 },
+      { localidad: 'Fontibón', vendedores: 10 },
+      { localidad: 'Engativá', vendedores: 10 },
+      { localidad: 'Suba', vendedores: 10 },
+      { localidad: 'Barrios Unidos', vendedores: 10 },
+      { localidad: 'Teusaquillo', vendedores: 10 },
+      { localidad: 'Los Mártires', vendedores: 10 },
+      { localidad: 'Antonio Nariño', vendedores: 10 },
+      { localidad: 'Puente Aranda', vendedores: 10 },
+      { localidad: 'La Candelaria', vendedores: 10 },
+      { localidad: 'Rafael Uribe Uribe', vendedores: 90 },
+      { localidad: 'Ciudad Bolívar', vendedores: 10 },
+      { localidad: 'Sumapaz', vendedores: 10 }
+      ];
+    }else if (selectedLocation === 'Ciudad Bolívar') {
+      return [
+        { localidad: 'Usaquén', vendedores: 10 },
+      { localidad: 'Chapinero', vendedores: 10 },
+      { localidad: 'Santa Fe', vendedores: 10 },
+      { localidad: 'San Cristóbal', vendedores: 10 },
+      { localidad: 'Usme', vendedores: 10 },
+      { localidad: 'Tunjuelito', vendedores: 10 },
+      { localidad: 'Bosa', vendedores:  10 },
+      { localidad: 'Kennedy', vendedores: 10 },
+      { localidad: 'Fontibón', vendedores: 10 },
+      { localidad: 'Engativá', vendedores: 10 },
+      { localidad: 'Suba', vendedores: 10 },
+      { localidad: 'Barrios Unidos', vendedores: 10 },
+      { localidad: 'Teusaquillo', vendedores: 10 },
+      { localidad: 'Los Mártires', vendedores: 10 },
+      { localidad: 'Antonio Nariño', vendedores: 10 },
+      { localidad: 'Puente Aranda', vendedores: 10 },
+      { localidad: 'La Candelaria', vendedores: 10 },
+      { localidad: 'Rafael Uribe Uribe', vendedores: 10 },
+      { localidad: 'Ciudad Bolívar', vendedores: 95 },
+      { localidad: 'Sumapaz', vendedores: 10 }
+      ];
+    }else if (selectedLocation === 'Sumapaz') {
+      return [
+        { localidad: 'Usaquén', vendedores: 10 },
+      { localidad: 'Chapinero', vendedores: 10 },
+      { localidad: 'Santa Fe', vendedores: 10 },
+      { localidad: 'San Cristóbal', vendedores: 10 },
+      { localidad: 'Usme', vendedores: 10 },
+      { localidad: 'Tunjuelito', vendedores: 10 },
+      { localidad: 'Bosa', vendedores:  10 },
+      { localidad: 'Kennedy', vendedores: 10 },
+      { localidad: 'Fontibón', vendedores: 10 },
+      { localidad: 'Engativá', vendedores: 10 },
+      { localidad: 'Suba', vendedores: 10 },
+      { localidad: 'Barrios Unidos', vendedores: 10 },
+      { localidad: 'Teusaquillo', vendedores: 10 },
+      { localidad: 'Los Mártires', vendedores: 10 },
+      { localidad: 'Antonio Nariño', vendedores: 10 },
+      { localidad: 'Puente Aranda', vendedores: 10 },
+      { localidad: 'La Candelaria', vendedores: 10 },
+      { localidad: 'Rafael Uribe Uribe', vendedores: 10 },
+      { localidad: 'Ciudad Bolívar', vendedores: 10 },
+      { localidad: 'Sumapaz', vendedores: 70 }
+      ];
+    }
+
+    return baseData;
+  };
+
+  // Datos para gráfica circular con Recharts
+  const getPieChartData = () => {
     if (selectedGender === 'Mujeres') {
-      return 'conic-gradient(#ea580c 0deg 180deg, #f97316 180deg 360deg)'; // 50% mujeres, 50% otros
+      return [
+        { name: 'Mujeres', value: 60, color: '#f97316' },
+        { name: 'Hombres', value: 30, color: '#ea580c' },
+        { name: 'Otros', value: 10, color: '#6b7280' }
+      ];
     } else if (selectedGender === 'Hombres') {
-      return 'conic-gradient(#ea580c 0deg 240deg, #f97316 240deg 300deg, #6b7280 300deg 360deg)'; // 67% hombres, 17% mujeres, 16% otros
+      return [
+        { name: 'Hombres', value: 65, color: '#ea580c' },
+        { name: 'Mujeres', value: 25, color: '#f97316' },
+        { name: 'Otros', value: 10, color: '#6b7280' }
+      ];
     } else if (selectedGender === 'Otros') {
-      return 'conic-gradient(#ea580c 0deg 60deg, #f97316 60deg 120deg, #6b7280 120deg 360deg)'; // Otros predominante
-    } else {
-      return 'conic-gradient(#ea580c 0deg 120deg, #f97316 120deg 240deg, #6b7280 240deg 360deg)'; // Distribución normal
+      return [
+        { name: 'Otros', value: 50, color: '#6b7280' },
+        { name: 'Mujeres', value: 30, color: '#f97316' },
+        { name: 'Hombres', value: 20, color: '#ea580c' }
+      ];
+    }
+
+    return [
+      { name: 'Hombres', value: 45, color: '#ea580c' },
+      { name: 'Mujeres', value: 40, color: '#f97316' },
+      { name: 'Otros', value: 15, color: '#6b7280' }
+    ];
+  };
+
+  // Función para descargar gráfica específica
+  const downloadChart = async (chartRef, filename) => {
+    if (!chartRef.current || !window.html2canvas) {
+      alert('Espera un momento mientras cargamos los recursos necesarios...');
+      return;
+    }
+
+    try {
+      const canvas = await window.html2canvas(chartRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2
+      });
+      
+      const link = document.createElement('a');
+      link.download = `${filename}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (error) {
+      console.error('Error al descargar:', error);
+      alert('Hubo un error al descargar la gráfica');
     }
   };
 
-  // Variable para cambiar las barras según la localidad seleccionada
-  const getBarData = () => {
-    if (selectedLocation === 'Localidad 1') {
-      return [100, 20, 10, 15, 25]; // Localidad 1 tiene más vendedores
-    } else if (selectedLocation === 'Localidad 2') {
-      return [30, 100, 40, 20, 35]; // Localidad 2 tiene más vendedores
-    } else if (selectedLocation === 'Localidad 3') {
-      return [15, 25, 100, 30, 20]; // Localidad 3 tiene más vendedores
-    } else {
-      return [80, 60, 50, 90, 70]; // Distribución normal para "Todas"
-    }
-  };
+  // Función para descargar todas las gráficas
 
-  // Crear estilos CSS igual que en el módulo de registro
+
+  // Crear estilos CSS
   useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    script.async = true;
+    document.body.appendChild(script);
+
     const style = document.createElement('style');
     style.textContent = `
       .dashboard-container {
@@ -60,57 +601,6 @@ export default function UrbanStandDashboard() {
         margin: 0;
         padding: 0 10rem;
         min-height: 100vh;
-      }
-
-      .dashboard-nav {
-        background: white;
-        padding: 1rem 2rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid #e5e7eb;
-      }
-
-      .dashboard-logo {
-        color: #9a1e22;
-        font-size: 1.5rem;
-        font-weight: bold;
-        margin: 0;
-      }
-
-      .dashboard-nav-links {
-        display: flex;
-        gap: 2rem;
-        align-items: center;
-      }
-
-      .dashboard-nav-button {
-        background: none;
-        border: none;
-        color: #9a1e22;
-        cursor: pointer;
-        font-size: 1rem;
-        transition: color 0.2s ease;
-      }
-
-      .dashboard-nav-button:hover {
-        color: #ea580c;
-      }
-
-      .dashboard-logout-button {
-        background: #ea580c;
-        color: white;
-        border: none;
-        padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        font-weight: 600;
-      }
-
-      .dashboard-logout-button:hover {
-        background: #9a1e22;
       }
 
       .dashboard-content {
@@ -134,19 +624,6 @@ export default function UrbanStandDashboard() {
         font-weight: bold;
         margin: 0 0 0.5rem 0;
         line-height: 1.2;
-      }
-
-      .dashboard-hero-icon {
-        width: 200px;
-        height: 120px;
-        background: #ea580c;
-        border-radius: 1rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 3rem;
-        opacity: 0.8;
       }
 
       .dashboard-filters {
@@ -265,80 +742,6 @@ export default function UrbanStandDashboard() {
         font-weight: 600;
       }
 
-      .dashboard-bar-chart {
-        display: flex;
-        align-items: flex-end;
-        gap: 1rem;
-        height: 200px;
-        padding: 1rem 0;
-        border: 1px solid #e5e7eb;
-        border-radius: 0.5rem;
-        background: #fafafa;
-      }
-
-      .dashboard-bar {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        flex: 1;
-        height: 100%;
-      }
-
-      .dashboard-bar-fill {
-        width: 100%;
-        background: #ea580c;
-        border-radius: 0.25rem 0.25rem 0 0;
-        margin-bottom: 0.5rem;
-        transition: background 0.2s ease;
-        min-height: 2px;
-      }
-
-      .dashboard-bar-fill:hover {
-        background: #9a1e22;
-      }
-
-      .dashboard-bar-label {
-        font-size: 0.8rem;
-        color: #6b7280;
-      }
-
-      .dashboard-pie-chart {
-        text-align: center;
-      }
-
-      .dashboard-pie-circle {
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-        margin: 1rem auto;
-        border: 4px solid white;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      }
-
-      .dashboard-pie-legend {
-        display: flex;
-        justify-content: center;
-        gap: 1rem;
-        flex-wrap: wrap;
-      }
-
-      .dashboard-legend-item {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .dashboard-legend-color {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-      }
-
-      .dashboard-legend-label {
-        font-size: 0.9rem;
-        color: #6b7280;
-      }
-
       .dashboard-table-container {
         background: white;
         border-radius: 1rem;
@@ -379,6 +782,10 @@ export default function UrbanStandDashboard() {
       .dashboard-download-container {
         text-align: center;
         margin-top: 2rem;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
       }
 
       .dashboard-download-button {
@@ -400,6 +807,10 @@ export default function UrbanStandDashboard() {
       }
 
       @media (max-width: 768px) {
+        .dashboard-container {
+          padding: 0 1rem;
+        }
+
         .dashboard-content {
           padding: 1rem;
         }
@@ -411,8 +822,22 @@ export default function UrbanStandDashboard() {
           gap: 1rem;
         }
 
-        
-  
+        .dashboard-hero-title {
+          font-size: 1.5rem;
+        }
+
+        .dashboard-charts-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .dashboard-download-container {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .dashboard-download-button {
+          width: 100%;
+        }
       }
     `;
     
@@ -420,27 +845,26 @@ export default function UrbanStandDashboard() {
     
     return () => {
       document.head.removeChild(style);
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
     };
   }, []);
 
   return (
     <div className="dashboard-container">
-    
-
-      {/* Contenido principal */}
       <div className="dashboard-content">
-        
-        {/* Hero Section */}
         <div className="dashboard-hero">
           <div>
             <h2 className="dashboard-hero-title">
-              Entidad: Monitoreo de vendedores informales en la ciudad.
+              Entidades: 
+            </h2>
+            <h2 className="dashboard-hero-title">
+                 Monitoreo de vendedores informales en la ciudad.
             </h2>
           </div>
-<img className="dashboard-hero-icon" src="/img/img-VistaEnt.jpeg" alt="Imagen vendedor" />
         </div>
 
-        {/* Filtros */}
         <div className="dashboard-filters">
           <div className="dashboard-filter-group">
             <label className="dashboard-filter-label">Localidad</label>
@@ -511,7 +935,6 @@ export default function UrbanStandDashboard() {
           </div>
         </div>
 
-        {/* Tarjetas de estadísticas */}
         <div className="dashboard-stats-grid">
           <div className="dashboard-stat-card">
             <div className="dashboard-stat-number">
@@ -535,49 +958,69 @@ export default function UrbanStandDashboard() {
           </div>
         </div>
 
-        {/* Gráficos */}
         <div className="dashboard-charts-grid">
-          
-          {/* Gráfico de barras */}
-          <div className="dashboard-chart-card">
+          {/* Gráfica de barras con Recharts */}
+          <div className="dashboard-chart-card" ref={barChartRef}>
             <h3 className="dashboard-chart-title">Vendedores por localidad</h3>
-            <div className="dashboard-bar-chart">
-              {getBarData().map((height, index) => (
-                <div key={index} className="dashboard-bar">
-                  <div 
-                    className="dashboard-bar-fill"
-                    style={{ height: `${height}%` }}
-                  />
-                  <span className="dashboard-bar-label">Loc. {index + 1}</span>
-                </div>
-              ))}
-            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={getBarChartData()}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="localidad" 
+                  angle={-45}
+                  textAnchor="end"
+                  height={100}
+                  tick={{ fill: '#6b7280', fontSize: 12 }}
+                />
+                <YAxis tick={{ fill: '#6b7280' }} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'white', 
+                    border: '2px solid #ea580c',
+                    borderRadius: '0.5rem'
+                  }}
+                />
+                <Bar dataKey="vendedores" fill="#ea580c" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
 
-          {/* Gráfico circular */}
-          <div className="dashboard-chart-card">
+          {/* Gráfica circular con Recharts */}
+          <div className="dashboard-chart-card" ref={pieChartRef}>
             <h3 className="dashboard-chart-title">Distribución por género</h3>
-            <div className="dashboard-pie-chart">
-              <div className="dashboard-pie-circle" style={{ background: getChartData() }} />
-              <div className="dashboard-pie-legend">
-                <div className="dashboard-legend-item">
-                  <div className="dashboard-legend-color" style={{ backgroundColor: '#ea580c' }} />
-                  <span className="dashboard-legend-label">Hombres</span>
-                </div>
-                <div className="dashboard-legend-item">
-                  <div className="dashboard-legend-color" style={{ backgroundColor: '#f97316' }} />
-                  <span className="dashboard-legend-label">Mujeres</span>
-                </div>
-                <div className="dashboard-legend-item">
-                  <div className="dashboard-legend-color" style={{ backgroundColor: '#6b7280' }} />
-                  <span className="dashboard-legend-label">Otro</span>
-                </div>
-              </div>
-            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={getPieChartData()}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {getPieChartData().map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'white', 
+                    border: '2px solid #ea580c',
+                    borderRadius: '0.5rem'
+                  }}
+                />
+                <Legend 
+                  verticalAlign="bottom" 
+                  height={36}
+                  iconType="circle"
+                />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Tabla de datos */}
         <div className="dashboard-table-container">
           <table className="dashboard-table">
             <thead>
@@ -603,11 +1046,21 @@ export default function UrbanStandDashboard() {
           </table>
         </div>
 
-        {/* Botón de descarga */}
         <div className="dashboard-download-container">
-          <button className="dashboard-download-button">
-            Descargar reporte
+          
+          <button 
+            className="dashboard-download-button"
+            onClick={() => downloadChart(barChartRef, 'vendedores-por-localidad')}
+          >
+            Descargar gráfica de barras
           </button>
+          <button 
+            className="dashboard-download-button"
+            onClick={() => downloadChart(pieChartRef, 'distribucion-por-genero')}
+          >
+            Descargar gráfica circular
+          </button>
+
         </div>
       </div>
     </div>
