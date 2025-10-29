@@ -150,7 +150,7 @@ const VendedorSchema = new mongoose.Schema({
   id_localidad: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Localidad',
-    required: false
+    required: [true, 'La localidad es requerida']
   },
   id_entidad: {
     type: mongoose.Schema.Types.ObjectId,

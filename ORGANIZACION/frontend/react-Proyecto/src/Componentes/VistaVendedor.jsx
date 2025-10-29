@@ -270,11 +270,14 @@ const VistaVendedor = ({ vendedorData = null }) => {
   const vendorProfileImage = getProfileImage(vendedor.genero);
 
   return (
-    <div className="container">
-
-
-      {/* Hero Section */}
-      <section className="hero">
+    <>
+      <div className="container-fluid" style={{ padding: '0 var(--spacing-3xl)' }}>
+        {/* Hero Section */}
+      <section 
+        className="hero" 
+        style={{ 
+          paddingBottom: 'var(--spacing-3xl)' 
+        }}>
         <div className="hero-content">
           <div className="hero-text">
             <h1>
@@ -298,9 +301,9 @@ const VistaVendedor = ({ vendedorData = null }) => {
       {/* Main Content Grid */}
       <main style={{
         display: 'grid',
-        gridTemplateColumns: '1.5fr 1fr',
-        gap: '2rem',
-        marginBottom: '3rem'
+        gridTemplateColumns: '1.2fr 1fr',
+        gap: 'var(--spacing-2xl)',
+        marginBottom: 'var(--spacing-3xl)'
       }}>
         {/* Map Section */}
         <div style={{
@@ -309,8 +312,8 @@ const VistaVendedor = ({ vendedorData = null }) => {
           gap: '1rem'
         }}>
           <div style={{
-            backgroundColor: 'var(--surface)',
-            padding: '1rem',
+            backgroundColor: 'var(--surface)', // White background
+            padding: 'var(--spacing-md)',
             borderRadius: 'var(--radius-lg)',
             boxShadow: '0 2px 10px var(--shadow)'
           }}>
@@ -327,7 +330,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
           </div>
 
           <div style={{
-            height: '500px',
+            height: '450px',
             backgroundColor: '#f0f0f0',
             borderRadius: 'var(--radius-xl)',
             boxShadow: '0 2px 12px var(--shadow)',
@@ -343,8 +346,8 @@ const VistaVendedor = ({ vendedorData = null }) => {
 
           {/* Leyenda del mapa */}
           <div style={{
-            backgroundColor: 'var(--surface)',
-            padding: '1rem',
+            backgroundColor: 'var(--surface)', // White background
+            padding: 'var(--spacing-md)',
             borderRadius: 'var(--radius-lg)',
             boxShadow: '0 2px 10px var(--shadow)'
           }}>
@@ -403,7 +406,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
         }}>
           <div style={{
             backgroundColor: 'var(--surface)',
-            padding: 'var(--spacing-2xl)',
+            padding: 'var(--spacing-lg)',
             borderRadius: 'var(--radius-xl)',
             textAlign: 'center',
             boxShadow: '0 2px 10px var(--shadow)'
@@ -412,8 +415,8 @@ const VistaVendedor = ({ vendedorData = null }) => {
               src={vendorProfileImage}
               alt={`Perfil de ${vendedor.nombre}`}
               style={{
-                width: '120px',
-                height: '120px',
+                width: '100px',
+                height: '100px',
                 borderRadius: 'var(--radius-full)',
                 marginBottom: 'var(--spacing-lg)',
                 objectFit: 'cover'
@@ -421,17 +424,18 @@ const VistaVendedor = ({ vendedorData = null }) => {
             />
             <h2 style={{
               margin: '0 0 0.5rem 0',
-              fontSize: '1.5rem'
+              fontSize: '1.3rem'
             }}>{vendedor.nombre}</h2>
             <h4 style={{
               margin: '0 0 1rem 0',
               color: 'var(--text-secondary)',
-              fontWeight: 'normal'
+              fontWeight: 'normal',
+              fontSize: '0.9rem'
             }}>{vendedor.tipoVendedor}</h4>
             <p style={{
               margin: '0 0 var(--spacing-xl) 0',
               color: 'var(--text-secondary)',
-              fontSize: '0.9rem',
+              fontSize: '0.85rem',
               lineHeight: '1.4'
             }}>
               {vendedor.descripcion}
@@ -447,9 +451,9 @@ const VistaVendedor = ({ vendedorData = null }) => {
               <button style={{
                 background: '#f0f0f0',
                 border: 'none',
-                padding: 'var(--spacing-sm) var(--spacing-lg)',
+                padding: 'var(--spacing-xs) var(--spacing-md)',
                 borderRadius: 'var(--radius-xl)',
-                fontSize: '0.8rem',
+                fontSize: '0.75rem',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -462,9 +466,9 @@ const VistaVendedor = ({ vendedorData = null }) => {
               <button style={{
                 background: '#f0f0f0',
                 border: 'none',
-                padding: 'var(--spacing-sm) var(--spacing-lg)',
+                padding: 'var(--spacing-xs) var(--spacing-md)',
                 borderRadius: 'var(--radius-xl)',
-                fontSize: '0.8rem',
+                fontSize: '0.75rem',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -479,9 +483,9 @@ const VistaVendedor = ({ vendedorData = null }) => {
             <button style={{
               background: '#f0f0f0',
               border: 'none',
-              padding: 'var(--spacing-sm) var(--spacing-lg)',
+              padding: 'var(--spacing-xs) var(--spacing-md)',
               borderRadius: 'var(--radius-xl)',
-              fontSize: '0.8rem',
+              fontSize: '0.75rem',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -497,7 +501,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
           {/* Stats Card */}
           <div style={{
             backgroundColor: 'var(--surface)',
-            padding: 'var(--spacing-xl)',
+            padding: 'var(--spacing-lg)',
             borderRadius: 'var(--radius-xl)',
             boxShadow: '0 2px 10px var(--shadow)'
           }}>
@@ -511,7 +515,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
             <div style={{
               display: 'grid',
               gridTemplateColumns: '1fr 1fr',
-              gap: '1rem',
+              gap: 'var(--spacing-lg)',
               textAlign: 'center'
             }}>
               <div style={{
@@ -520,13 +524,13 @@ const VistaVendedor = ({ vendedorData = null }) => {
                 borderRadius: 'var(--radius-md)'
               }}>
                 <div style={{
-                  fontSize: '1.5rem',
+                  fontSize: '1.3rem',
                   fontWeight: 'bold',
                   color: 'var(--primary)',
                   marginBottom: '0.25rem'
                 }}>12</div>
                 <div style={{
-                  fontSize: '0.8rem',
+                  fontSize: '0.75rem',
                   color: 'var(--text-secondary)'
                 }}>Ventas</div>
               </div>
@@ -537,13 +541,13 @@ const VistaVendedor = ({ vendedorData = null }) => {
                 borderRadius: 'var(--radius-md)'
               }}>
                 <div style={{
-                  fontSize: '1.5rem',
+                  fontSize: '1.3rem',
                   fontWeight: 'bold',
                   color: 'var(--secondary)',
                   marginBottom: '0.25rem'
                 }}>$85K</div>
                 <div style={{
-                  fontSize: '0.8rem',
+                  fontSize: '0.75rem',
                   color: 'var(--text-secondary)'
                 }}>Ingresos</div>
               </div>
@@ -554,13 +558,13 @@ const VistaVendedor = ({ vendedorData = null }) => {
                 borderRadius: 'var(--radius-md)'
               }}>
                 <div style={{
-                  fontSize: '1.5rem',
+                  fontSize: '1.3rem',
                   fontWeight: 'bold',
                   color: 'var(--accent)',
                   marginBottom: '0.25rem'
                 }}>8</div>
                 <div style={{
-                  fontSize: '0.8rem',
+                  fontSize: '0.75rem',
                   color: 'var(--text-secondary)'
                 }}>Clientes</div>
               </div>
@@ -571,21 +575,21 @@ const VistaVendedor = ({ vendedorData = null }) => {
                 borderRadius: 'var(--radius-md)'
               }}>
                 <div style={{
-                  fontSize: '1.5rem',
+                  fontSize: '1.3rem',
                   fontWeight: 'bold',
                   color: 'var(--primary)',
                   marginBottom: '0.25rem'
                 }}>4.8</div>
                 <div style={{
-                  fontSize: '0.8rem',
+                  fontSize: '0.75rem',
                   color: 'var(--text-secondary)'
                 }}>Rating</div>
               </div>
             </div>
           </div>
         </div>
-      </main>
-
+        </main>
+      </div>
       {/* Chat Toggle Button */}
       <button
         onClick={() => setChatOpen(!isChatOpen)}
@@ -596,9 +600,9 @@ const VistaVendedor = ({ vendedorData = null }) => {
           background: 'var(--accent)',
           color: '#fff',
           border: 'none',
-          borderRadius: 'var(--radius-full)',
-          width: '60px',
-          height: '60px',
+          borderRadius: '50%',
+          width: '50px',
+          height: '50px',
           fontSize: '24px',
           cursor: 'pointer',
           boxShadow: '0 4px 10px var(--shadow)',
@@ -616,10 +620,10 @@ const VistaVendedor = ({ vendedorData = null }) => {
       {isChatOpen && (
         <div style={{
           position: 'fixed',
-          bottom: '90px',
+          bottom: '80px',
           right: '20px',
-          width: '350px',
-          height: '500px',
+          width: '320px',
+          height: '450px',
           backgroundColor: 'var(--surface)',
           borderRadius: 'var(--radius-xl)',
           boxShadow: '0 4px 12px var(--shadow-hover)',
@@ -754,12 +758,11 @@ const VistaVendedor = ({ vendedorData = null }) => {
         padding: 'var(--spacing-2xl)',
         backgroundColor: 'var(--secondary)',
         color: '#fff',
-        marginTop: 'var(--spacing-3xl)',
-        borderRadius: 'var(--radius-xl)'
+        marginTop: 'var(--spacing-3xl)'
       }}>
         <p style={{ margin: 0 }}>2025 UrbanStand. Todos los derechos reservados.</p>
       </footer>
-    </div>
+    </>
   );
 };
 

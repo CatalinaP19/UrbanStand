@@ -36,6 +36,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 // Importar rutas
 const authRoutes = require('./routes/auth');
 const authEntidadRoutes = require('./routes/authEntidad');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 // Rutas de vendedores
 app.use('/api/auth', authRoutes);
@@ -43,6 +44,8 @@ app.use('/api/vendedores', authRoutes); // Mantener compatibilidad si ya usas es
 
 // Rutas de entidades gubernamentales
 app.use('/api/entidad', authEntidadRoutes.router);
+// Rutas de dashboard/estadísticas
+app.use('/api/dashboard', dashboardRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {

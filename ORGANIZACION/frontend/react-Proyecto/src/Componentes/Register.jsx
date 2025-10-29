@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react'
-import Swal from "sweetalert2"
+import Swal from 'sweetalert2'
 import { useNavigate } from 'react-router-dom'
 
-export default function Register({ onBackToRoles,  onGoToLogin }) {
+export default function Register({ onBackToRoles, onGoToLogin }) {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
+  const [localidad, setLocalidad] = useState('')
   const [numDoc, setNumDoc] = useState('')
   const [direccion, setDireccion] = useState('')
   const [genero, setGenero] = useState('')
@@ -19,7 +20,8 @@ export default function Register({ onBackToRoles,  onGoToLogin }) {
   const [terms, setTerms] = useState(false)
   const [message, setMessage] = useState('')
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false)
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
+    useState(false)
   const [selectedProducts, setSelectedProducts] = useState([])
 
   const productsList = [
@@ -41,12 +43,35 @@ export default function Register({ onBackToRoles,  onGoToLogin }) {
     'S. Reparación de calzado',
     'S. Reparación de celulares y electrónicos',
     'S. Ambulantes de aseo y apoyo',
-    'Otros'
+    'Otros',
+  ]
+
+  const localidadesBogota = [
+    'Usaquén',
+    'Chapinero',
+    'Santa Fe',
+    'San Cristóbal',
+    'Usme',
+    'Tunjuelito',
+    'Bosa',
+    'Kennedy',
+    'Fontibón',
+    'Engativá',
+    'Suba',
+    'Barrios Unidos',
+    'Teusaquillo',
+    'Los Mártires',
+    'Antonio Nariño',
+    'Puente Aranda',
+    'La Candelaria',
+    'Rafael Uribe Uribe',
+    'Ciudad Bolívar',
+    'Sumapaz',
   ]
 
   const mostrarModal = () => {
     Swal.fire({
-      title: "Consentimiento de Tratamiento de Datos",
+      title: 'Consentimiento de Tratamiento de Datos',
       html: `
         <p style="text-align:justify;">
           Autorizo de manera libre, previa, expresa, voluntaria e informada a
@@ -62,23 +87,23 @@ export default function Register({ onBackToRoles,  onGoToLogin }) {
           Para más información, consulte nuestra <a href="../CONSENTIMIENTO INFORMADO PARA TRATAMIENTO DE DATOS PERSONALES URBANSTAND.pdf">Política de Privacidad</a>.
         </p>
       `,
-      icon: "info",
+      icon: 'info',
       showCancelButton: true,
-      confirmButtonText: "Acepto",
-      cancelButtonText: "No acepto",
-      confirmButtonColor: "#9a1e22",
-      cancelButtonColor: "#6c757d",
-      width: "600px"
+      confirmButtonText: 'Acepto',
+      cancelButtonText: 'No acepto',
+      confirmButtonColor: '#9a1e22',
+      cancelButtonColor: '#6c757d',
+      width: '600px',
     }).then((result) => {
       if (result.isConfirmed) {
-        Swal.fire("¡Consentimiento aceptado!", "", "success");
+        Swal.fire('¡Consentimiento aceptado!', '', 'success')
         // Aquí puedes guardar el consentimiento en tu backend o localStorage
       } else if (result.dismiss === Swal.DismissReason.cancel) {
-        Swal.fire("No aceptaste el consentimiento", "", "error");
+        Swal.fire('No aceptaste el consentimiento', '', 'error')
         // Aquí puedes redirigir o bloquear el registro
       }
-    });
-  };
+    })
+  }
 
   useEffect(() => {
     const style = document.createElement('style')
@@ -492,7 +517,7 @@ export default function Register({ onBackToRoles,  onGoToLogin }) {
       minLength: pass.length >= 8,
       hasUppercase: /[A-Z]/.test(pass),
       hasLowercase: /[a-z]/.test(pass),
-      hasNumber: /\d/.test(pass)
+      hasNumber: /\d/.test(pass),
     }
     return requirements
   }
@@ -505,7 +530,8 @@ export default function Register({ onBackToRoles,  onGoToLogin }) {
 
   // Validación de la dirección corregida
   const ValidateAddress = (address) => {
-    const direccionRegex = /^(Calle|Carrera|Transversal|Diagonal|Avenida|Av\.?|Cr|Cl)\s?\d+[A-Za-z]{0,2}(?:\s?Bis)?(?:\s?(Sur|Este|Oeste))?\s?#\d+[A-Za-z]?-?\d*(?:,\s?.+)?$/i
+    const direccionRegex =
+      /^(Calle|Carrera|Transversal|Diagonal|Avenida|Av\.?|Cr|Cl)\s?\d+[A-Za-z]{0,2}(?:\s?Bis)?(?:\s?(Sur|Este|Oeste))?\s?#\d+[A-Za-z]?-?\d*(?:,\s?.+)?$/i
     return direccionRegex.test(address)
   }
 
@@ -541,7 +567,9 @@ export default function Register({ onBackToRoles,  onGoToLogin }) {
     if (!ValidateAddress(direccion)) {
       errors.push('La dirección debe ser válida y compatible con Bogotá.')
     }
-
+    if (!localidad) {
+      errors.push('Debes seleccionar la localidad donde trabajas.')
+    }
     if (!vigencia) {
       errors.push('Debes elegir una opción de vigencia.')
     }
@@ -551,11 +579,15 @@ export default function Register({ onBackToRoles,  onGoToLogin }) {
     }
 
     if (selectedProducts.length === 0) {
-      errors.push('Debes seleccionar al menos una categoría de productos que ofreces.')
+      errors.push(
+        'Debes seleccionar al menos una categoría de productos que ofreces.'
+      )
     }
 
     if (!validatePhoneNumber(NumTel)) {
-      errors.push('El número telefónico debe ser válido y compatible con Colombia (formato: 3XXXXXXXXX).')
+      errors.push(
+        'El número telefónico debe ser válido y compatible con Colombia (formato: 3XXXXXXXXX).'
+      )
     }
 
     // Validación de contraseña mejorada
@@ -585,23 +617,27 @@ export default function Register({ onBackToRoles,  onGoToLogin }) {
       setMessage(errors.join(' '))
     } else {
       try {
-        const response = await fetch('http://localhost:3005/api/auth/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            firstName,
-            lastName,
-            email,
-            password,
-            numDoc,
-            NumTel,
-            TypeDoc,
-            genero,
-            selectedProducts,
-            direccion,
-            rivi,
-          })
-        })
+        const response = await fetch(
+          'http://localhost:3005/api/auth/register',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              firstName,
+              lastName,
+              email,
+              password,
+              numDoc,
+              NumTel,
+              TypeDoc,
+              genero,
+              selectedProducts,
+              direccion,
+              localidad,
+              rivi,
+            }),
+          }
+        )
         const data = await response.json()
 
         if (response.ok) {
@@ -610,7 +646,9 @@ export default function Register({ onBackToRoles,  onGoToLogin }) {
 
           // Guardar perfil mínimo en localStorage para personalizar luego del login
           try {
-            const existing = JSON.parse(localStorage.getItem('urbanstand_users') || '{}')
+            const existing = JSON.parse(
+              localStorage.getItem('urbanstand_users') || '{}'
+            )
             const key = (email || '').trim().toLowerCase()
             existing[key] = {
               role: 'vendedor',
@@ -631,9 +669,9 @@ export default function Register({ onBackToRoles,  onGoToLogin }) {
               setEmail('')
               setPassword('')
               setConfirmPassword('')
-
               setNumDoc('')
               setDireccion('')
+              setLocalidad('')
               setGenero('')
               setTypeDoc('CC')
               setRivi(null)
@@ -653,7 +691,9 @@ export default function Register({ onBackToRoles,  onGoToLogin }) {
         }
       } catch (error) {
         console.error('Error en registro:', error)
-        setMessage('Error en el registro. Por favor, inténtalo de nuevo más tarde.')
+        setMessage(
+          'Error en el registro. Por favor, inténtalo de nuevo más tarde.'
+        )
       }
     }
   }
@@ -665,7 +705,7 @@ export default function Register({ onBackToRoles,  onGoToLogin }) {
   const handleFileChange = (e) => {
     const file = e.target.files[0]
     if (file) {
-      setRivi(file.name)  // Solo guarda el nombre como string
+      setRivi(file.name) // Solo guarda el nombre como string
     }
   }
 
@@ -677,11 +717,11 @@ export default function Register({ onBackToRoles,  onGoToLogin }) {
     setIsConfirmPasswordVisible(!isConfirmPasswordVisible)
   }
 
- const goToLogin = () => {
-  if (onGoToLogin) {
-    onGoToLogin()
+  const goToLogin = () => {
+    if (onGoToLogin) {
+      onGoToLogin()
+    }
   }
-}
 
   const handleProductChange = (product, isChecked) => {
     if (isChecked) {
@@ -723,7 +763,7 @@ export default function Register({ onBackToRoles,  onGoToLogin }) {
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder='Primer nombre'
+                  placeholder="Primer nombre"
                   className="register-input"
                   required
                 />
@@ -735,7 +775,7 @@ export default function Register({ onBackToRoles,  onGoToLogin }) {
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder='Primer apellido'
+                  placeholder="Primer apellido"
                   className="register-input"
                   required
                 />
@@ -806,7 +846,7 @@ export default function Register({ onBackToRoles,  onGoToLogin }) {
                 value={numDoc}
                 onChange={(e) => setNumDoc(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder='Número de identificación'
+                placeholder="Número de identificación"
                 className="register-input"
                 required
               />
@@ -828,16 +868,37 @@ export default function Register({ onBackToRoles,  onGoToLogin }) {
 
             {/* Address Input */}
             <div className="register-input-group">
-              <label className="register-label">Dirección de su puesto de trabajo</label>
+              <label className="register-label">
+                Dirección de su puesto de trabajo
+              </label>
               <input
                 type="text"
                 value={direccion}
                 onChange={(e) => setDireccion(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder='Ej. Calle 100 #15-55, barrio Barrios Unidos'
+                placeholder="Ej. Calle 100 #15-55, barrio Barrios Unidos"
                 className="register-input"
                 required
               />
+            </div>
+
+            {/* Localidad Select */}
+            <div className="register-input-group">
+              <label className="register-label">Localidad donde trabaja</label>
+              <select
+                value={localidad}
+                onChange={(e) => setLocalidad(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className="register-input"
+                required
+              >
+                <option value="">Seleccione una localidad</option>
+                {localidadesBogota.map((loc, index) => (
+                  <option key={index} value={loc}>
+                    {loc}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Validity Input */}
@@ -908,7 +969,7 @@ export default function Register({ onBackToRoles,  onGoToLogin }) {
                 value={NumTel}
                 onChange={(e) => setNumTel(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder='Ej. 3123456789'
+                placeholder="Ej. 3123456789"
                 className="register-input"
                 required
               />
@@ -922,7 +983,7 @@ export default function Register({ onBackToRoles,  onGoToLogin }) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder='email@correo.com'
+                placeholder="email@correo.com"
                 className="register-input"
                 required
               />
@@ -937,7 +998,7 @@ export default function Register({ onBackToRoles,  onGoToLogin }) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder='Ej. MiContra123'
+                  placeholder="Ej. MiContra123"
                   className="register-password-input"
                   required
                 />
@@ -973,17 +1034,29 @@ export default function Register({ onBackToRoles,  onGoToLogin }) {
               </div>
               {password && (
                 <div className="password-requirements">
-                  <div className={`password-requirement ${passwordRequirements.minLength ? 'valid' : 'invalid'}`}>
-                    {passwordRequirements.minLength ? '✓' : '✗'} Mínimo 8 caracteres
+                  <div
+                    className={`password-requirement ${passwordRequirements.minLength ? 'valid' : 'invalid'}`}
+                  >
+                    {passwordRequirements.minLength ? '✓' : '✗'} Mínimo 8
+                    caracteres
                   </div>
-                  <div className={`password-requirement ${passwordRequirements.hasUppercase ? 'valid' : 'invalid'}`}>
-                    {passwordRequirements.hasUppercase ? '✓' : '✗'} Al menos una letra mayúscula
+                  <div
+                    className={`password-requirement ${passwordRequirements.hasUppercase ? 'valid' : 'invalid'}`}
+                  >
+                    {passwordRequirements.hasUppercase ? '✓' : '✗'} Al menos una
+                    letra mayúscula
                   </div>
-                  <div className={`password-requirement ${passwordRequirements.hasLowercase ? 'valid' : 'invalid'}`}>
-                    {passwordRequirements.hasLowercase ? '✓' : '✗'} Al menos una letra minúscula
+                  <div
+                    className={`password-requirement ${passwordRequirements.hasLowercase ? 'valid' : 'invalid'}`}
+                  >
+                    {passwordRequirements.hasLowercase ? '✓' : '✗'} Al menos una
+                    letra minúscula
                   </div>
-                  <div className={`password-requirement ${passwordRequirements.hasNumber ? 'valid' : 'invalid'}`}>
-                    {passwordRequirements.hasNumber ? '✓' : '✗'} Al menos un número
+                  <div
+                    className={`password-requirement ${passwordRequirements.hasNumber ? 'valid' : 'invalid'}`}
+                  >
+                    {passwordRequirements.hasNumber ? '✓' : '✗'} Al menos un
+                    número
                   </div>
                 </div>
               )}
@@ -998,7 +1071,7 @@ export default function Register({ onBackToRoles,  onGoToLogin }) {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder='Confirmar contraseña'
+                  placeholder="Confirmar contraseña"
                   className="register-password-input"
                   required
                 />
@@ -1046,7 +1119,9 @@ export default function Register({ onBackToRoles,  onGoToLogin }) {
                 />
                 <p className="register-checkbox-text">
                   He leído y acepto los
-                  <a href="../POLÍTICA DE PRIVACIDAD Y TÉRMINOS Y CONDICIONES URBANSTAND.pdf"> Términos y condiciones
+                  <a href="../POLÍTICA DE PRIVACIDAD Y TÉRMINOS Y CONDICIONES URBANSTAND.pdf">
+                    {' '}
+                    Términos y condiciones
                   </a>
                 </p>
               </label>
@@ -1058,13 +1133,21 @@ export default function Register({ onBackToRoles,  onGoToLogin }) {
             </div>
 
             {/* Submit */}
-            <button type="button" onClick={handleSubmit} className="register-submit-button">
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="register-submit-button"
+            >
               Registrarse
             </button>
 
             {/* Go to Login */}
             <div className="register-toggle-container">
-              <button type="button" onClick={goToLogin} className="register-toggle-button">
+              <button
+                type="button"
+                onClick={goToLogin}
+                className="register-toggle-button"
+              >
                 ¿Ya tienes cuenta? Inicia sesión
               </button>
             </div>
@@ -1072,10 +1155,11 @@ export default function Register({ onBackToRoles,  onGoToLogin }) {
             {/* Message */}
             {message && (
               <div
-                className={`register-message ${message.includes('exitoso')
-                  ? 'register-message-success'
-                  : 'register-message-error'
-                  }`}
+                className={`register-message ${
+                  message.includes('exitoso')
+                    ? 'register-message-success'
+                    : 'register-message-error'
+                }`}
               >
                 {message}
               </div>

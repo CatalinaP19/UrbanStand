@@ -3,12 +3,7 @@ import { useNavigate } from 'react-router-dom'
 
 export default function Register_roles({ 
   onRoleSelect,
-  currentView = 'register_roles',
-  setCurrentView = () => {},
-  isLoggedIn = false,
-  userRole = '',
-  userData = null,
-  onLogout = () => {}
+
 }) {
 
   // Función para manejar la selección de rol
