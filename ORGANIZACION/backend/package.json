@@ -6,6 +6,10 @@
   "scripts": {
     "start-backend": "node server.js",
     "start-chat": "nodemon serverChat.js",
+    "poblar-localidades": "node scripts/poblarLocalidades.js",
+    "poblar-vendedores": "node scripts/poblarVendedores.js",
+    "poblar-vendedores-limpiar": "node scripts/poblarVendedores.js --limpiar",
+    "poblar-todo": "node scripts/poblarLocalidades.js && node scripts/poblarVendedores.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
