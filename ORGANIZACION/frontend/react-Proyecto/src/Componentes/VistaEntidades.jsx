@@ -602,6 +602,18 @@ export default function UrbanStandDashboard() {
               placeholder="DD/MM/AAAA"
             />
           </div>
+
+          <div className="dashboard-filter-group">
+            <label className="dashboard-filter-label">Acciones</label>
+            <button 
+              className="dashboard-filter-select"
+              onClick={() => cargarEstadisticas()}
+              style={{ cursor: 'pointer', fontWeight: '600' }}
+            >
+              🔄 Actualizar datos
+            </button>
+          </div>
+          
         </div>
 
         {loading && (

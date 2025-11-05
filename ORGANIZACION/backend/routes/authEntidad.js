@@ -289,6 +289,42 @@ router.post('/login', [
   }
 });
 
+// VALIDAR TOKEN DE ENTIDAD (RUTA PROTEGIDA)
+router.get('/validate', authenticateEntidadToken, async (req, res) => {
+  try {
+    const entidad = await EntidadGubernamental.findById(req.entidad.entidadId)
+      .select('estado_cuenta emailVerificado');
+
+    if (!entidad) {
+      return res.status(404).json({
+        valid: false,
+        message: 'Entidad no encontrada'
+      });
+    }
+
+    if (entidad.estado_cuenta !== 'activo') {
+      return res.status(403).json({
+        valid: false,
+        message: 'Cuenta inactiva o suspendida'
+      });
+    }
+
+    res.json({
+      valid: true,
+      entidad: {
+        id: entidad._id,
+        role: 'entidad'
+      }
+    });
+  } catch (error) {
+    console.error('Error validando token:', error);
+    res.status(500).json({
+      valid: false,
+      message: 'Error al validar token'
+    });
+  }
+});
+
 // OBTENER PERFIL DE ENTIDAD (RUTA PROTEGIDA)
 router.get('/profile', authenticateEntidadToken, async (req, res) => {
   try {

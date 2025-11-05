@@ -37,6 +37,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 const authRoutes = require('./routes/auth');
 const authEntidadRoutes = require('./routes/authEntidad');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const emailRoutes = require('./routes/emailRoutes');
 
 // Rutas de vendedores
 app.use('/api/auth', authRoutes);
@@ -46,11 +47,13 @@ app.use('/api/vendedores', authRoutes); // Mantener compatibilidad si ya usas es
 app.use('/api/entidad', authEntidadRoutes.router);
 // Rutas de dashboard/estadísticas
 app.use('/api/dashboard', dashboardRoutes);
+// Rutas de email (confirmación y recuperación)
+app.use('/api/email', emailRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
   res.json({ 
-    message: 'UrbanStand API funcionando correctamente! 🎉',
+    message: 'UrbanStand API funcionando correctamente! ',
     version: '1.0.0',
     timestamp: new Date().toISOString(),
     endpoints: {

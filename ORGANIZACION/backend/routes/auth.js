@@ -301,6 +301,43 @@ router.post(
   }
 );
 
+// VALIDAR TOKEN (RUTA PROTEGIDA)
+router.get('/validate', authenticateToken, async (req, res) => {
+  try {
+    const vendedor = await Vendedor.findById(req.vendedor.vendedorId)
+      .select('vigencia emailVerificado');
+
+    if (!vendedor) {
+      return res.status(404).json({
+        valid: false,
+        message: 'Vendedor no encontrado'
+      });
+    }
+
+    // Verificar estado de cuenta
+    if (vendedor.vigencia !== 'activo') {
+      return res.status(403).json({
+        valid: false,
+        message: 'Cuenta inactiva o suspendida'
+      });
+    }
+
+    res.json({
+      valid: true,
+      vendedor: {
+        id: vendedor._id,
+        role: 'vendedor'
+      }
+    });
+  } catch (error) {
+    console.error('Error validando token:', error);
+    res.status(500).json({
+      valid: false,
+      message: 'Error al validar token'
+    });
+  }
+});
+
 // OBTENER PERFIL (RUTA PROTEGIDA)
 router.get("/profile", authenticateToken, async (req, res) => {
   try {

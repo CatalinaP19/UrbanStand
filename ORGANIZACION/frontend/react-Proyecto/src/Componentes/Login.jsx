@@ -67,16 +67,18 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
               localStorage.setItem('urbanstand_entidades', JSON.stringify(allEntidades));
             } catch (e) { /* ignore */ }
 
-            try {
-              localStorage.setItem('urbanstand_current_user', JSON.stringify({
-                role: 'entidad',
-                email,
-                nomEnti: entidadData.nomEnti,
-              }));
-            } catch (_) { /* ignore */ }
-
             // Usar el contexto de autenticación
-            authLogin(entidadData, loginResp.token, 'entidad');
+            const entidadUserData = {
+              role: 'entidad',
+              email,
+              nomEnti: entidadData.nomEnti,
+            };
+            
+            try {
+              localStorage.setItem('urbanstand_current_user', JSON.stringify(entidadUserData));
+            } catch (_) { /* ignore */ }
+            
+            authLogin(loginResp.token, entidadUserData);
 
             setMessage("Inicio de sesión exitoso.");
             if (typeof onSuccessfulLogin === 'function') {
@@ -154,7 +156,14 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
 
           // Usar el contexto de autenticación
           const token = localStorage.getItem('token');
-          authLogin(vendorData, token, 'vendedor');
+          const vendedorUserData = {
+            role: 'vendedor',
+            email,
+            firstName: vendorData?.firstName,
+            lastName: vendorData?.lastName,
+            genero: vendorData?.genero,
+          };
+          authLogin(token, vendedorUserData);
 
           setMessage("Inicio de sesión exitoso.");
           if (typeof onSuccessfulLogin === 'function') {

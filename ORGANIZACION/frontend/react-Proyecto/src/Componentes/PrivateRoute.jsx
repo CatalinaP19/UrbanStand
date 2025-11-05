@@ -1,28 +1,80 @@
-// src/Componentes/PrivateRoute.jsx
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContex';
+import { Navigate, useLocation } from 'react-router-dom'
+import { useAuth } from '../context/AuthContex'
+import { useEffect, useState } from 'react'
 
 const PrivateRoute = ({ children, allowedRoles }) => {
-  const { isAuthenticated, getUserRole } = useAuth();
-  
-  // Si no está autenticado, redirigir al login
-  if (!isAuthenticated()) {
-    return <Navigate to="/login" replace />;
+  const { isAuthenticated, getUserRole, validateToken } = useAuth()
+  const location = useLocation()
+  const [isValidating, setIsValidating] = useState(true)
+  const [isValid, setIsValid] = useState(false)
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        // Validar token en el servidor
+        const valid = await validateToken()
+        setIsValid(valid)
+      } catch (error) {
+        console.error('Error validando token:', error)
+        setIsValid(false)
+      } finally {
+        setIsValidating(false)
+      }
+    }
+
+    checkAuth()
+  }, [validateToken])
+
+
+  // Mostrar loading mientras valida
+  if (isValidating) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '100vh',
+          backgroundColor: '#faf3e0',
+        }}
+      >
+        <div
+          style={{
+            fontSize: '1.25rem',
+            color: '#9a1e22',
+            fontWeight: '600',
+          }}
+        >
+          Validando acceso...
+        </div>
+      </div>
+    )
   }
-  
-  // Si hay roles permitidos, verificar que el usuario tenga el rol correcto
+
+  // Si no está autenticado o el token no es válido, redirigir al login
+  if (!isAuthenticated() || !isValid) {
+    // Guardar la ubicación intentada para redirigir después del login
+    return <Navigate to="/login" state={{ from: location }} replace />
+  }
+
+  // Verificar roles permitidos
   if (allowedRoles && allowedRoles.length > 0) {
-    const userRole = getUserRole();
+    const userRole = getUserRole()
+
     if (!allowedRoles.includes(userRole)) {
-      // Si no tiene el rol correcto, redirigir a su página correspondiente
-      if (userRole === 'vendedor') return <Navigate to="/vendedor" replace />;
-      if (userRole === 'entidad') return <Navigate to="/entidades" replace />;
-      if (userRole === 'cliente') return <Navigate to="/cliente" replace />;
-      return <Navigate to="/" replace />;
+      // Redirigir al dashboard correspondiente según el rol
+      const roleDashboards = {
+        vendedor: '/vendedor',
+        entidad: '/entidades',
+        cliente: '/cliente',
+      }
+
+      const dashboard = roleDashboards[userRole] || '/'
+      return <Navigate to={dashboard} replace />
     }
   }
-  
-  return children;
-};
 
-export default PrivateRoute;
+  return children
+}
+
+export default PrivateRoute

@@ -156,6 +156,30 @@ const VendedorSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'EntidadGubernamental',
     required: false
+  },
+
+  // Campos para confirmación de email
+  emailVerificado: {
+    type: Boolean,
+    default: false
+  },
+  tokenConfirmacion: {
+    type: String,
+    default: null
+  },
+  tokenConfirmacionExpira: {
+    type: Date,
+    default: null
+  },
+
+  // Campos para recuperación de contraseña
+  tokenRecuperacion: {
+    type: String,
+    default: null
+  },
+  tokenRecuperacionExpira: {
+    type: Date,
+    default: null
   }
 }, {
   timestamps: true,

@@ -13,6 +13,7 @@ import Chat from './Componentes/ChatTemplate.jsx'
 import VistaVendedor from './Componentes/VistaVendedor.jsx'
 import VistaEntidades from './Componentes/VistaEntidades.jsx'
 import VistaCliente from './Componentes/VistaCliente.jsx'
+import PerfilVendedor from './Componentes/PerfilVendedor.jsx'
 import Layout from './Layout.jsx'
 import { AuthProvider } from './context/AuthContex.jsx'
 import PrivateRoute from './Componentes/PrivateRoute.jsx'
@@ -48,6 +49,14 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             }
           />
           <Route
+            path="/vendedor/perfil"
+            element={
+              <PrivateRoute allowedRoles={['vendedor']}>
+                <PerfilVendedor />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/entidades"
             element={
               <PrivateRoute allowedRoles={['entidad']}>
@@ -57,7 +66,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           />
           <Route
             path="/cliente"
-            element={<VistaCliente />}
+            element={
+              <PrivateRoute allowedRoles={['cliente']}>
+                <VistaCliente />
+              </PrivateRoute>
+            }
           />
 
           {/* Ruta por defecto */}
