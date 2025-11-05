@@ -1,22 +1,27 @@
 import React, { useState, useEffect } from 'react'
+import Swal from 'sweetalert2'
+import { useNavigate } from 'react-router-dom'
 
-export default function Register() {
+export default function Register({ onBackToRoles, onGoToLogin }) {
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
+  const [localidad, setLocalidad] = useState('')
   const [numDoc, setNumDoc] = useState('')
+  const [direccion, setDireccion] = useState('')
+  const [genero, setGenero] = useState('')
   const [TypeDoc, setTypeDoc] = useState('CC')
-  const [rivi, setRivi] = useState(null) // Cambiar a null para archivos
+  const [rivi, setRivi] = useState(null)
   const [vigencia, setVigencia] = useState('')
   const [NumTel, setNumTel] = useState('')
   const [terms, setTerms] = useState(false)
   const [message, setMessage] = useState('')
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false)
-  
-  // Estado para manejar los productos seleccionados
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
+    useState(false)
   const [selectedProducts, setSelectedProducts] = useState([])
 
   const productsList = [
@@ -38,54 +43,79 @@ export default function Register() {
     'S. Reparación de calzado',
     'S. Reparación de celulares y electrónicos',
     'S. Ambulantes de aseo y apoyo',
+    'Otros',
   ]
+
+  const localidadesBogota = [
+    'Usaquén',
+    'Chapinero',
+    'Santa Fe',
+    'San Cristóbal',
+    'Usme',
+    'Tunjuelito',
+    'Bosa',
+    'Kennedy',
+    'Fontibón',
+    'Engativá',
+    'Suba',
+    'Barrios Unidos',
+    'Teusaquillo',
+    'Los Mártires',
+    'Antonio Nariño',
+    'Puente Aranda',
+    'La Candelaria',
+    'Rafael Uribe Uribe',
+    'Ciudad Bolívar',
+    'Sumapaz',
+  ]
+
+  const mostrarModal = () => {
+    Swal.fire({
+      title: 'Consentimiento de Tratamiento de Datos',
+      html: `
+        <p style="text-align:justify;">
+          Autorizo de manera libre, previa, expresa, voluntaria e informada a
+          <strong>UrbanStand</strong> para que realice el tratamiento de mis datos
+          personales conforme a lo dispuesto en la Ley 1581 de 2012 y el Decreto 1377 de 2013.
+        </p>
+        <p style="text-align:justify;">
+          Entiendo que mis datos podrán ser utilizados únicamente para las finalidades
+          relacionadas con la prestación de los servicios de la plataforma, y que tengo derecho
+          a conocer, actualizar, rectificar o suprimir mis datos.
+        </p>
+        <p style="text-align:justify;">
+          Para más información, consulte nuestra <a href="../CONSENTIMIENTO INFORMADO PARA TRATAMIENTO DE DATOS PERSONALES URBANSTAND.pdf">Política de Privacidad</a>.
+        </p>
+      `,
+      icon: 'info',
+      showCancelButton: true,
+      confirmButtonText: 'Acepto',
+      cancelButtonText: 'No acepto',
+      confirmButtonColor: '#9a1e22',
+      cancelButtonColor: '#6c757d',
+      width: '600px',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire('¡Consentimiento aceptado!', '', 'success')
+        // Aquí puedes guardar el consentimiento en tu backend o localStorage
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        Swal.fire('No aceptaste el consentimiento', '', 'error')
+        // Aquí puedes redirigir o bloquear el registro
+      }
+    })
+  }
 
   useEffect(() => {
     const style = document.createElement('style')
     style.textContent = `
       .register-container {
         width: 100vw;
-        height: 100vh;
         background: #faf3e0;
         font-family: system-ui, -apple-system, sans-serif;
         overflow-x: hidden;
         margin: 0;
         padding: 0;
-      }
-      
-      .register-header {
-        background: #faf3e0;
-        backdrop-filter: blur(10px);
-        padding: 1rem 2rem;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        position: sticky;
-        top: 0;
-        z-index: 50;
-      }
-
-      .register-header-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        max-width: 1200px;
-        margin: 0 auto;
-      }
-
-      .register-home-button {
-        background: #9a1e22;
-        border: 2px solid #9a1e22;
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
-        cursor: pointer;
-        font-size: 0.9rem;
-        font-weight: 500;
-        transition: all 0.2s ease;
-      }
-
-      .register-home-button:hover {
-        background: transparent;
-        color: #9a1e22;
+        min-height: 100vh;
       }
 
       .register-content {
@@ -93,9 +123,12 @@ export default function Register() {
         justify-content: center;
         align-items: center;
         padding: 2rem;
-        min-height: calc(100vh - 80px);
+        min-height: 100vh;
       }
 
+        
+            
+      
       .register-box {
         width: 100%;
         max-width: 32rem;
@@ -139,6 +172,13 @@ export default function Register() {
         font-weight: 600;
         color: #374151;
         font-size: 0.9rem;
+        position: relative;
+      }
+
+      .register-label::after {
+        content: ' *';
+        color: #dc2626;
+        font-weight: bold;
       }
 
       .register-input {
@@ -212,6 +252,7 @@ export default function Register() {
         display: flex;
         gap: 1rem;
         margin-top: 0.5rem;
+        flex-wrap: wrap;
       }
 
       .register-radio-label {
@@ -331,16 +372,6 @@ export default function Register() {
         stroke-linejoin: round;
       }
 
-      .logo {
-        font-size: 28px;
-        font-weight: bold;
-        color: #f97316;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      /* ===== ESTILOS PARA PRODUCTOS ===== */
       .register-products-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -401,6 +432,49 @@ export default function Register() {
         text-align: right;
       }
 
+      .password-requirements {
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        background: #f9f9f9;
+        border-radius: 0.25rem;
+        font-size: 0.8rem;
+        color: #666;
+      }
+
+      .password-requirement {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        margin: 0.25rem 0;
+      }
+
+      .password-requirement.valid {
+        color: #16a34a;
+      }
+
+      .password-requirement.invalid {
+        color: #dc2626;
+      }
+
+      .back-button {
+        background: #6b7280;
+        border: 2px solid #6b7280;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        margin-bottom: 1.5rem;
+        width: 100%;
+      }
+
+      .back-button:hover {
+        background: transparent;
+        color: #6b7280;
+      }
+
       @media (max-width: 768px) {
         .register-content {
           padding: 1rem;
@@ -408,15 +482,6 @@ export default function Register() {
         
         .register-box {
           padding: 1.5rem;
-        }
-        
-        .logo img {
-          height: 40px;
-          width: auto;
-        }
-        
-        .register-header-content {
-          padding: 0 1rem;
         }
 
         .register-name-group {
@@ -446,39 +511,190 @@ export default function Register() {
     }
   }, [])
 
-  const handleSubmit = () => {
-    let errors = ''
+  // Validación de contraseña mejorada
+  const validatePassword = (pass) => {
+    const requirements = {
+      minLength: pass.length >= 8,
+      hasUppercase: /[A-Z]/.test(pass),
+      hasLowercase: /[a-z]/.test(pass),
+      hasNumber: /\d/.test(pass),
+    }
+    return requirements
+  }
+
+  // Validación de teléfono colombiano
+  const validatePhoneNumber = (phone) => {
+    const colombianPhoneRegex = /^3\d{9}$/
+    return colombianPhoneRegex.test(phone.replace(/\s/g, ''))
+  }
+
+  // Validación de la dirección corregida
+  const ValidateAddress = (address) => {
+    const direccionRegex =
+      /^(Calle|Carrera|Transversal|Diagonal|Avenida|Av\.?|Cr|Cl)\s?\d+[A-Za-z]{0,2}(?:\s?Bis)?(?:\s?(Sur|Este|Oeste))?\s?#\d+[A-Za-z]?-?\d*(?:,\s?.+)?$/i
+    return direccionRegex.test(address)
+  }
+
+  const handleSubmit = async () => {
+    let errors = []
     const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/
 
-    if (!firstName.trim()) errors += 'El nombre es obligatorio. '
-    if (!lastName.trim()) errors += 'El apellido es obligatorio. '
-    if (numDoc.length < 6 || numDoc.length > 10)
-      errors += 'El número de documento debe tener entre 6 y 10 dígitos. '
-    if (!rivi) errors += 'La imagen es requerida. '
-    if (!emailRegex.test(email)) errors += 'El email no es válido. '
-    if (!vigencia) errors += 'Debes elegir una opción de vigencia. '
-    if (selectedProducts.length === 0) errors += 'Debes seleccionar al menos una categoría de productos que ofreces. '
-    if (!NumTel) errors += 'El número telefónico es obligatorio. '
-    if (password.length < 8)
-      errors += 'La contraseña debe tener al menos 8 caracteres. '
-    if (password !== confirmPassword) errors += 'Las contraseñas no coinciden. '
-    if (!terms) errors += 'Debes aceptar los términos y condiciones. '
+    // Validaciones
+    if (!firstName.trim()) {
+      errors.push('El nombre es obligatorio.')
+    } else if (firstName.length > 30) {
+      errors.push('Su nombre no debe tener más de 30 caracteres.')
+    }
 
-    if (errors) {
-      setMessage(errors)
+    if (!lastName.trim()) {
+      errors.push('El apellido es obligatorio.')
+    } else if (lastName.length > 30) {
+      errors.push('Su apellido no debe tener más de 30 caracteres.')
+    }
+
+    if (numDoc.length < 6 || numDoc.length > 10) {
+      errors.push('El número de documento debe tener entre 6 y 10 dígitos.')
+    }
+
+    if (!rivi) {
+      errors.push('La imagen del RIVI Y HEMI es requerida.')
+    }
+
+    if (!emailRegex.test(email)) {
+      errors.push('El email no es válido.')
+    }
+
+    if (!ValidateAddress(direccion)) {
+      errors.push('La dirección debe ser válida y compatible con Bogotá.')
+    }
+    if (!localidad) {
+      errors.push('Debes seleccionar la localidad donde trabajas.')
+    }
+    if (!vigencia) {
+      errors.push('Debes elegir una opción de vigencia.')
+    }
+
+    if (!genero) {
+      errors.push('Debes elegir una opción de género.')
+    }
+
+    if (selectedProducts.length === 0) {
+      errors.push(
+        'Debes seleccionar al menos una categoría de productos que ofreces.'
+      )
+    }
+
+    if (!validatePhoneNumber(NumTel)) {
+      errors.push(
+        'El número telefónico debe ser válido y compatible con Colombia (formato: 3XXXXXXXXX).'
+      )
+    }
+
+    // Validación de contraseña mejorada
+    const passwordRequirements = validatePassword(password)
+    if (!passwordRequirements.minLength) {
+      errors.push('La contraseña debe tener al menos 8 caracteres.')
+    }
+    if (!passwordRequirements.hasUppercase) {
+      errors.push('La contraseña debe contener al menos una letra mayúscula.')
+    }
+    if (!passwordRequirements.hasLowercase) {
+      errors.push('La contraseña debe contener al menos una letra minúscula.')
+    }
+    if (!passwordRequirements.hasNumber) {
+      errors.push('La contraseña debe contener al menos un número.')
+    }
+
+    if (password !== confirmPassword) {
+      errors.push('Las contraseñas no coinciden.')
+    }
+
+    if (!terms) {
+      errors.push('Debes aceptar los términos y condiciones.')
+    }
+
+    if (errors.length > 0) {
+      setMessage(errors.join(' '))
     } else {
-      setMessage('¡Registro exitoso! Bienvenido a UrbanStand.')
-      console.log('Datos del registro:', {
-        firstName,
-        lastName,
-        TypeDoc,
-        numDoc,
-        email,
-        vigencia,
-        rivi,
-        selectedProducts,
-        NumTel
-      })
+      try {
+        const response = await fetch(
+          'http://localhost:3005/api/auth/register',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              firstName,
+              lastName,
+              email,
+              password,
+              numDoc,
+              NumTel,
+              TypeDoc,
+              genero,
+              selectedProducts,
+              direccion,
+              localidad,
+              rivi,
+            }),
+          }
+        )
+        const data = await response.json()
+
+        if (response.ok) {
+          // Éxito
+          setMessage('¡Registro exitoso! Redirigiendo al login...')
+
+          // Guardar perfil mínimo en localStorage para personalizar luego del login
+          try {
+            const existing = JSON.parse(
+              localStorage.getItem('urbanstand_users') || '{}'
+            )
+            const key = (email || '').trim().toLowerCase()
+            existing[key] = {
+              role: 'vendedor',
+              firstName,
+              lastName,
+              genero,
+            }
+            localStorage.setItem('urbanstand_users', JSON.stringify(existing))
+          } catch (e) {
+            console.error('Error guardando perfil en localStorage:', e)
+          }
+
+          // Limpiar formulario y redirigir después de 2 segundos
+          setTimeout(() => {
+            if (onGoToLogin) {
+              setFirstName('')
+              setLastName('')
+              setEmail('')
+              setPassword('')
+              setConfirmPassword('')
+              setNumDoc('')
+              setDireccion('')
+              setLocalidad('')
+              setGenero('')
+              setTypeDoc('CC')
+              setRivi(null)
+              setVigencia('')
+              setNumTel('')
+              setTerms(false)
+              setSelectedProducts([])
+              setMessage('')
+              onGoToLogin()
+            } else {
+              navigate('/login')
+            }
+          }, 2000)
+        } else {
+          // Error del servidor
+          setMessage(data.message || data.error || 'Error en el registro')
+        }
+      } catch (error) {
+        console.error('Error en registro:', error)
+        setMessage(
+          'Error en el registro. Por favor, inténtalo de nuevo más tarde.'
+        )
+      }
     }
   }
 
@@ -489,7 +705,7 @@ export default function Register() {
   const handleFileChange = (e) => {
     const file = e.target.files[0]
     if (file) {
-      setRivi(file) // Guardar el archivo completo
+      setRivi(file.name) // Solo guarda el nombre como string
     }
   }
 
@@ -501,12 +717,10 @@ export default function Register() {
     setIsConfirmPasswordVisible(!isConfirmPasswordVisible)
   }
 
-  const goHome = () => {
-    alert('Redirigiendo al inicio…')
-  }
-
   const goToLogin = () => {
-    alert('Redirigiendo a inicio de sesión…')
+    if (onGoToLogin) {
+      onGoToLogin()
+    }
   }
 
   const handleProductChange = (product, isChecked) => {
@@ -517,25 +731,27 @@ export default function Register() {
     }
   }
 
+  const passwordRequirements = validatePassword(password)
+
   return (
     <div className="register-container">
-      {/* Header */}
-      <header className="register-header">
-        <div className="register-header-content">
-          <div className="logo">
-            <img className="logo-img" src="../img/logo.png" alt="logo" />
-            UrbanStand
-          </div>
-          <button onClick={goHome} className="register-home-button">
-            Volver al inicio
-          </button>
-        </div>
-      </header>
-
-      {/* Register Container */}
       <div className="register-content">
         <div className="register-box">
-          <h2 className="register-title">Registrarse</h2>
+          {/* Botón de regreso */}
+          <button
+            onClick={() => {
+              if (typeof onBackToRoles === 'function') {
+                onBackToRoles()
+              } else {
+                navigate('/register-roles')
+              }
+            }}
+            className="back-button"
+          >
+            ← Volver a selección de roles
+          </button>
+
+          <h2 className="register-title">Vendedor, ¡Regístrate!</h2>
 
           <div className="register-form">
             {/* Name Inputs */}
@@ -547,6 +763,7 @@ export default function Register() {
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   onKeyPress={handleKeyPress}
+                  placeholder="Primer nombre"
                   className="register-input"
                   required
                 />
@@ -558,9 +775,50 @@ export default function Register() {
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   onKeyPress={handleKeyPress}
+                  placeholder="Primer apellido"
                   className="register-input"
                   required
                 />
+              </div>
+            </div>
+
+            {/* Gender Input */}
+            <div className="register-input-group">
+              <label className="register-label">Género</label>
+              <div className="register-radio-group">
+                <label className="register-radio-label">
+                  <input
+                    type="radio"
+                    name="genero"
+                    value="masculino"
+                    checked={genero === 'masculino'}
+                    onChange={(e) => setGenero(e.target.value)}
+                    className="register-radio"
+                  />
+                  <span>Masculino</span>
+                </label>
+                <label className="register-radio-label">
+                  <input
+                    type="radio"
+                    name="genero"
+                    value="femenino"
+                    checked={genero === 'femenino'}
+                    onChange={(e) => setGenero(e.target.value)}
+                    className="register-radio"
+                  />
+                  <span>Femenino</span>
+                </label>
+                <label className="register-radio-label">
+                  <input
+                    type="radio"
+                    name="genero"
+                    value="otro"
+                    checked={genero === 'otro'}
+                    onChange={(e) => setGenero(e.target.value)}
+                    className="register-radio"
+                  />
+                  <span>Otro</span>
+                </label>
               </div>
             </div>
 
@@ -588,6 +846,7 @@ export default function Register() {
                 value={numDoc}
                 onChange={(e) => setNumDoc(e.target.value)}
                 onKeyPress={handleKeyPress}
+                placeholder="Número de identificación"
                 className="register-input"
                 required
               />
@@ -607,6 +866,41 @@ export default function Register() {
               />
             </div>
 
+            {/* Address Input */}
+            <div className="register-input-group">
+              <label className="register-label">
+                Dirección de su puesto de trabajo
+              </label>
+              <input
+                type="text"
+                value={direccion}
+                onChange={(e) => setDireccion(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ej. Calle 100 #15-55, barrio Barrios Unidos"
+                className="register-input"
+                required
+              />
+            </div>
+
+            {/* Localidad Select */}
+            <div className="register-input-group">
+              <label className="register-label">Localidad donde trabaja</label>
+              <select
+                value={localidad}
+                onChange={(e) => setLocalidad(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className="register-input"
+                required
+              >
+                <option value="">Seleccione una localidad</option>
+                {localidadesBogota.map((loc, index) => (
+                  <option key={index} value={loc}>
+                    {loc}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Validity Input */}
             <div className="register-input-group">
               <label className="register-label">Vigencia</label>
@@ -615,19 +909,19 @@ export default function Register() {
                   <input
                     type="radio"
                     name="vigencia"
-                    value="vigente"
-                    checked={vigencia === 'vigente'}
+                    value="activo"
+                    checked={vigencia === 'activo'}
                     onChange={(e) => setVigencia(e.target.value)}
                     className="register-radio"
                   />
-                  <span>Vigente</span>
+                  <span> Vigente</span>
                 </label>
                 <label className="register-radio-label">
                   <input
                     type="radio"
                     name="vigencia"
-                    value="vencido"
-                    checked={vigencia === 'vencido'}
+                    value="inactivo"
+                    checked={vigencia === 'inactivo'}
                     onChange={(e) => setVigencia(e.target.value)}
                     className="register-radio"
                   />
@@ -675,6 +969,7 @@ export default function Register() {
                 value={NumTel}
                 onChange={(e) => setNumTel(e.target.value)}
                 onKeyPress={handleKeyPress}
+                placeholder="Ej. 3123456789"
                 className="register-input"
                 required
               />
@@ -688,6 +983,7 @@ export default function Register() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 onKeyPress={handleKeyPress}
+                placeholder="email@correo.com"
                 className="register-input"
                 required
               />
@@ -702,6 +998,7 @@ export default function Register() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyPress={handleKeyPress}
+                  placeholder="Ej. MiContra123"
                   className="register-password-input"
                   required
                 />
@@ -735,6 +1032,34 @@ export default function Register() {
                   </svg>
                 </button>
               </div>
+              {password && (
+                <div className="password-requirements">
+                  <div
+                    className={`password-requirement ${passwordRequirements.minLength ? 'valid' : 'invalid'}`}
+                  >
+                    {passwordRequirements.minLength ? '✓' : '✗'} Mínimo 8
+                    caracteres
+                  </div>
+                  <div
+                    className={`password-requirement ${passwordRequirements.hasUppercase ? 'valid' : 'invalid'}`}
+                  >
+                    {passwordRequirements.hasUppercase ? '✓' : '✗'} Al menos una
+                    letra mayúscula
+                  </div>
+                  <div
+                    className={`password-requirement ${passwordRequirements.hasLowercase ? 'valid' : 'invalid'}`}
+                  >
+                    {passwordRequirements.hasLowercase ? '✓' : '✗'} Al menos una
+                    letra minúscula
+                  </div>
+                  <div
+                    className={`password-requirement ${passwordRequirements.hasNumber ? 'valid' : 'invalid'}`}
+                  >
+                    {passwordRequirements.hasNumber ? '✓' : '✗'} Al menos un
+                    número
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Confirm Password Input */}
@@ -746,6 +1071,7 @@ export default function Register() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   onKeyPress={handleKeyPress}
+                  placeholder="Confirmar contraseña"
                   className="register-password-input"
                   required
                 />
@@ -792,20 +1118,36 @@ export default function Register() {
                   required
                 />
                 <p className="register-checkbox-text">
-                  Acepto los
-                  <a href="#"> términos y condiciones</a>
+                  He leído y acepto los
+                  <a href="../POLÍTICA DE PRIVACIDAD Y TÉRMINOS Y CONDICIONES URBANSTAND.pdf">
+                    {' '}
+                    Términos y condiciones
+                  </a>
                 </p>
               </label>
             </div>
+            <div>
+              <button onClick={mostrarModal} className="btn btn-primary">
+                Ver Consentimiento
+              </button>
+            </div>
 
             {/* Submit */}
-            <button onClick={handleSubmit} className="register-submit-button">
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="register-submit-button"
+            >
               Registrarse
             </button>
 
             {/* Go to Login */}
             <div className="register-toggle-container">
-              <button onClick={goToLogin} className="register-toggle-button">
+              <button
+                type="button"
+                onClick={goToLogin}
+                className="register-toggle-button"
+              >
                 ¿Ya tienes cuenta? Inicia sesión
               </button>
             </div>

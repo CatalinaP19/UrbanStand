@@ -59,6 +59,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Ensure the background spans the whole app */
+html, body, #root, main {
+  background: var(--background);
+}
+
 /* ========================================
    COMPONENTES BASE REUTILIZABLES
    ======================================== */
@@ -684,6 +689,12 @@ body {
   color: var(--primary);
 }
 
+.login-eye-icon {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2;
+}
+
 .login-checkbox-container {
   display: flex;
   align-items: flex-start;
@@ -727,6 +738,50 @@ body {
   background: transparent;
   color: #ea580c;
   border-color: var(--primary);
+}
+
+.login-link {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.login-toggle-container {
+  margin-top: var(--spacing-md);
+}
+
+.login-toggle-button {
+  color: var(--primary);
+  text-align: center;
+  width: 100%;
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
+  background: transparent;
+  border: none;
+}
+
+.login-toggle-button:hover {
+  background: rgba(234, 88, 12, 0.08);
+}
+
+.login-message {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  text-align: center;
+  font-weight: 600;
+}
+
+.login-message-success {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.login-message-error {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
 }
 
 /* ========================================
@@ -872,3 +927,68 @@ body {
 .h-full {
   height: 100%;
 }
+
+/* =====================
+   Responsive improvements
+   ===================== */
+
+/* Map section sizing and safe scrolling */
+.map-section {
+  padding: 60px 0;
+  scroll-margin-top: 80px; /* evita que la navbar sticky tape el título al hacer scroll */
+}
+.testimonial-section,
+.benefits-section,
+.users-section,
+.hero {
+  scroll-margin-top: 80px;
+}
+
+.map-container {
+  width: 100%;
+  height: 420px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px var(--shadow);
+  background: var(--surface);
+}
+#map { width: 100%; height: 100%; }
+
+/* Navbar responsive hardening */
+@media (max-width: 768px) {
+  .navbar .navbar-content { flex-wrap: wrap; }
+  .navbar .navbar-nav {
+    gap: 0.5rem;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 0.25rem;
+    -webkit-overflow-scrolling: touch;
+  }
+  .navbar .navbar-link {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.6rem;
+    white-space: nowrap;
+  }
+  .navbar .navbar-actions { gap: 0.5rem; }
+  /* Map height on small screens */
+  .map-container { height: 60vh; }
+}
+
+/* Very small devices */
+@media (max-width: 480px) {
+  .navbar .navbar-link { font-size: 0.85rem; padding: 0.35rem 0.5rem; }
+  .section-title { font-size: 1.5rem; }
+}
+
+/* ===== Navbar sticky compensation ===== */
+/* Evita que el contenido quede oculto bajo la navbar sticky y mejora el scroll a anclas */
+main.container {
+  margin-top: 72px;           /* ajusta según alto real de la navbar en desktop */
+  scroll-margin-top: 80px;    /* evita tapado al usar scrollIntoView */
+}
+@media (max-width: 768px) {
+  main.container {
+    margin-top: 64px;         /* navbar un poco más compacta en móvil */
+  }
+}
+/* end navbar sticky compensation */

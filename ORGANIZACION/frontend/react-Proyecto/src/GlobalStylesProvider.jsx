@@ -1,14 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { useEffect } from 'react'
 
 const GlobalStylesProvider = ({ children }) => {
   useEffect(() => {
     // Verificar si ya se han aplicado los estilos globales
     if (document.querySelector('#global-urbanstand-styles')) {
-      return;
+      return
     }
 
-    const style = document.createElement('style');
-    style.id = 'global-urbanstand-styles';
+    const style = document.createElement('style')
+    style.id = 'global-urbanstand-styles'
     style.textContent = `
       /* ========================================
          VARIABLES CSS GLOBALES
@@ -65,11 +65,24 @@ const GlobalStylesProvider = ({ children }) => {
         margin: 0;
         font-family: var(--font-family);
         background: var(--background);
-        color: var(--text-primary);
         line-height: 1.6;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
       }
+
+      /* Make the app span the full viewport and avoid external body constraints */
+      html, body, #root {
+        height: 100%;
+        min-height: 100vh;
+        width: 100%;
+        background: var(--background);
+      }
+      body {
+        display: block; /* override any global 'display' coming from other CSS */
+        overflow-x: hidden;
+      }
+      
+      
 
       /* ========================================
          COMPONENTES BASE REUTILIZABLES
@@ -164,6 +177,8 @@ const GlobalStylesProvider = ({ children }) => {
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
+        max-width: 1200px;
+        margin: 0 auto;
         gap: var(--spacing-xl);
       }
 
@@ -234,9 +249,9 @@ const GlobalStylesProvider = ({ children }) => {
       }
 
       .hero-image {
-        width: 100%;
+        width: 70%;
         border-radius: 15px;
-        box-shadow: 0 15px 35px var(--shadow);
+        box-shadow: 0 0.5px 35px var(--shadow);
         object-fit: cover;
         height: 350px;
       }
@@ -1333,7 +1348,89 @@ const GlobalStylesProvider = ({ children }) => {
         .login-title {
           font-size: 1.5rem;
         }
+        /* Mejoras para VistaVendedor Responsive */
+@media (max-width: 1024px) {
+  main[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .hero-content {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .hero-image {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 300px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: var(--spacing-xl) 0 !important;
+  }
+  
+  .hero-text h1 {
+    font-size: 1.75rem !important;
+  }
+  
+  .hero-image {
+    width: 100% !important;
+    max-height: 250px !important;
+  }
+  
+  /* Mapa responsive */
+  div[id="vendor-map"] {
+    height: 350px !important;
+  }
+  
+  /* Stats grid responsive */
+  div[style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.75rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 var(--spacing-md) !important;
+  }
+  
+  .hero-text h1 {
+    font-size: 1.5rem !important;
+  }
+  
+  .hero-text p {
+    font-size: 1rem !important;
+  }
+  
+  div[id="vendor-map"] {
+    height: 300px !important;
+  }
+  
+  /* Stats grid a una columna en móviles pequeños */
+  div[style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Botón de chat más pequeño */
+  button[style*="position: fixed"][style*="bottom: 20px"] {
+    width: 50px !important;
+    height: 50px !important;
+    bottom: 15px !important;
+    right: 15px !important;
+  }
+  
+  /* Chat box responsive */
+  div[style*="position: fixed"][style*="bottom: 90px"] {
+    width: calc(100vw - 20px) !important;
+    height: 400px !important;
+    right: 10px !important;
+    bottom: 75px !important;
+  }
+}
       }
+
 
       /* ========================================
          UTILIDADES
@@ -1414,20 +1511,20 @@ const GlobalStylesProvider = ({ children }) => {
       .h-full {
         height: 100%;
       }
-    `;
+    `
 
-    document.head.appendChild(style);
+    document.head.appendChild(style)
 
     // Cleanup function para remover los estilos cuando el componente se desmonte
     return () => {
-      const existingStyle = document.querySelector('#global-urbanstand-styles');
+      const existingStyle = document.querySelector('#global-urbanstand-styles')
       if (existingStyle) {
-        document.head.removeChild(existingStyle);
+        document.head.removeChild(existingStyle)
       }
-    };
-  }, []);
+    }
+  }, [])
 
-  return <>{children}</>;
-};
+  return <>{children}</>
+}
 
-export default GlobalStylesProvider;
+export default GlobalStylesProvider

@@ -1,0 +1,651 @@
+/* ===== ESTILOS REGISTER ROLES ===== */
+.register-container {
+  width: 100vw;
+  height: 100vh;
+  background: #faf3e0;
+  font-family: system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+.register-header {
+  background: #faf3e0;
+  backdrop-filter: blur(10px);
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.register-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.register-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  min-height: calc(100vh - 80px);
+}
+
+.register-box {
+  width: 100%;
+  max-width: 32rem;
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.register-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #9a1e22;
+}
+
+.register-subtitle {
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: #374151;
+}
+
+.register-buttons-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.register-role-button {
+  border: 2px solid #ea580c;
+  padding: 1rem 1.5rem;
+  border-radius: 0.5rem;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  width: 100%;
+  color: #ea580c;
+  text-align: center;
+}
+
+.register-role-button:hover {
+  background: #ea580c;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+}
+
+.register-role-button:active {
+  transform: translateY(0);
+}
+
+.logo {
+  font-size: 28px;
+  font-weight: bold;
+  color: #f97316;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.back-button {
+  background: #6b7280;
+  border: 2px solid #6b7280;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  margin-bottom: 1rem;
+}
+
+.back-button:hover {
+  background: transparent;
+  color: #6b7280;
+}
+
+/* ===== ESTILOS VISTA CLIENTE ===== */
+.vista-cliente-container {
+  height: 100vh;
+  width: 100vw;
+  background: #faf3e0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.vista-cliente-header {
+  background: #9a1e22;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 20px 0;
+}
+
+.vista-cliente-header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.vista-cliente-header-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vista-cliente-title {
+  font-size: 32px;
+  font-weight: 800;
+  background: #ffffff;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0;
+}
+
+.vista-cliente-nav-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.vista-cliente-nav-button-active {
+  padding: 12px 24px;
+  background: #9a1e22;
+  color: white;
+  border: 1px solid white;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.vista-cliente-nav-button {
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.8);
+  color: #374151;
+  border: 1px solid rgba(209, 213, 219, 0.5);
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.vista-cliente-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+.vista-cliente-grid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 30px;
+  height: 70vh;
+}
+
+.vista-cliente-map-container {
+  position: relative;
+}
+
+.vista-cliente-map {
+  background: rgb(242, 242, 242);
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  width: 100%;
+  height: 100%;
+}
+
+.vista-cliente-map-bg {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: float 20s ease-in-out infinite;
+  z-index: 1;
+}
+
+.vista-cliente-radar-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+.vista-cliente-radar-ring {
+  position: absolute;
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  border-radius: 50%;
+}
+
+.vista-cliente-radar-ring-1 {
+  width: 80px;
+  height: 80px;
+  top: -40px;
+  left: -40px;
+  animation: radar 3s ease-out infinite;
+}
+
+.vista-cliente-radar-ring-2 {
+  width: 160px;
+  height: 160px;
+  top: -80px;
+  left: -80px;
+  animation: radar 4s ease-out infinite;
+}
+
+.vista-cliente-radar-ring-3 {
+  width: 240px;
+  height: 240px;
+  top: -120px;
+  left: -120px;
+  animation: radar 5s ease-out infinite;
+}
+
+.vista-cliente-user-location {
+  position: absolute;
+  top: 60%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 8;
+}
+
+.vista-cliente-user-pin {
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+  animation: userPulse 2s ease-in-out infinite;
+}
+
+.vista-cliente-vendor-pin {
+  position: absolute;
+  cursor: pointer;
+  z-index: 5;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: scale(1);
+}
+
+.vista-cliente-vendor-pin.selected {
+  transform: scale(1.2);
+  z-index: 10;
+}
+
+.vista-cliente-vendor-pin.tracking {
+     animation: pulse 2s infinite; }
+
+.vista-cliente-vendor-aura {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+}
+
+.vista-cliente-vendor-aura.active {
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, transparent 70%);
+  animation: breathe 3s ease-in-out infinite;
+}
+
+.vista-cliente-vendor-aura.inactive {
+  background: radial-gradient(circle, rgba(156, 163, 175, 0.2) 0%, transparent 70%);
+}
+
+.vista-cliente-pin {
+  border-radius: 50% 50% 50% 0;
+  width: 40px;
+  height: 40px;
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.vista-cliente-pin.active {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.vista-cliente-pin.inactive {
+  background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+}
+
+.vista-cliente-pin-emoji {
+  transform: rotate(45deg);
+  font-size: 18px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+.vista-cliente-status-indicator {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 12px;
+  height: 12px;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.4);
+  animation: blink 2s infinite;
+}
+
+/* TU BOTÓN DETENER ORIGINAL - SIN CAMBIOS */
+.vista-cliente-tracking-control { position: relative; top: auto; left: auto; margin-bottom: 15px; }
+
+.vista-cliente-tracking-text {
+  font-weight: 600;
+}
+
+.vista-cliente-stop-button {
+  background: #ef4444;
+  border: none;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.vista-cliente-panel {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.vista-cliente-panel-header {
+  padding: 25px;
+  border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+}
+
+.vista-cliente-panel-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 15px 0;
+  color: #111827;
+}
+
+.vista-cliente-search-container {
+  position: relative;
+}
+
+.vista-cliente-search-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+}
+
+.vista-cliente-search-input {
+  width: 100%;
+  padding: 15px 15px 15px 45px;
+  border: 2px solid rgba(229, 231, 235, 0.5);
+  border-radius: 15px;
+  font-size: 16px;
+  background: rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.vista-cliente-vendors-list {
+  padding: 20px;
+  max-height: calc(100% - 200px);
+  overflow-y: auto;
+}
+
+.vista-cliente-vendor-card {
+  padding: 20px;
+  margin-bottom: 15px;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(249, 250, 251, 0.8);
+  border: 1px solid rgba(229, 231, 235, 0.5);
+  transform: scale(1);
+}
+
+.vista-cliente-vendor-card.selected {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  border: 2px solid rgba(102, 126, 234, 0.3);
+  transform: scale(1.02);
+}
+
+.vista-cliente-vendor-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.vista-cliente-vendor-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.vista-cliente-vendor-status {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  background: #10b981;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.vista-cliente-vendor-details {
+  flex: 1;
+}
+
+.vista-cliente-vendor-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+
+.vista-cliente-vendor-name {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  color: #111827;
+}
+
+.vista-cliente-vendor-online {
+  font-size: 10px;
+  padding: 2px 8px;
+  background: #10b981;
+  color: white;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.vista-cliente-vendor-product {
+  color: #6b7280;
+  margin: 0 0 8px 0;
+  font-size: 14px;
+}
+
+.vista-cliente-vendor-stats {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 12px;
+}
+
+.vista-cliente-vendor-stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.vista-cliente-vendor-rating {
+  color: #374151;
+  font-weight: 600;
+}
+
+.vista-cliente-vendor-distance,
+.vista-cliente-vendor-time {
+  color: #6b7280;
+}
+
+.vista-cliente-vendor-actions {
+  margin-top: 20px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  border: 1px solid rgba(229, 231, 235, 0.3);
+}
+
+.vista-cliente-products-section {
+  margin-bottom: 15px;
+}
+
+.vista-cliente-products-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.vista-cliente-products-list {
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.vista-cliente-products-price {
+  font-size: 14px;
+  color: #059669;
+  font-weight: 600;
+  margin-top: 5px;
+}
+
+.vista-cliente-action-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.vista-cliente-action-button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+}
+
+.vista-cliente-action-button.track {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.vista-cliente-action-button.track-disabled {
+  background: #d1d5db;
+  color: white;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.vista-cliente-action-button.call {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.vista-cliente-action-button.whatsapp {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.vista-cliente-action-button.order {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+/* ===== ANIMACIONES ===== */
+@keyframes radar { 0% { transform: scale(0); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
+@keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } }
+@keyframes breathe { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.1); } }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+@keyframes userPulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.2); } }
+@keyframes float { 0%, 100% { transform: translateY(0px) rotate(0deg); } 33% { transform: translateY(-10px) rotate(1deg); } 66% { transform: translateY(5px) rotate(-1deg); } }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .vista-cliente-grid { grid-template-columns: 1fr 350px; gap: 20px; }
+  .vista-cliente-main { padding: 20px 15px; }
+  .vista-cliente-container { margin-top: 0; }
+}
+
+@media (max-width: 768px) {
+  .register-content { padding: 1rem; }
+  .register-box { padding: 1.5rem; }
+  .register-title { font-size: 1.5rem; }
+  .register-subtitle { font-size: 1rem; }
+  
+  .vista-cliente-container { margin-top: 0; }
+  .vista-cliente-grid { grid-template-columns: 1fr; gap: 20px; height: auto; }
+  .vista-cliente-map-container { height: 50vh; min-height: 300px; order: 2; }
+  .vista-cliente-panel { order: 1; }
+  .vista-cliente-header-flex { flex-wrap: wrap; gap: 15px; }
+  .vista-cliente-nav-buttons { justify-content: center; }
+  .vista-cliente-main { padding: 15px 10px; }
+}
+
+@media (max-width: 480px) {
+  .vista-cliente-title { font-size: 24px; }
+  .vista-cliente-nav-button, .vista-cliente-nav-button-active { padding: 8px 16px; font-size: 12px; }
+  .vista-cliente-main { padding: 10px 5px; }
+  .vista-cliente-map-container { min-height: 250px; }
+  .vista-cliente-vendor-info { flex-direction: column; text-align: center; gap: 10px; }
+  .vista-cliente-vendor-stats { justify-content: center; flex-wrap: wrap; }
+  .vista-cliente-action-buttons { flex-direction: column; }
+  .vista-cliente-action-button { width: 100%; justify-content: center; }
+}

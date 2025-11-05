@@ -3,11 +3,8 @@
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
+  /* Use app variables for colors; avoid setting background on :root to prevent half-background issues */
+  color: var(--text-primary, #213547);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -26,9 +23,8 @@ a {
 
 body {
   margin: 0;
-  display: auto-flex;
-  place-items: center;
-
+  /* Ensure body doesn't impose invalid layout rules */
+  display: block;
 }
 
 h1 {
@@ -43,7 +39,8 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #150101;
+  /* Let component/global styles define button backgrounds */
+  background-color: transparent;
   cursor: pointer;
   transition: border-color 0.25s;
 }
@@ -53,15 +50,6 @@ button:focus-visible {
   outline: transparent;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-
-  button {
-    background-color: #f9f9f9;
-  }
-}
+/* Remove light color-scheme overrides; global styles manage colors */
 
 
