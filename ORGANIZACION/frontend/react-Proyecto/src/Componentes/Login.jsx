@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import apiService from "../services/apiService.js";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContex.jsx";
@@ -11,14 +11,120 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
   const [terms, setTerms] = useState(false);
   const [message, setMessage] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isRegistrationMode, setIsRegistrationMode] = useState(false);
+  const [isRegistrationMode] = useState(false);
   const [role, setRole] = useState("vendedor");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  //Estados para el control de intentos y bloqueo
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [isLocked, setIsLocked] = useState(false);
+  const [lockoutTime, setLockoutTime] = useState(null);
+  const [remainingTime, setRemainingTime] = useState(0);
+
+  const LOCKOUT_DURATION = 30 * 60 * 1000; // 30 minutos en milisegundos
+  const MAX_ATTEMPTS = 3;
+
+  //Verificar si hay un bloqueo activo al cargar el componente
+  useEffect(() => {
+    const storedLockout = localStorage.getItem('login_lockout_time');
+    const storedAttempts = localStorage.getItem('login_failed_attempts');
+    
+    if (storedLockout) {
+      const lockTime = parseInt(storedLockout);
+      const now = Date.now();
+      
+      if (now < lockTime) {
+        // Aún está bloqueado
+        setIsLocked(true);
+        setLockoutTime(lockTime);
+        setFailedAttempts(MAX_ATTEMPTS);
+        console.log('Cuenta bloqueada detectada al cargar');
+      } else {
+        // El bloqueo expiró, limpiar
+        localStorage.removeItem('login_lockout_time');
+        localStorage.removeItem('login_failed_attempts');
+        console.log('Bloqueo expirado, limpiando datos');
+      }
+    } else if (storedAttempts) {
+      const attempts = parseInt(storedAttempts);
+      setFailedAttempts(attempts);
+      console.log(`Intentos fallidos previos: ${attempts}`);
+    }
+  }, []);
+
+  //Timer para mostrar tiempo restante de bloqueo
+  useEffect(() => {
+    if (!isLocked || !lockoutTime) return;
+
+    const timer = setInterval(() => {
+      const now = Date.now();
+      const remaining = lockoutTime - now;
+
+      if (remaining <= 0) {
+        // El bloqueo expiró
+        setIsLocked(false);
+        setLockoutTime(null);
+        setFailedAttempts(0);
+        setRemainingTime(0);
+        localStorage.removeItem('login_lockout_time');
+        localStorage.removeItem('login_failed_attempts');
+        setMessage("");
+        console.log('Bloqueo expirado, cuenta desbloqueada');
+      } else {
+        setRemainingTime(remaining);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isLocked, lockoutTime]);
+
+  // Formatear tiempo restante (MM:SS)
+  const formatRemainingTime = (ms) => {
+    const minutes = Math.floor(ms / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  //Registrar intento fallido
+  const registerFailedAttempt = () => {
+    const newAttempts = failedAttempts + 1;
+    setFailedAttempts(newAttempts);
+    localStorage.setItem('login_failed_attempts', newAttempts.toString());
+    console.log(`Intento fallido registrado: ${newAttempts}/${MAX_ATTEMPTS}`);
+
+    if (newAttempts >= MAX_ATTEMPTS) {
+      const lockTime = Date.now() + LOCKOUT_DURATION;
+      setIsLocked(true);
+      setLockoutTime(lockTime);
+      localStorage.setItem('login_lockout_time', lockTime.toString());
+      setMessage(`Has alcanzado el máximo de intentos fallidos. La cuenta está bloqueada por 30 minutos.`);
+      console.log('Cuenta bloqueada por 30 minutos');
+    } else {
+      setMessage(`Credenciales incorrectas. Intento ${newAttempts} de ${MAX_ATTEMPTS}.`);
+    }
+  };
+
+  //Resetear intentos fallidos tras login exitoso
+  const resetFailedAttempts = () => {
+    setFailedAttempts(0);
+    setIsLocked(false);
+    setLockoutTime(null);
+    localStorage.removeItem('login_failed_attempts');
+    localStorage.removeItem('login_lockout_time');
+    console.log('Intentos fallidos reseteados');
+  };
+
   const handleSubmit = async () => {
-    // ✅ Prevenir múltiples submits
+    // Verificar si está bloqueado
+    if (isLocked) {
+      setMessage(`Cuenta bloqueada. Intenta nuevamente en ${formatRemainingTime(remainingTime)}.`);
+      console.log('Intento de login bloqueado');
+      return;
+    }
+
+    //Prevenir múltiples submits
     if (isSubmitting) {
-      console.log('⏳ Ya hay un login en proceso, ignorando...');
+      console.log('Ya hay un login en proceso, ignorando...');
       return;
     }
 
@@ -34,10 +140,10 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
 
     if (errors !== "") {
       setMessage(errors);
-      return; // ✅ Salir sin bloquear
+      return; //Salir sin bloquear
     }
 
-    setIsSubmitting(true); // ✅ Bloquear SOLO si las validaciones pasaron
+    setIsSubmitting(true); //Bloquear SOLO si las validaciones pasaron
     setMessage("Iniciando sesión...");
 
     if (!isRegistrationMode) {
@@ -48,18 +154,22 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
             password,
           });
 
-          console.log('🔍 Respuesta de login entidad:', loginResp);
+          console.log('Respuesta de login entidad:', loginResp);
 
           // Verificar si hay token en la respuesta
           if (!loginResp?.token) {
-            console.warn('⚠️ No se recibió token en la respuesta');
-            setMessage('Error en el inicio de sesión. Por favor intenta nuevamente.');
+            console.warn('No se recibió token en la respuesta');
+            registerFailedAttempt(); //Registrar intento fallido
+            setMessage('Credenciales incorrectas. Por favor intenta nuevamente.');
             return;
           }
 
+          //Login exitoso - resetear intentos
+          resetFailedAttempts();
+
           const token = apiService.saveAuth(loginResp.token, 'entidad');
-          console.log('🔑 Token guardado:', token);
-          console.log('🔑 Token en localStorage:', localStorage.getItem('token'));
+          console.log('Token guardado:', token);
+          console.log('Token en localStorage:', localStorage.getItem('token'));
           const profileResponse = await apiService.entidad.profile(token);
           const profile = profileResponse?.vendedor || profileResponse;
 
@@ -73,7 +183,7 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
             const emailKey = email.trim().toLowerCase();
             allEntidades[emailKey] = entidadData;
             localStorage.setItem('urbanstand_entidades', JSON.stringify(allEntidades));
-          } catch (e) { /* ignore */ }
+          } catch { /* ignore */ }
 
           // Usar el contexto de autenticación
           const entidadUserData = {
@@ -98,24 +208,28 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
           return;
         } else if (role === 'vendedor') {
           const loginResp = await apiService.vendedor.login({ email, password });
-          console.log('📦 Respuesta completa del backend:', loginResp);
+          console.log('Respuesta completa del backend:', loginResp);
 
           // Verificar si hay token en la respuesta
           if (!loginResp?.token) {
-            console.warn('⚠️ No se recibió token en la respuesta');
-            setMessage('Error en el inicio de sesión. Por favor intenta nuevamente.');
+            console.warn('No se recibió token en la respuesta');
+            registerFailedAttempt(); //Registrar intento fallido
+            setMessage('Credenciales incorrectas. Por favor intenta nuevamente.');
             return;
           }
 
+          // ✅ Login exitoso - resetear intentos
+          resetFailedAttempts();
+
           const token = apiService.saveAuth(loginResp.token, 'vendedor');
-          console.log('🔑 Token guardado:', token);
-          console.log('🔑 Token en localStorage:', localStorage.getItem('token'));
+          console.log('Token guardado:', token);
+          console.log('Token en localStorage:', localStorage.getItem('token'));
 
           const profileResponse = await apiService.vendedor.profile(token);
-          console.log('👤 Perfil recibido:', profileResponse);
+          console.log('Perfil recibido:', profileResponse);
 
           const profile = profileResponse?.vendedor || profileResponse;
-          console.log('🔍 Campos del perfil:', {
+          console.log('Campos del perfil:', {
             firstName: profile?.firstName,
             lastName: profile?.lastName,
             genero: profile?.genero,
@@ -129,14 +243,14 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
             genero: profile?.genero || undefined,
           };
 
-          console.log('💾 Datos a guardar en localStorage:', vendorData);
+          console.log('Datos a guardar en localStorage:', vendorData);
 
           try {
             const allUsers = JSON.parse(localStorage.getItem('urbanstand_users') || '{}');
             const emailKey = email.trim().toLowerCase();
             allUsers[emailKey] = vendorData;
             localStorage.setItem('urbanstand_users', JSON.stringify(allUsers));
-          } catch (e) { /* ignore */ }
+          } catch { /* ignore */ }
 
           // Usar el contexto de autenticación
           const vendedorUserData = {
@@ -163,38 +277,47 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
           return;
         }
       } catch (error) {
-        console.error('❌ Error de login:', error);
-        console.error('❌ Tipo de error:', typeof error);
-        console.error('❌ Error completo:', JSON.stringify(error, null, 2));
+        console.error('Error de login:', error);
+        console.error('Tipo de error:', typeof error);
+        console.error('Error completo:', JSON.stringify(error, null, 2));
         
         // Mensajes de error más específicos
         let errorMessage = 'Error iniciando sesión';
+        let isCredentialError = false;
         
         if (error?.message) {
           const msg = error.message.toLowerCase();
-          console.log('📝 Mensaje de error:', msg);
+          console.log('Mensaje de error:', msg);
           
-          if (msg.includes('password') || msg.includes('contraseña') || msg.includes('credencial') || msg.includes('incorrect') || msg.includes('incorrectos')) {
-            errorMessage = 'Contraseña incorrecta. Por favor verifica tus credenciales.';
-          } else if (msg.includes('user') || msg.includes('usuario') || msg.includes('not found') || msg.includes('no encontrado')) {
-            errorMessage = 'Usuario no encontrado. Verifica tu email.';
-          } else if (msg.includes('401') || msg.includes('inválidas')) {
+          if (msg.includes('password') || msg.includes('contraseña') || msg.includes('credencial') || 
+              msg.includes('incorrect') || msg.includes('incorrectos') || msg.includes('unauthorized') ||
+              msg.includes('401') || msg.includes('inválidas') || msg.includes('user') || 
+              msg.includes('usuario') || msg.includes('not found') || msg.includes('no encontrado')) {
+            isCredentialError = true;
             errorMessage = 'Credenciales incorrectas. Por favor verifica tu email y contraseña.';
           } else {
             errorMessage = error.message;
           }
+        } else if (error?.response?.status === 401 || error?.status === 401) {
+          isCredentialError = true;
+          errorMessage = 'Credenciales incorrectas. Por favor verifica tu email y contraseña.';
         }
-        
-        setMessage(errorMessage);
+
+        //Registrar intento fallido solo si es error de credenciales
+        if (isCredentialError) {
+          registerFailedAttempt();
+        } else {
+          setMessage(errorMessage);
+        }
       } finally {
-        setIsSubmitting(false); // ✅ Siempre desbloquear al finalizar
+        setIsSubmitting(false); //Siempre desbloquear al finalizar
       }
     }
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !isSubmitting) {
-      e.preventDefault(); // ✅ Prevenir submit del form
+    if (e.key === 'Enter' && !isSubmitting && !isLocked) {
+      e.preventDefault(); //Prevenir submit del form
       handleSubmit();
     }
   };
@@ -213,7 +336,6 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
 
   return (
     <div className="login-container">
-
       {/* Login Container */}
       <div className="login-content">
         <div className="login-box">
@@ -222,6 +344,46 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
           </h2>
 
           <div className="login-form">
+            {/*Advertencia de intentos fallidos */}
+            {failedAttempts > 0 && failedAttempts < MAX_ATTEMPTS && !isLocked && (
+              <div style={{
+                padding: '12px 15px',
+                marginBottom: '15px',
+                backgroundColor: '#fff3cd',
+                border: '1px solid #ffc107',
+                borderRadius: '6px',
+                color: '#856404',
+                fontSize: '14px',
+                fontWeight: '500',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <span>Intentos fallidos: <strong>{failedAttempts}</strong> de <strong>{MAX_ATTEMPTS}</strong></span>
+              </div>
+            )}
+
+            {/*Mensaje de bloqueo */}
+            {isLocked && (
+              <div style={{
+                padding: '12px 15px',
+                marginBottom: '15px',
+                backgroundColor: '#f8d7da',
+                border: '1px solid #f5c6cb',
+                borderRadius: '6px',
+                color: '#721c24',
+                fontSize: '14px',
+                fontWeight: '500'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '5px' }}>
+                  <strong>Cuenta bloqueada por seguridad</strong>
+                </div>
+                <div style={{ marginLeft: '24px', fontSize: '13px' }}>
+                  Tiempo restante: <strong>{formatRemainingTime(remainingTime)}</strong>
+                </div>
+              </div>
+            )}
+
             {/* Role Selection (solo para iniciar sesión) */}
             {!isRegistrationMode && (
               <div className="login-input-group">
@@ -232,12 +394,14 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
                   className="login-input"
+                  disabled={isLocked}
                 >
                   <option value="vendedor">Vendedor</option>
                   <option value="entidad">Entidad</option>
                 </select>
               </div>
             )}
+
             {/* Email Input */}
             <div className="login-input-group">
               <label className="login-label">
@@ -249,6 +413,7 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
                 onChange={(e) => setEmail(e.target.value)}
                 onKeyPress={handleKeyPress}
                 className="login-input"
+                disabled={isLocked}
                 required
               />
             </div>
@@ -265,12 +430,14 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyPress={handleKeyPress}
                   className="login-password-input"
+                  disabled={isLocked}
                   required
                 />
                 <button
                   type="button"
                   onClick={togglePassword}
                   className="login-eye-button"
+                  disabled={isLocked}
                   aria-label={isPasswordVisible ? "Ocultar contraseña" : "Mostrar contraseña"}
                 >
                   <svg className="login-eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -295,6 +462,7 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
                   checked={terms}
                   onChange={(e) => setTerms(e.target.checked)}
                   className="login-checkbox"
+                  disabled={isLocked}
                   required
                 />
                 <span className="login-checkbox-text">
@@ -308,10 +476,13 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
               <button
                 onClick={handleSubmit}
                 className="login-submit-button"
-                disabled={isSubmitting || !terms}
-                style={{ opacity: isSubmitting ? 0.5 : 1, cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
+                disabled={isSubmitting || !terms || isLocked}
+                style={{ 
+                  opacity: (isSubmitting || isLocked || !terms) ? 0.5 : 1, 
+                  cursor: (isSubmitting || isLocked || !terms) ? 'not-allowed' : 'pointer' 
+                }}
               >
-                {isSubmitting ? "Procesando..." : (isRegistrationMode ? "Registrarse" : "Entrar")}
+                {isLocked ? "Bloqueado" : (isSubmitting ? "Procesando..." : (isRegistrationMode ? "Registrarse" : "Entrar"))}
               </button>
             </div>
 
@@ -345,7 +516,7 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
             {/* Message */}
             {message && (
               <div
-                className={`login-message ${message.includes("exitoso")
+                className={`login-message ${message.includes("exitoso") || message.includes("✅")
                   ? "login-message-success"
                   : "login-message-error"
                   }`}

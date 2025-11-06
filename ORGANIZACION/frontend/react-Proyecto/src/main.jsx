@@ -67,9 +67,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route
             path="/cliente"
             element={
-              <PrivateRoute allowedRoles={['cliente']}>
                 <VistaCliente />
-              </PrivateRoute>
             }
           />
 
