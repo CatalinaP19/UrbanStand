@@ -74,17 +74,19 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
               nomEnti: entidadData.nomEnti,
             };
             
-            try {
-              localStorage.setItem('urbanstand_current_user', JSON.stringify(entidadUserData));
-            } catch (_) { /* ignore */ }
-            
-            authLogin(loginResp.token, entidadUserData);
+            // Llamar a authLogin que actualiza el estado y localStorage
+            const loginSuccess = authLogin(loginResp.token, entidadUserData);
 
-            setMessage("Inicio de sesión exitoso.");
-            if (typeof onSuccessfulLogin === 'function') {
-              onSuccessfulLogin('entidad', entidadData);
+            if (loginSuccess) {
+              setMessage("Inicio de sesión exitoso.");
+              if (typeof onSuccessfulLogin === 'function') {
+                onSuccessfulLogin('entidad', entidadData);
+              }
+              // Usar setTimeout para asegurar que el estado se actualice antes de navegar
+              setTimeout(() => {
+                navigate('/entidades', { replace: true });
+              }, 100);
             }
-            navigate('/entidades');
             return;
           }
         } else if (role === 'vendedor') {
@@ -143,17 +145,6 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
             vendorData = { email, ...profile };
           }
 
-          try {
-            const current = {
-              role: 'vendedor',
-              email,
-              firstName: vendorData?.firstName,
-              lastName: vendorData?.lastName,
-              genero: vendorData?.genero,
-            };
-            localStorage.setItem('urbanstand_current_user', JSON.stringify(current));
-          } catch (e) { /* ignore */ }
-
           // Usar el contexto de autenticación
           const token = localStorage.getItem('token');
           const vendedorUserData = {
@@ -163,13 +154,20 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
             lastName: vendorData?.lastName,
             genero: vendorData?.genero,
           };
-          authLogin(token, vendedorUserData);
+          
+          // Llamar a authLogin que actualiza el estado y localStorage
+          const loginSuccess = authLogin(token, vendedorUserData);
 
-          setMessage("Inicio de sesión exitoso.");
-          if (typeof onSuccessfulLogin === 'function') {
-            onSuccessfulLogin('vendedor', vendorData);
+          if (loginSuccess) {
+            setMessage("Inicio de sesión exitoso.");
+            if (typeof onSuccessfulLogin === 'function') {
+              onSuccessfulLogin('vendedor', vendorData);
+            }
+            // Usar setTimeout para asegurar que el estado se actualice antes de navegar
+            setTimeout(() => {
+              navigate('/vendedor', { replace: true });
+            }, 100);
           }
-          navigate('/vendedor');
           return;
         }
       } catch (error) {

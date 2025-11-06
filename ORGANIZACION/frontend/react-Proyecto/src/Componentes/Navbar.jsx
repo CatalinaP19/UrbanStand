@@ -308,6 +308,9 @@ export default function Navbar({
     }
   }
 
+  // Usar el contexto de autenticación directamente
+  const { user: authUser, isAuthenticated } = useAuth()
+  
   // Fallback de sesión local si no llegan props o están vacías
   const getSessionFromLocal = () => {
     try {
@@ -323,9 +326,11 @@ export default function Navbar({
   }
 
   const session = getSessionFromLocal()
-  const effectiveLogged = Boolean(isLoggedIn ?? session.isLoggedIn)
-  const effectiveRole = userRole ?? session.role
-  const effectiveData = userData ?? session.data
+  
+  // Priorizar el contexto de autenticación sobre props y localStorage
+  const effectiveLogged = authUser ? isAuthenticated() : Boolean(isLoggedIn ?? session.isLoggedIn)
+  const effectiveRole = authUser?.role ?? userRole ?? session.role
+  const effectiveData = authUser ?? userData ?? session.data
 
   // Obtener inicial del usuario para avatar
   const getUserInitial = () => {
