@@ -48,105 +48,97 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
             password,
           });
 
-          if (loginResp?.token) {
-            const token = apiService.saveAuth(loginResp.token, 'entidad');
-            console.log('🔑 Token guardado:', token);
-            console.log('🔑 Token en localStorage:', localStorage.getItem('token'));
-            const profileResponse = await apiService.entidad.profile(token);
-            const profile = profileResponse?.vendedor || profileResponse;
+          console.log('🔍 Respuesta de login entidad:', loginResp);
 
-            const entidadData = {
-              email,
-              nomEnti: profile?.nombre_entidad || profile?.nomEnti || profile?.nombre || undefined,
-            };
-
-            try {
-              const allEntidades = JSON.parse(localStorage.getItem('urbanstand_entidades') || '{}');
-              const emailKey = email.trim().toLowerCase();
-              allEntidades[emailKey] = entidadData;
-              localStorage.setItem('urbanstand_entidades', JSON.stringify(allEntidades));
-            } catch (e) { /* ignore */ }
-
-            // Usar el contexto de autenticación
-            const entidadUserData = {
-              role: 'entidad',
-              email,
-              nomEnti: entidadData.nomEnti,
-            };
-            
-            // Llamar a authLogin que actualiza el estado y localStorage
-            const loginSuccess = authLogin(loginResp.token, entidadUserData);
-
-            if (loginSuccess) {
-              setMessage("Inicio de sesión exitoso.");
-              if (typeof onSuccessfulLogin === 'function') {
-                onSuccessfulLogin('entidad', entidadData);
-              }
-              // Usar setTimeout para asegurar que el estado se actualice antes de navegar
-              setTimeout(() => {
-                navigate('/entidades', { replace: true });
-              }, 100);
-            }
+          // Verificar si hay token en la respuesta
+          if (!loginResp?.token) {
+            console.warn('⚠️ No se recibió token en la respuesta');
+            setMessage('Error en el inicio de sesión. Por favor intenta nuevamente.');
             return;
           }
-        } else if (role === 'vendedor') {
-          let vendorData = null;
+
+          const token = apiService.saveAuth(loginResp.token, 'entidad');
+          console.log('🔑 Token guardado:', token);
+          console.log('🔑 Token en localStorage:', localStorage.getItem('token'));
+          const profileResponse = await apiService.entidad.profile(token);
+          const profile = profileResponse?.vendedor || profileResponse;
+
+          const entidadData = {
+            email,
+            nomEnti: profile?.nombre_entidad || profile?.nomEnti || profile?.nombre || undefined,
+          };
+
           try {
-            const loginResp = await apiService.vendedor.login({ email, password });
-            console.log('📦 Respuesta completa del backend:', loginResp);
-
-            if (loginResp?.token) {
-              const token = apiService.saveAuth(loginResp.token, 'vendedor');
-              console.log('🔑 Token guardado:', token);
-              console.log('🔑 Token en localStorage:', localStorage.getItem('token'));
-
-              const profileResponse = await apiService.vendedor.profile(token);
-              console.log('👤 Perfil recibido:', profileResponse);
-
-              const profile = profileResponse?.vendedor || profileResponse;
-              console.log('🔍 Campos del perfil:', {
-                firstName: profile?.firstName,
-                lastName: profile?.lastName,
-                genero: profile?.genero,
-                email: profile?.email
-              });
-
-              vendorData = {
-                email,
-                firstName: profile?.firstName || profile?.nombre || undefined,
-                lastName: profile?.lastName || profile?.apellido || undefined,
-                genero: profile?.genero || undefined,
-              };
-
-              console.log('💾 Datos a guardar en localStorage:', vendorData);
-
-              try {
-                const allUsers = JSON.parse(localStorage.getItem('urbanstand_users') || '{}');
-                const emailKey = email.trim().toLowerCase();
-                allUsers[emailKey] = vendorData;
-                localStorage.setItem('urbanstand_users', JSON.stringify(allUsers));
-              } catch (e) { /* ignore */ }
-            }
-          } catch (innerError) {
-            console.log('⚠️ Error en login/profile, usando fallback local');
-            let profile = {};
-            const key = (email || '').trim().toLowerCase();
-            try {
-              const allRaw = JSON.parse(localStorage.getItem('urbanstand_users') || '{}');
-              const migrated = {};
-              if (allRaw && typeof allRaw === 'object') {
-                Object.keys(allRaw).forEach(k => {
-                  migrated[k.trim().toLowerCase()] = allRaw[k];
-                });
-                localStorage.setItem('urbanstand_users', JSON.stringify(migrated));
-              }
-              profile = migrated[key] || {};
-            } catch (e) { /* ignore */ }
-            vendorData = { email, ...profile };
-          }
+            const allEntidades = JSON.parse(localStorage.getItem('urbanstand_entidades') || '{}');
+            const emailKey = email.trim().toLowerCase();
+            allEntidades[emailKey] = entidadData;
+            localStorage.setItem('urbanstand_entidades', JSON.stringify(allEntidades));
+          } catch (e) { /* ignore */ }
 
           // Usar el contexto de autenticación
-          const token = localStorage.getItem('token');
+          const entidadUserData = {
+            role: 'entidad',
+            email,
+            nomEnti: entidadData.nomEnti,
+          };
+          
+          // Llamar a authLogin que actualiza el estado y localStorage
+          const loginSuccess = authLogin(loginResp.token, entidadUserData);
+
+          if (loginSuccess) {
+            setMessage("Inicio de sesión exitoso.");
+            if (typeof onSuccessfulLogin === 'function') {
+              onSuccessfulLogin('entidad', entidadData);
+            }
+            // Usar setTimeout para asegurar que el estado se actualice antes de navegar
+            setTimeout(() => {
+              navigate('/entidades', { replace: true });
+            }, 100);
+          }
+          return;
+        } else if (role === 'vendedor') {
+          const loginResp = await apiService.vendedor.login({ email, password });
+          console.log('📦 Respuesta completa del backend:', loginResp);
+
+          // Verificar si hay token en la respuesta
+          if (!loginResp?.token) {
+            console.warn('⚠️ No se recibió token en la respuesta');
+            setMessage('Error en el inicio de sesión. Por favor intenta nuevamente.');
+            return;
+          }
+
+          const token = apiService.saveAuth(loginResp.token, 'vendedor');
+          console.log('🔑 Token guardado:', token);
+          console.log('🔑 Token en localStorage:', localStorage.getItem('token'));
+
+          const profileResponse = await apiService.vendedor.profile(token);
+          console.log('👤 Perfil recibido:', profileResponse);
+
+          const profile = profileResponse?.vendedor || profileResponse;
+          console.log('🔍 Campos del perfil:', {
+            firstName: profile?.firstName,
+            lastName: profile?.lastName,
+            genero: profile?.genero,
+            email: profile?.email
+          });
+
+          const vendorData = {
+            email,
+            firstName: profile?.firstName || profile?.nombre || undefined,
+            lastName: profile?.lastName || profile?.apellido || undefined,
+            genero: profile?.genero || undefined,
+          };
+
+          console.log('💾 Datos a guardar en localStorage:', vendorData);
+
+          try {
+            const allUsers = JSON.parse(localStorage.getItem('urbanstand_users') || '{}');
+            const emailKey = email.trim().toLowerCase();
+            allUsers[emailKey] = vendorData;
+            localStorage.setItem('urbanstand_users', JSON.stringify(allUsers));
+          } catch (e) { /* ignore */ }
+
+          // Usar el contexto de autenticación
           const vendedorUserData = {
             role: 'vendedor',
             email,
@@ -172,7 +164,28 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
         }
       } catch (error) {
         console.error('❌ Error de login:', error);
-        setMessage(error?.message || 'Error iniciando sesión');
+        console.error('❌ Tipo de error:', typeof error);
+        console.error('❌ Error completo:', JSON.stringify(error, null, 2));
+        
+        // Mensajes de error más específicos
+        let errorMessage = 'Error iniciando sesión';
+        
+        if (error?.message) {
+          const msg = error.message.toLowerCase();
+          console.log('📝 Mensaje de error:', msg);
+          
+          if (msg.includes('password') || msg.includes('contraseña') || msg.includes('credencial') || msg.includes('incorrect') || msg.includes('incorrectos')) {
+            errorMessage = 'Contraseña incorrecta. Por favor verifica tus credenciales.';
+          } else if (msg.includes('user') || msg.includes('usuario') || msg.includes('not found') || msg.includes('no encontrado')) {
+            errorMessage = 'Usuario no encontrado. Verifica tu email.';
+          } else if (msg.includes('401') || msg.includes('inválidas')) {
+            errorMessage = 'Credenciales incorrectas. Por favor verifica tu email y contraseña.';
+          } else {
+            errorMessage = error.message;
+          }
+        }
+        
+        setMessage(errorMessage);
       } finally {
         setIsSubmitting(false); // ✅ Siempre desbloquear al finalizar
       }
