@@ -16,7 +16,6 @@ class ApiService {
       ...options,
     };
 
-
     // Agregar token si existe
     const token = options.token || localStorage.getItem('token');
     if (token) {
@@ -37,10 +36,9 @@ class ApiService {
         try {
           data = await response.json();
         } catch (_) {
-          data = null; // cuerpo vacío o JSON inválido
+          data = null;
         }
       } else {
-        // No-JSON: intenta texto
         try {
           const text = await response.text();
           data = text || null;
@@ -50,7 +48,6 @@ class ApiService {
       }
 
       if (!response.ok) {
-        // Mejor extracción de mensaje de error
         const msg = (data && (data.message || data.error || data.msg)) || `HTTP ${response.status}`;
         throw new Error(msg);
       }
@@ -74,7 +71,21 @@ class ApiService {
   saveAuth(token, userType = 'vendedor') {
     localStorage.setItem('token', token);
     localStorage.setItem('userType', userType);
-    return token; // ✅ Retorna el token
+    return token;
+  }
+
+  // ✅ AGREGA ESTOS DOS MÉTODOS AQUÍ
+  confirmarEmail(token) {
+    return this.request(`/confirmar-email/${token}`, {
+      method: 'GET',
+    });
+  }
+
+  restablecerPassword(token, nuevaPassword) {
+    return this.request(`/restablecer-password/${token}`, {
+      method: 'POST',
+      body: JSON.stringify({ password: nuevaPassword }),
+    });
   }
 
   vendedor = {

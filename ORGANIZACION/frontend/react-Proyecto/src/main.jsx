@@ -14,6 +14,8 @@ import VistaVendedor from './Componentes/VistaVendedor.jsx'
 import VistaEntidades from './Componentes/VistaEntidades.jsx'
 import VistaCliente from './Componentes/VistaCliente.jsx'
 import PerfilVendedor from './Componentes/PerfilVendedor.jsx'
+import ConfirmarEmail from './Componentes/ConfirmarEmail.jsx'
+import RestablecerPassword from './Componentes/RestablecerPassword.jsx'
 import Layout from './Layout.jsx'
 import { AuthProvider } from './context/AuthContex.jsx'
 import PrivateRoute from './Componentes/PrivateRoute.jsx'
@@ -30,6 +32,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="/register-roles" element={<RegisterRoles />} />
           <Route path="/register" element={<Register />} />
           <Route path="/registro-entidades" element={<RegistroEntidades />} />
+          
+          {/* Rutas para confirmación de email y recuperación de contraseña */}
+          <Route path="/confirmar-email/:token" element={<ConfirmarEmail />} />
+          <Route path="/restablecer-password/:token" element={<RestablecerPassword />} />
 
           {/* Rutas protegidas */}
           <Route

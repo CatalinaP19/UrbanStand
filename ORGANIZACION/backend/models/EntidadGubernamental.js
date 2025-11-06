@@ -76,6 +76,30 @@ const EntidadGubernamentalSchema = new mongoose.Schema({
     // Las validaciones adicionales (mayúsculas, números, etc.) se manejan en el frontend
   },
 
+  // Campos para confirmación de email
+  emailVerificado: {
+    type: Boolean,
+    default: false
+  },
+  tokenConfirmacion: {
+    type: String,
+    default: null
+  },
+  tokenConfirmacionExpira: {
+    type: Date,
+    default: null
+  },
+
+  // Campos para recuperación de contraseña
+  tokenRecuperacion: {
+    type: String,
+    default: null
+  },
+  tokenRecuperacionExpira: {
+    type: Date,
+    default: null
+  },
+
   // Control de estado y permisos
   estado_entidad: {
     type: String,

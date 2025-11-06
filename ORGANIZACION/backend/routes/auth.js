@@ -1,9 +1,11 @@
 // routes/auth.js
 const express = require("express");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const { body, validationResult } = require("express-validator");
 const Vendedor = require("../models/Vendedor");
 const Localidad = require("../models/Localidad");
+const { enviarEmailConfirmacion } = require("../services/emailService");
 
 const router = express.Router();
 
@@ -186,6 +188,26 @@ router.post(
 
       await nuevoVendedor.save();
 
+      // Generar token de confirmación de email
+      const tokenConfirmacion = crypto.randomBytes(32).toString('hex');
+      nuevoVendedor.tokenConfirmacion = tokenConfirmacion;
+      nuevoVendedor.tokenConfirmacionExpira = Date.now() + 24 * 60 * 60 * 1000; // 24 horas
+      nuevoVendedor.emailVerificado = false;
+      await nuevoVendedor.save();
+
+      // Enviar email de confirmación
+      try {
+        await enviarEmailConfirmacion(
+          nuevoVendedor.email,
+          nuevoVendedor.firstName,
+          tokenConfirmacion
+        );
+        console.log('✅ Email de confirmación enviado a:', nuevoVendedor.email);
+      } catch (emailError) {
+        console.error('⚠️ Error al enviar email de confirmación:', emailError);
+        // No fallar el registro si el email falla
+      }
+
       // Generar JWT token
       const token = jwt.sign(
         {
@@ -200,9 +222,10 @@ router.post(
 
       // Respuesta exitosa
       res.status(201).json({
-        message: "Vendedor registrado exitosamente",
+        message: "Vendedor registrado exitosamente. Por favor verifica tu email para confirmar tu cuenta.",
         token,
         vendedor: nuevoVendedor.toPublicJSON(),
+        emailEnviado: true
       });
     } catch (error) {
       console.error("Error en registro:", error);

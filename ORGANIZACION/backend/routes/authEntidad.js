@@ -1,9 +1,11 @@
 // routes/authEntidad.js
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const { body, validationResult } = require('express-validator');
 const EntidadGubernamental = require('../models/EntidadGubernamental');
 const Vendedor = require('../models/Vendedor');
+const { enviarEmailConfirmacion } = require('../services/emailService');
 
 const router = express.Router();
 // Middleware para validar errores
@@ -162,6 +164,26 @@ router.post('/register', [
 
     await nuevaEntidad.save();
 
+    // Generar token de confirmación de email
+    const tokenConfirmacion = crypto.randomBytes(32).toString('hex');
+    nuevaEntidad.tokenConfirmacion = tokenConfirmacion;
+    nuevaEntidad.tokenConfirmacionExpira = Date.now() + 24 * 60 * 60 * 1000; // 24 horas
+    nuevaEntidad.emailVerificado = false;
+    await nuevaEntidad.save();
+
+    // Enviar email de confirmación
+    try {
+      await enviarEmailConfirmacion(
+        nuevaEntidad.emailE,
+        nuevaEntidad.nomEnti,
+        tokenConfirmacion
+      );
+      console.log('✅ Email de confirmación enviado a:', nuevaEntidad.emailE);
+    } catch (emailError) {
+      console.error('⚠️ Error al enviar email de confirmación:', emailError);
+      // No fallar el registro si el email falla
+    }
+
     // Generar JWT token específico para entidades
     const token = jwt.sign(
       { 
@@ -178,9 +200,10 @@ router.post('/register', [
 
     // Respuesta exitosa
     res.status(201).json({
-      message: "Entidad registrada exitosamente",
+      message: "Entidad registrada exitosamente. Por favor verifica tu email para confirmar tu cuenta.",
       token,
-      entidad: nuevaEntidad.toPublicJSON()
+      entidad: nuevaEntidad.toPublicJSON(),
+      emailEnviado: true
     });
 
   } catch (error) {
