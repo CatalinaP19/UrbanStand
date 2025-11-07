@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   MapPin,
   Bell,
@@ -13,6 +14,7 @@ import {
 import apiService from '../services/apiService'
 
 const VistaVendedor = ({ vendedorData = null }) => {
+  const navigate = useNavigate()
   // Cargar usuario actual desde localStorage si no llega por props
   const storedUser = (() => {
     try {

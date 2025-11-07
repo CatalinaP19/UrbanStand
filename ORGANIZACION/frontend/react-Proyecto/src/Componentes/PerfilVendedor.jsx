@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { User, Mail, Phone, MapPin, Package, Edit3, Save, X, CheckCircle, XCircle } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Package, Edit3, ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function PerfilVendedor() {
   const [vendedor, setVendedor] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [editMode, setEditMode] = useState(false);
-  const [editData, setEditData] = useState({});
 
   useEffect(() => {
     cargarPerfil();
@@ -14,10 +13,33 @@ export default function PerfilVendedor() {
   const cargarPerfil = async () => {
     setLoading(true);
     try {
+      // Primero intentamos cargar desde localStorage
+      const storedUser = JSON.parse(localStorage.getItem('urbanstand_current_user') || '{}');
+      
+      if (storedUser && storedUser.email) {
+        // Si encontramos datos en localStorage, los usamos
+        console.log('Cargando perfil desde localStorage');
+        setVendedor({
+          ...storedUser,
+          // Aseguramos que los campos requeridos tengan valores por defecto
+          nombre: storedUser.firstName || 'Usuario',
+          apellido: storedUser.lastName || '',
+          email: storedUser.email || '',
+          telefono: storedUser.telefono || 'No especificado',
+          genero: storedUser.genero || 'No especificado',
+          tipoVendedor: storedUser.tipoVendedor || 'Vendedor',
+          descripcion: storedUser.descripcion || 'Sin descripción',
+          direccion: storedUser.direccion || 'No especificada',
+          ciudad: storedUser.ciudad || 'Bogotá',
+          localidad: storedUser.localidad || 'No especificada'
+        });
+        return;
+      }
+
+      // Si no hay datos en localStorage, intentamos con la API
       const token = localStorage.getItem('token');
       if (!token) {
-        alert('No se encontró token de autenticación');
-        return;
+        throw new Error('No se encontró token de autenticación');
       }
 
       const response = await fetch('http://localhost:3005/api/vendedor/profile', {
@@ -26,58 +48,25 @@ export default function PerfilVendedor() {
         }
       });
 
+      if (!response.ok) {
+        throw new Error('Error en la respuesta del servidor');
+      }
+
       const result = await response.json();
       
-      if (result.success) {
+      if (result.success && result.vendedor) {
         setVendedor(result.vendedor);
-        setEditData(result.vendedor);
+        // Guardamos los datos en localStorage para futuras cargas
+        localStorage.setItem('urbanstand_current_user', JSON.stringify(result.vendedor));
+      } else {
+        throw new Error('No se pudo cargar el perfil');
       }
     } catch (error) {
       console.error('Error cargando perfil:', error);
-      alert('Error al cargar el perfil');
+      // No mostramos alerta aquí para no molestar al usuario
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleEdit = () => {
-    setEditMode(true);
-  };
-
-  const handleCancel = () => {
-    setEditMode(false);
-    setEditData(vendedor);
-  };
-
-  const handleSave = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3005/api/vendedor/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(editData)
-      });
-
-      const result = await response.json();
-      
-      if (result.success) {
-        setVendedor(result.vendedor);
-        setEditMode(false);
-        alert('Perfil actualizado correctamente');
-      } else {
-        alert(result.message || 'Error al actualizar perfil');
-      }
-    } catch (error) {
-      console.error('Error actualizando perfil:', error);
-      alert('Error al actualizar el perfil');
-    }
-  };
-
-  const handleInputChange = (field, value) => {
-    setEditData(prev => ({ ...prev, [field]: value }));
   };
 
   const getProfileImage = (genero) => {
@@ -88,27 +77,15 @@ export default function PerfilVendedor() {
     return '/img/PerfilOther.png';
   };
 
-  const categorias = [
-    'Comidas preparadas',
-    'Bebidas',
-    'Confitería',
-    'Frutas y verduras',
-    'Productos textiles',
-    'Calzado',
-    'Bisutería y accesorios',
-    'Juguetería',
-    'Artículos de temporada',
-    'Cigarrillos y tabaco',
-    'Electrónicos y accesorios',
-    'Arreglos florales',
-    'Papelería y útiles escolares',
-    'Productos varios (Para el hogar)',
-    'S. Lustrado de calzado',
-    'S. Reparación de calzado',
-    'S. Reparación de celulares y electrónicos',
-    'S. Ambulantes de aseo y apoyo',
-    'Otros'
-  ];
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    navigate('/vendedor');
+  };
+
+  const handleEdit = () => {
+    navigate('/vendedor/editar-perfil');
+  };
 
   if (loading) {
     return (
@@ -135,24 +112,21 @@ export default function PerfilVendedor() {
       <div style={styles.content}>
         {/* Header */}
         <div style={styles.header}>
+          <button 
+            style={styles.backButton}
+            onClick={handleBack}
+          >
+            <ArrowLeft size={18} />
+            <span>Volver</span>
+          </button>
           <h1 style={styles.title}>Mi Perfil</h1>
-          {!editMode ? (
-            <button style={styles.editButton} onClick={handleEdit}>
-              <Edit3 size={18} />
-              <span>Editar Perfil</span>
-            </button>
-          ) : (
-            <div style={styles.editActions}>
-              <button style={styles.cancelButton} onClick={handleCancel}>
-                <X size={18} />
-                <span>Cancelar</span>
-              </button>
-              <button style={styles.saveButton} onClick={handleSave}>
-                <Save size={18} />
-                <span>Guardar</span>
-              </button>
-            </div>
-          )}
+          <button 
+            style={styles.editButton} 
+            onClick={handleEdit}
+          >
+            <Edit3 size={18} />
+            <span>Editar Perfil</span>
+          </button>
         </div>
 
         {/* Profile Card */}
@@ -192,16 +166,7 @@ export default function PerfilVendedor() {
                 <Mail size={18} color="#f97316" />
                 <span>Correo Electrónico</span>
               </div>
-              {editMode ? (
-                <input
-                  type="email"
-                  value={editData.email || ''}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  style={styles.input}
-                />
-              ) : (
-                <div style={styles.infoValue}>{vendedor.email}</div>
-              )}
+              <div style={styles.infoValue}>{vendedor.email}</div>
             </div>
 
             {/* Phone */}
@@ -210,17 +175,7 @@ export default function PerfilVendedor() {
                 <Phone size={18} color="#f97316" />
                 <span>Número de Celular</span>
               </div>
-              {editMode ? (
-                <input
-                  type="tel"
-                  value={editData.NumTel || ''}
-                  onChange={(e) => handleInputChange('NumTel', e.target.value)}
-                  style={styles.input}
-                  maxLength={10}
-                />
-              ) : (
-                <div style={styles.infoValue}>{vendedor.NumTel}</div>
-              )}
+              <div style={styles.infoValue}>{vendedor.NumTel}</div>
             </div>
 
             {/* Address */}
@@ -229,16 +184,7 @@ export default function PerfilVendedor() {
                 <MapPin size={18} color="#f97316" />
                 <span>Dirección del Puesto</span>
               </div>
-              {editMode ? (
-                <input
-                  type="text"
-                  value={editData.direccion || ''}
-                  onChange={(e) => handleInputChange('direccion', e.target.value)}
-                  style={styles.input}
-                />
-              ) : (
-                <div style={styles.infoValue}>{vendedor.direccion}</div>
-              )}
+              <div style={styles.infoValue}>{vendedor.direccion}</div>
             </div>
 
             {/* Gender */}
@@ -247,21 +193,9 @@ export default function PerfilVendedor() {
                 <User size={18} color="#f97316" />
                 <span>Género</span>
               </div>
-              {editMode ? (
-                <select
-                  value={editData.genero || ''}
-                  onChange={(e) => handleInputChange('genero', e.target.value)}
-                  style={styles.select}
-                >
-                  <option value="masculino">Masculino</option>
-                  <option value="femenino">Femenino</option>
-                  <option value="otro">Otro</option>
-                </select>
-              ) : (
-                <div style={styles.infoValue}>
-                  {vendedor.genero.charAt(0).toUpperCase() + vendedor.genero.slice(1)}
-                </div>
-              )}
+              <div style={styles.infoValue}>
+                {vendedor.genero.charAt(0).toUpperCase() + vendedor.genero.slice(1)}
+              </div>
             </div>
 
             {/* Locality */}
@@ -281,46 +215,24 @@ export default function PerfilVendedor() {
                 <Package size={18} color="#f97316" />
                 <span>Categorías de Productos</span>
               </div>
-              {editMode ? (
-                <div style={styles.productsEditContainer}>
-                  {categorias.map(cat => (
-                    <label key={cat} style={styles.checkbox}>
-                      <input
-                        type="checkbox"
-                        checked={editData.selectedProducts?.includes(cat) || false}
-                        onChange={(e) => {
-                          const current = editData.selectedProducts || [];
-                          if (e.target.checked) {
-                            handleInputChange('selectedProducts', [...current, cat]);
-                          } else {
-                            handleInputChange('selectedProducts', current.filter(p => p !== cat));
-                          }
-                        }}
-                      />
-                      <span style={styles.checkboxLabel}>{cat}</span>
-                    </label>
-                  ))}
-                </div>
-              ) : (
-                <div style={styles.productsContainer}>
-                  {vendedor.selectedProducts && vendedor.selectedProducts.length > 0 ? (
-                    vendedor.selectedProducts.map((producto, index) => (
-                      <span key={index} style={styles.productTag}>
-                        {producto}
-                      </span>
-                    ))
-                  ) : (
-                    <div style={styles.noProducts}>No hay productos registrados</div>
-                  )}
-                </div>
-              )}
+              <div style={styles.productsContainer}>
+                {vendedor.selectedProducts && vendedor.selectedProducts.length > 0 ? (
+                  vendedor.selectedProducts.map((producto, index) => (
+                    <span key={index} style={styles.productTag}>
+                      {producto}
+                    </span>
+                  ))
+                ) : (
+                  <div style={styles.noProducts}>No hay productos registrados</div>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
 
 const styles = {
   container: {

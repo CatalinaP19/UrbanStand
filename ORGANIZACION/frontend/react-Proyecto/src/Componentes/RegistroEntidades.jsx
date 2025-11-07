@@ -17,7 +17,8 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
   const [terms, setTerms] = useState(false)
   const [message, setMessage] = useState('')
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false)
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
+    useState(false)
 
   useEffect(() => {
     const style = document.createElement('style')
@@ -374,7 +375,7 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
       minLength: pass.length >= 8,
       hasUppercase: /[A-Z]/.test(pass),
       hasLowercase: /[a-z]/.test(pass),
-      hasNumber: /\d/.test(pass)
+      hasNumber: /\d/.test(pass),
     }
     return requirements
   }
@@ -387,7 +388,8 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
 
   // Validación de la dirección
   const ValidateAddressEnti = (direccion) => {
-    const direccionRegex = /^(Calle|Carrera|Transversal|Diagonal|Avenida|Autopista|Circunvalar|Av\.?|Kr\.?|Cr\.?|Cl\.?|Tv\.?|Dg\.?|Ac\.?|Ak\.?|Cra\.?)\s*\d+[A-Za-z]*(?:\s*(?:Bis|Sur|Norte|Este|Oeste|A|B|C))?\s*(?:#|No\.?|Nro\.?|N°)\s*\d+[A-Za-z]*(?:\s*[-–]\s*\d+[A-Za-z]*)?(?:\s*(?:Apt|Apto|Apartamento|Of|Oficina|Local|Int|Interior|Piso|Torre|Bloque|Casa|Lote)\s*[A-Za-z0-9]+)?/i;
+    const direccionRegex =
+      /^(Calle|Carrera|Transversal|Diagonal|Avenida|Autopista|Circunvalar|Av\.?|Kr\.?|Cr\.?|Cl\.?|Tv\.?|Dg\.?|Ac\.?|Ak\.?|Cra\.?)\s*\d+[A-Za-z]*(?:\s*(?:Bis|Sur|Norte|Este|Oeste|A|B|C))?\s*(?:#|No\.?|Nro\.?|N°)\s*\d+[A-Za-z]*(?:\s*[-–]\s*\d+[A-Za-z]*)?(?:\s*(?:Apt|Apto|Apartamento|Of|Oficina|Local|Int|Interior|Piso|Torre|Bloque|Casa|Lote)\s*[A-Za-z0-9]+)?/i
     return direccionRegex.test(direccion)
   }
 
@@ -399,30 +401,39 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
     // Validaciones
     if (!nomEnti.trim()) errors.push('El nombre de la empresa es obligatorio.')
     else if (nomEnti.length > 100) {
-      errors.push('El nombre de la empresa no debe exceder más de 100 caracteres.')
+      errors.push(
+        'El nombre de la empresa no debe exceder más de 100 caracteres.'
+      )
     }
 
     if (!tipoE) errors.push('¿De qué tipo es tu entidad?.')
     if (!sector) errors.push('¿A qué sector pertenece tu entidad?.')
     if (!nit.trim()) errors.push('El NIT es requerido.')
     if (!emailRegex.test(emailE)) errors.push('El email no es válido.')
-    if (!validatePhoneNumber(NumTelE)) errors.push('El número telefónico debe ser válido y compatible con Colombia (formato: 3XXXXXXXXX).')
+    if (!validatePhoneNumber(NumTelE))
+      errors.push(
+        'El número telefónico debe ser válido y compatible con Colombia (formato: 3XXXXXXXXX).'
+      )
 
     // Validación de contraseña mejorada
     const passwordRequirements = validatePassword(password)
-    if (!passwordRequirements.minLength) errors.push('La contraseña debe tener al menos 8 caracteres.')
-    if (!passwordRequirements.hasUppercase) errors.push('La contraseña debe contener al menos una letra mayúscula.')
-    if (!passwordRequirements.hasLowercase) errors.push('La contraseña debe contener al menos una letra minúscula.')
-    if (!passwordRequirements.hasNumber) errors.push('La contraseña debe contener al menos un número.')
+    if (!passwordRequirements.minLength)
+      errors.push('La contraseña debe tener al menos 8 caracteres.')
+    if (!passwordRequirements.hasUppercase)
+      errors.push('La contraseña debe contener al menos una letra mayúscula.')
+    if (!passwordRequirements.hasLowercase)
+      errors.push('La contraseña debe contener al menos una letra minúscula.')
+    if (!passwordRequirements.hasNumber)
+      errors.push('La contraseña debe contener al menos un número.')
 
-    if (password !== confirmPasswordE) errors.push('Las contraseñas no coinciden.')
+    if (password !== confirmPasswordE)
+      errors.push('Las contraseñas no coinciden.')
     if (!terms) errors.push('Debes aceptar los términos y condiciones.')
 
     if (errors.length > 0) {
       setMessage(errors.join(' '))
       return
     }
-
 
     try {
       setMessage('Registrando entidad...')
@@ -434,7 +445,7 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
         emailE: emailE,
         NumTelE: NumTelE,
         direccionE: direccionE,
-        password: password
+        password: password,
       }
       console.log('Enviando datos:', registroData)
 
@@ -445,7 +456,6 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
       setTimeout(() => {
         if (typeof onGoToLogin === 'function') onGoToLogin()
       }, 2000)
-
     } catch (error) {
       console.error('Error en registro:', error)
       const backendMsg = error?.message || 'No se pudo registrar la entidad.'
@@ -469,7 +479,6 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
 
   return (
     <div className="register-container">
-
       {/* Register Container */}
       <div className="register-content">
         <div className="register-box">
@@ -478,7 +487,13 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
               if (typeof onBackToRoles === 'function') {
                 onBackToRoles()
               } else {
-                navigate('/register-roles')
+                navigate('/verificar-email', {
+                  state: {
+                    email: emailE,
+                    tipoUsuario: 'entidad',
+                    nombre: nomEnti,
+                  },
+                })
               }
             }}
             className="back-button"
@@ -498,7 +513,7 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
                   value={nomEnti}
                   onChange={(e) => setNomEnti(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder='Nombre de la entidad'
+                  placeholder="Nombre de la entidad"
                   className="register-input"
                   required
                 />
@@ -626,7 +641,7 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
                 value={nit}
                 onChange={(e) => setNit(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder='Número de identificación Tributaria'
+                placeholder="Número de identificación Tributaria"
                 className="register-input"
                 required
               />
@@ -634,13 +649,15 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
 
             {/* Email Input */}
             <div className="register-input-group">
-              <label className="register-label">Correo electrónico institucional</label>
+              <label className="register-label">
+                Correo electrónico institucional
+              </label>
               <input
                 type="email"
                 value={emailE}
                 onChange={(e) => setEmailE(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder='email@correo.com'
+                placeholder="email@correo.com"
                 className="register-input"
                 required
               />
@@ -648,13 +665,15 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
 
             {/* Numero de telefono Input */}
             <div className="register-input-group">
-              <label className="register-label">Número telefónico institucional</label>
+              <label className="register-label">
+                Número telefónico institucional
+              </label>
               <input
                 type="text"
                 value={NumTelE}
                 onChange={(e) => setNumTelE(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder='Ej. 3123456789'
+                placeholder="Ej. 3123456789"
                 className="register-input"
                 required
               />
@@ -662,13 +681,15 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
 
             {/* Direccion Input */}
             <div className="register-input-group">
-              <label className="register-label">Dirección (sede principal)</label>
+              <label className="register-label">
+                Dirección (sede principal)
+              </label>
               <input
                 type="text"
                 value={direccionE}
                 onChange={(e) => setDireccionE(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder='Ej. Calle 100 #15-55, barrio Barrios Unidos'
+                placeholder="Ej. Calle 100 #15-55, barrio Barrios Unidos"
                 className="register-input"
                 required
               />
@@ -683,7 +704,7 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder='Ej. MiContra123'
+                  placeholder="Ej. MiContra123"
                   className="register-password-input"
                   required
                 />
@@ -719,17 +740,29 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
               </div>
               {password && (
                 <div className="password-requirements">
-                  <div className={`password-requirement ${passwordRequirements.minLength ? 'valid' : 'invalid'}`}>
-                    {passwordRequirements.minLength ? '✓' : '✗'} Mínimo 8 caracteres
+                  <div
+                    className={`password-requirement ${passwordRequirements.minLength ? 'valid' : 'invalid'}`}
+                  >
+                    {passwordRequirements.minLength ? '✓' : '✗'} Mínimo 8
+                    caracteres
                   </div>
-                  <div className={`password-requirement ${passwordRequirements.hasUppercase ? 'valid' : 'invalid'}`}>
-                    {passwordRequirements.hasUppercase ? '✓' : '✗'} Al menos una letra mayúscula
+                  <div
+                    className={`password-requirement ${passwordRequirements.hasUppercase ? 'valid' : 'invalid'}`}
+                  >
+                    {passwordRequirements.hasUppercase ? '✓' : '✗'} Al menos una
+                    letra mayúscula
                   </div>
-                  <div className={`password-requirement ${passwordRequirements.hasLowercase ? 'valid' : 'invalid'}`}>
-                    {passwordRequirements.hasLowercase ? '✓' : '✗'} Al menos una letra minúscula
+                  <div
+                    className={`password-requirement ${passwordRequirements.hasLowercase ? 'valid' : 'invalid'}`}
+                  >
+                    {passwordRequirements.hasLowercase ? '✓' : '✗'} Al menos una
+                    letra minúscula
                   </div>
-                  <div className={`password-requirement ${passwordRequirements.hasNumber ? 'valid' : 'invalid'}`}>
-                    {passwordRequirements.hasNumber ? '✓' : '✗'} Al menos un número
+                  <div
+                    className={`password-requirement ${passwordRequirements.hasNumber ? 'valid' : 'invalid'}`}
+                  >
+                    {passwordRequirements.hasNumber ? '✓' : '✗'} Al menos un
+                    número
                   </div>
                 </div>
               )}
@@ -744,7 +777,7 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
                   value={confirmPasswordE}
                   onChange={(e) => setConfirmPasswordE(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder='Confirmar contraseña'
+                  placeholder="Confirmar contraseña"
                   className="register-password-input"
                   required
                 />
@@ -791,23 +824,30 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
                   required
                 />
                 <p className="register-checkbox-text">
-                  Declaro que la entidad hace uso de la información solo con fines estadísticos y respetando la privacidad de los vendedores
+                  Declaro que la entidad hace uso de la información solo con
+                  fines estadísticos y respetando la privacidad de los
+                  vendedores
                 </p>
               </label>
             </div>
 
             {/* Submit */}
-            <button type="button" onClick={handleSubmit} className="register-submit-button">
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="register-submit-button"
+            >
               Registrarse
             </button>
 
             {/* Message */}
             {message && (
               <div
-                className={`register-message ${message.includes('exitoso')
-                  ? 'register-message-success'
-                  : 'register-message-error'
-                  }`}
+                className={`register-message ${
+                  message.includes('exitoso')
+                    ? 'register-message-success'
+                    : 'register-message-error'
+                }`}
               >
                 {message}
               </div>

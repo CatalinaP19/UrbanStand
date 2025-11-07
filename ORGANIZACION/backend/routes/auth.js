@@ -5,7 +5,11 @@ const crypto = require("crypto");
 const { body, validationResult } = require("express-validator");
 const Vendedor = require("../models/Vendedor");
 const Localidad = require("../models/Localidad");
-const { enviarEmailConfirmacion } = require("../services/emailService");
+const { 
+  enviarEmailConfirmacion,
+  enviarEmailRecuperacion  // ✅ Importar esta función
+} = require("../services/emailService");
+
 
 const router = express.Router();
 
@@ -181,7 +185,7 @@ router.post(
         genero,
         selectedProducts,
         direccion,
-        id_localidad:localidadDoc._id,
+        id_localidad: localidadDoc._id,
         rivi,
         vigencia,
       });
@@ -189,7 +193,7 @@ router.post(
       await nuevoVendedor.save();
 
       // Generar token de confirmación de email
-      const tokenConfirmacion = crypto.randomBytes(32).toString('hex');
+      const tokenConfirmacion = crypto.randomBytes(32).toString("hex");
       nuevoVendedor.tokenConfirmacion = tokenConfirmacion;
       nuevoVendedor.tokenConfirmacionExpira = Date.now() + 24 * 60 * 60 * 1000; // 24 horas
       nuevoVendedor.emailVerificado = false;
@@ -202,9 +206,9 @@ router.post(
           nuevoVendedor.firstName,
           tokenConfirmacion
         );
-        console.log('✅ Email de confirmación enviado a:', nuevoVendedor.email);
+        console.log("✅ Email de confirmación enviado a:", nuevoVendedor.email);
       } catch (emailError) {
-        console.error('⚠️ Error al enviar email de confirmación:', emailError);
+        console.error("⚠️ Error al enviar email de confirmación:", emailError);
         // No fallar el registro si el email falla
       }
 
@@ -222,10 +226,11 @@ router.post(
 
       // Respuesta exitosa
       res.status(201).json({
-        message: "Vendedor registrado exitosamente. Por favor verifica tu email para confirmar tu cuenta.",
+        message:
+          "Vendedor registrado exitosamente. Por favor verifica tu email para confirmar tu cuenta.",
         token,
         vendedor: nuevoVendedor.toPublicJSON(),
-        emailEnviado: true
+        emailEnviado: true,
       });
     } catch (error) {
       console.error("Error en registro:", error);
@@ -289,6 +294,19 @@ router.post(
         });
       }
 
+      if (!vendedor.emailVerificado) {
+        return res.status(403).json({
+          error: "Email no verificado",
+          message:
+            "Debes verificar tu email antes de iniciar sesión. Revisa tu bandeja de entrada.",
+          emailVerificado: false,
+          vendedor: {
+            firstName: vendedor.firstName,
+            email: vendedor.email,
+          },
+        });
+      }
+
       // Actualizar estado a activo si está inactivo
       if (vendedor.vigencia === "inactivo") {
         vendedor.vigencia = "activo";
@@ -325,23 +343,24 @@ router.post(
 );
 
 // VALIDAR TOKEN (RUTA PROTEGIDA)
-router.get('/validate', authenticateToken, async (req, res) => {
+router.get("/validate", authenticateToken, async (req, res) => {
   try {
-    const vendedor = await Vendedor.findById(req.vendedor.vendedorId)
-      .select('vigencia emailVerificado');
+    const vendedor = await Vendedor.findById(req.vendedor.vendedorId).select(
+      "vigencia emailVerificado"
+    );
 
     if (!vendedor) {
       return res.status(404).json({
         valid: false,
-        message: 'Vendedor no encontrado'
+        message: "Vendedor no encontrado",
       });
     }
 
     // Verificar estado de cuenta
-    if (vendedor.vigencia !== 'activo') {
+    if (vendedor.vigencia !== "activo") {
       return res.status(403).json({
         valid: false,
-        message: 'Cuenta inactiva o suspendida'
+        message: "Cuenta inactiva o suspendida",
       });
     }
 
@@ -349,14 +368,14 @@ router.get('/validate', authenticateToken, async (req, res) => {
       valid: true,
       vendedor: {
         id: vendedor._id,
-        role: 'vendedor'
-      }
+        role: "vendedor",
+      },
     });
   } catch (error) {
-    console.error('Error validando token:', error);
+    console.error("Error validando token:", error);
     res.status(500).json({
       valid: false,
-      message: 'Error al validar token'
+      message: "Error al validar token",
     });
   }
 });
@@ -461,6 +480,139 @@ router.put(
       res.status(500).json({
         error: "Error interno del servidor",
         message: "No se pudo actualizar el perfil",
+      });
+    }
+  }
+);
+
+// ========================================
+// RECUPERACIÓN DE CONTRASEÑA - VENDEDOR
+// ========================================
+
+// Solicitar recuperación de contraseña
+router.post(
+  "/solicitar-recuperacion",
+  [
+    body("email")
+      .isEmail()
+      .withMessage("Debe ser un correo válido")
+      .normalizeEmail(),
+  ],
+  handleValidationErrors,
+  async (req, res) => {
+    try {
+      const { email } = req.body;
+
+      // Buscar vendedor por email
+      const vendedor = await Vendedor.findOne({ email });
+
+      if (!vendedor) {
+        // Por seguridad, no revelar si el email existe o no
+        return res.status(200).json({
+          message: "Si el correo existe, recibirás un enlace de recuperación",
+        });
+      }
+
+      // Generar token de recuperación
+      const resetToken = crypto.randomBytes(32).toString("hex");
+      const resetTokenExpires = Date.now() + 3600000; // 1 hora
+
+      // Guardar token en el vendedor
+      vendedor.tokenRecuperacion = resetToken;
+      vendedor.tokenRecuperacionExpira = resetTokenExpires;
+      await vendedor.save();
+
+      // Enviar email usando la función correcta
+      try {
+        await enviarEmailRecuperacion(
+          // ✅ Usar enviarEmailRecuperacion
+          vendedor.email,
+          vendedor.firstName,
+          resetToken
+        );
+
+        console.log("✅ Email de recuperación enviado a:", vendedor.email);
+      } catch (emailError) {
+        console.error("⚠️ Error al enviar email:", emailError);
+        // Revertir cambios si el email falla
+        vendedor.tokenRecuperacion = null;
+        vendedor.tokenRecuperacionExpira = null;
+        await vendedor.save();
+
+        return res.status(500).json({
+          error: "Error al enviar el correo de recuperación",
+          message: "No se pudo enviar el email. Intenta nuevamente.",
+        });
+      }
+
+      res.status(200).json({
+        message:
+          "Se ha enviado un enlace de recuperación a tu correo electrónico",
+      });
+    } catch (error) {
+      console.error("Error en solicitar-recuperacion:", error);
+      res.status(500).json({
+        error: "Error interno del servidor",
+        message: "No se pudo procesar la solicitud",
+      });
+    }
+  }
+);
+
+// Restablecer contraseña con token
+router.post(
+  "/restablecer-password",
+  [
+    body("token").notEmpty().withMessage("El token es requerido"),
+    body("nuevaPassword")
+      .isLength({ min: 8 })
+      .withMessage("La contraseña debe tener al menos 8 caracteres"),
+  ],
+  handleValidationErrors,
+  async (req, res) => {
+    try {
+      const { token, nuevaPassword } = req.body;
+
+      // Buscar vendedor con token válido y no expirado
+      const vendedor = await Vendedor.findOne({
+        tokenRecuperacion: token,
+        tokenRecuperacionExpira: { $gt: Date.now() },
+      });
+
+      if (!vendedor) {
+        return res.status(400).json({
+          error: "Token inválido o expirado",
+          message: "El enlace de recuperación ha expirado o no es válido",
+        });
+      }
+
+      // Actualizar contraseña
+      vendedor.password = nuevaPassword;
+      vendedor.tokenRecuperacion = null;
+      vendedor.tokenRecuperacionExpira = null;
+      await vendedor.save();
+
+      console.log("✅ Contraseña actualizada para vendedor:", vendedor.email);
+
+      // Opcional: Enviar email de confirmación de cambio
+      try {
+        const {
+          enviarEmailCambioPassword,
+        } = require("../services/emailService");
+        await enviarEmailCambioPassword(vendedor.email, vendedor.firstName);
+      } catch (emailError) {
+        console.error("⚠️ Error al enviar email de confirmación:", emailError);
+        // No fallar si el email de confirmación falla
+      }
+
+      res.status(200).json({
+        message: "Contraseña actualizada exitosamente",
+      });
+    } catch (error) {
+      console.error("Error en restablecer-password:", error);
+      res.status(500).json({
+        error: "Error interno del servidor",
+        message: "No se pudo restablecer la contraseña",
       });
     }
   }

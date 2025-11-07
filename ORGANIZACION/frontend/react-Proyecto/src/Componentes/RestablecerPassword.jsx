@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'; // ✅ Agregar useSearchParams
 import apiService from '../services/apiService';
 
 export default function RestablecerPassword() {
   const { token } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams(); // ✅ Ahora está importado
+  const tipoUsuario = searchParams.get('tipo') || 'vendedor';
+  
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [mensaje, setMensaje] = useState('');
@@ -16,20 +19,21 @@ export default function RestablecerPassword() {
 
     // Validaciones
     if (password.length < 8) {
-      setMensaje('La contraseña debe tener al menos 8 caracteres');
+      setMensaje('❌ La contraseña debe tener al menos 8 caracteres');
       return;
     }
 
     if (password !== confirmPassword) {
-      setMensaje('Las contraseñas no coinciden');
+      setMensaje('❌ Las contraseñas no coinciden');
       return;
     }
 
     setIsSubmitting(true);
-    setMensaje('');
+    setMensaje('Procesando...');
 
     try {
-      await apiService.restablecerPassword(token, password);
+      // ✅ Ahora pasa el tipoUsuario al backend
+      await apiService.restablecerPassword(token, password, tipoUsuario);
       setMensaje('✅ Contraseña actualizada exitosamente. Redirigiendo al login...');
       
       setTimeout(() => {
@@ -37,7 +41,7 @@ export default function RestablecerPassword() {
       }, 3000);
     } catch (error) {
       console.error('Error al restablecer contraseña:', error);
-      setMensaje(error.message || 'Error al restablecer la contraseña. El enlace puede haber expirado.');
+      setMensaje(error.message || '❌ Error al restablecer la contraseña. El enlace puede haber expirado.');
     } finally {
       setIsSubmitting(false);
     }
@@ -63,19 +67,20 @@ export default function RestablecerPassword() {
         <h2 style={{ color: '#333', marginBottom: '10px', textAlign: 'center' }}>
           🔐 Restablecer Contraseña
         </h2>
-        <p style={{ color: '#666', marginBottom: '30px', textAlign: 'center' }}>
-          Ingresa tu nueva contraseña
+        <p style={{ color: '#666', marginBottom: '30px', textAlign: 'center', fontSize: '14px' }}>
+          Ingresa tu nueva contraseña para <strong>{tipoUsuario === 'entidad' ? 'Entidad' : 'Vendedor'}</strong>
         </p>
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', color: '#333', fontWeight: '500' }}>
+            <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: '500' }}>
               Nueva Contraseña
             </label>
             <input
               type={isPasswordVisible ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={isSubmitting}
               style={{
                 width: '100%',
                 padding: '12px',
@@ -91,13 +96,14 @@ export default function RestablecerPassword() {
           </div>
 
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', color: '#333', fontWeight: '500' }}>
+            <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: '500' }}>
               Confirmar Contraseña
             </label>
             <input
               type={isPasswordVisible ? "text" : "password"}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              disabled={isSubmitting}
               style={{
                 width: '100%',
                 padding: '12px',
@@ -117,6 +123,7 @@ export default function RestablecerPassword() {
                 type="checkbox"
                 checked={isPasswordVisible}
                 onChange={() => setIsPasswordVisible(!isPasswordVisible)}
+                disabled={isSubmitting}
                 style={{ marginRight: '8px' }}
               />
               <span style={{ color: '#666', fontSize: '14px' }}>Mostrar contraseñas</span>
@@ -150,7 +157,8 @@ export default function RestablecerPassword() {
               background: mensaje.includes('✅') ? '#d4edda' : '#f8d7da',
               border: `1px solid ${mensaje.includes('✅') ? '#c3e6cb' : '#f5c6cb'}`,
               color: mensaje.includes('✅') ? '#155724' : '#721c24',
-              textAlign: 'center'
+              textAlign: 'center',
+              fontSize: '14px'
             }}>
               {mensaje}
             </div>

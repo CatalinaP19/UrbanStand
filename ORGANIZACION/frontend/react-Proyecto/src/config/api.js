@@ -1,19 +1,27 @@
-// frontend/src/config/api.js
 const API_CONFIG = {
-  BASE_URL: 'http://localhost:3005', // Tu puerto del backend
+  BASE_URL: 'http://localhost:3005/api',
   
   VENDEDOR: {
-    REGISTER: '/api/auth/register',
-    LOGIN: '/api/auth/login',
-    PROFILE: '/api/auth/profile'
+    REGISTER: '/auth/register',
+    LOGIN: '/auth/login',
+    PROFILE: '/auth/profile',
+    RECUPERAR: '/vendedor/solicitar-recuperacion',     // ✅
+    RESTABLECER: '/vendedor/restablecer-password',     // ✅
   },
   
   ENTIDAD: {
-    REGISTER: '/api/entidad/register',
-    LOGIN: '/api/entidad/login',
-    PROFILE: '/api/entidad/profile',
-    ESTADISTICAS: '/api/entidad/estadisticas',
-    REPORTES: '/api/entidad/descargar-reporte'
+    REGISTER: '/entidad/register',
+    LOGIN: '/entidad/login',
+    PROFILE: '/entidad/profile',
+    ESTADISTICAS: '/entidad/estadisticas',
+    REPORTES: '/entidad/descargar-reporte',
+    RECUPERAR: '/entidad/solicitar-recuperacion',      // ✅
+    RESTABLECER: '/entidad/restablecer-password',      // ✅
+  },
+  
+  EMAIL: {
+    CONFIRMAR: '/auth/confirmar',
+    REENVIAR: '/email/reenviar-confirmacion',
   }
 };
 

@@ -1,4 +1,3 @@
-// src/main.jsx
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
@@ -14,8 +13,11 @@ import VistaVendedor from './Componentes/VistaVendedor.jsx'
 import VistaEntidades from './Componentes/VistaEntidades.jsx'
 import VistaCliente from './Componentes/VistaCliente.jsx'
 import PerfilVendedor from './Componentes/PerfilVendedor.jsx'
+import EditarPerfilVendedor from './Componentes/EditarPerfilVendedor.jsx'
 import ConfirmarEmail from './Componentes/ConfirmarEmail.jsx'
 import RestablecerPassword from './Componentes/RestablecerPassword.jsx'
+import VerificarEmail from './Componentes/VerificarEmail.jsx'
+import SolicitarRestablecimiento from './Componentes/SolicitarRestablecimiento.jsx'
 import Layout from './Layout.jsx'
 import { AuthProvider } from './context/AuthContex.jsx'
 import PrivateRoute from './Componentes/PrivateRoute.jsx'
@@ -36,6 +38,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           {/* Rutas para confirmación de email y recuperación de contraseña */}
           <Route path="/confirmar-email/:token" element={<ConfirmarEmail />} />
           <Route path="/restablecer-password/:token" element={<RestablecerPassword />} />
+          <Route path="/verificar-email" element={<VerificarEmail />} />
+          <Route path="/solicitar-restablecimiento" element={<SolicitarRestablecimiento />} />
 
           {/* Rutas protegidas */}
           <Route
@@ -63,6 +67,14 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             }
           />
           <Route
+            path="/vendedor/editar-perfil"
+            element={
+              <PrivateRoute allowedRoles={['vendedor']}>
+                <EditarPerfilVendedor />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/entidades"
             element={
               <PrivateRoute allowedRoles={['entidad']}>
@@ -73,7 +85,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route
             path="/cliente"
             element={
-                <VistaCliente />
+              <VistaCliente />
             }
           />
 

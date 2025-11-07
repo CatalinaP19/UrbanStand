@@ -478,11 +478,7 @@ export default function Navbar({
                     className={`navbar-link ${location.pathname === '/vendedor/perfil' ? 'active' : ''}`}
                     onClick={() => {
                       setMenuOpen(false);
-                      // Por ahora scroll al perfil en la misma página
-                      const profileSection = document.querySelector('.navbar-user');
-                      if (profileSection) {
-                        profileSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                      }
+                      navigate('/vendedor/perfil');
                     }}
                   >
                     Perfil

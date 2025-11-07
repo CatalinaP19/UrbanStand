@@ -682,7 +682,13 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
               setMessage('')
               onGoToLogin()
             } else {
-              navigate('/login')
+              navigate('/verificar-email', {
+                state: {
+                  email: email,
+                  tipoUsuario: 'vendedor',
+                  nombre: firstName,
+                }
+              });
             }
           }, 2000)
         } else {

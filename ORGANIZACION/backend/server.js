@@ -39,16 +39,23 @@ const authEntidadRoutes = require('./routes/authEntidad');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const emailRoutes = require('./routes/emailRoutes');
 
+// ========================================
+// REGISTRAR RUTAS
+// ========================================
+
 // Rutas de vendedores
 app.use('/api/auth', authRoutes);
-app.use('/api/vendedores', authRoutes); // Mantener compatibilidad si ya usas esta ruta
+app.use('/api/vendedores', authRoutes);  // Mantener compatibilidad (plural)
+app.use('/api/vendedor', authRoutes);    // ✅ NUEVA LÍNEA - Para recuperación (singular)
 
 // Rutas de entidades gubernamentales
 app.use('/api/entidad', authEntidadRoutes.router);
+
 // Rutas de dashboard/estadísticas
 app.use('/api/dashboard', dashboardRoutes);
+
 // Rutas de email (confirmación y recuperación)
-app.use('/api/email', emailRoutes);
+app.use('/api/auth', emailRoutes); 
 
 // Ruta de prueba
 app.get('/', (req, res) => {
@@ -60,14 +67,18 @@ app.get('/', (req, res) => {
       vendedores: {
         register: 'POST /api/auth/register',
         login: 'POST /api/auth/login',
-        profile: 'GET /api/auth/profile'
+        profile: 'GET /api/auth/profile',
+        solicitarRecuperacion: 'POST /api/vendedor/solicitar-recuperacion',
+        restablecerPassword: 'POST /api/vendedor/restablecer-password'
       },
       entidades: {
         register: 'POST /api/entidad/register',
         login: 'POST /api/entidad/login',
         profile: 'GET /api/entidad/profile',
         estadisticas: 'GET /api/entidad/estadisticas',
-        reportes: 'POST /api/entidad/descargar-reporte'
+        reportes: 'POST /api/entidad/descargar-reporte',
+        solicitarRecuperacion: 'POST /api/entidad/solicitar-recuperacion',
+        restablecerPassword: 'POST /api/entidad/restablecer-password'
       }
     }
   });
@@ -92,11 +103,15 @@ app.use('*', (req, res) => {
       'POST /api/auth/register',
       'POST /api/auth/login', 
       'GET /api/auth/profile',
+      'POST /api/vendedor/solicitar-recuperacion',
+      'POST /api/vendedor/restablecer-password',
       'POST /api/entidad/register',
       'POST /api/entidad/login',
       'GET /api/entidad/profile',
       'GET /api/entidad/estadisticas',
-      'POST /api/entidad/descargar-reporte'
+      'POST /api/entidad/descargar-reporte',
+      'POST /api/entidad/solicitar-recuperacion',
+      'POST /api/entidad/restablecer-password'
     ]
   });
 });
@@ -105,5 +120,6 @@ app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
   console.log(`📱 UrbanStand API: http://localhost:${PORT}`);
   console.log(`👥 Vendedores: http://localhost:${PORT}/api/auth`);
+  console.log(`🔑 Recuperación Vendedor: http://localhost:${PORT}/api/vendedor`);
   console.log(`🏛️  Entidades: http://localhost:${PORT}/api/entidad`);
 });
