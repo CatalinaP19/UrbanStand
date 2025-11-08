@@ -1,4 +1,6 @@
 node_modules/
+echo .env
+.env
 
 # Logs
 logs
