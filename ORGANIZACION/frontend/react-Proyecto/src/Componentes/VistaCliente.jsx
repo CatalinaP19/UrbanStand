@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MapPin, Search, Eye, Phone, MessageCircle, Star, Navigation, Zap, Clock, ShoppingCart } from 'lucide-react';
-import './VistaCliente.css';
 
 export default function VistaCliente ({ onBackToRoles }) {
   const [selectedVendor, setSelectedVendor] = useState(null);
@@ -12,6 +11,7 @@ export default function VistaCliente ({ onBackToRoles }) {
   const leafletMapRef = useRef(null);
   const markersRef = useRef([]);
   const circlesRef = useRef([]);
+  const routingControlRef = useRef(null);
 
   const vendedores = [
     {
@@ -72,8 +72,6 @@ export default function VistaCliente ({ onBackToRoles }) {
     }
   ];
 
-  {/*Buscador*/}
-
   const filteredVendedores = vendedores.filter(v => 
     v.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
     v.producto.toLowerCase().includes(searchTerm.toLowerCase())
@@ -83,37 +81,173 @@ export default function VistaCliente ({ onBackToRoles }) {
     setTrackingVendor(vendor);
     setIsTracking(true);
     setSelectedVendor(vendor);
+    
+    // Crear la ruta con leaflet-routing-machine
+    if (leafletMapRef.current && window.L && window.L.Routing) {
+      // Remover ruta anterior si existe
+      if (routingControlRef.current) {
+        leafletMapRef.current.removeControl(routingControlRef.current);
+      }
+
+      // Crear nueva ruta
+      const routingControl = window.L.Routing.control({
+        waypoints: [
+          window.L.latLng(userLocation.lat, userLocation.lng),
+          window.L.latLng(vendor.ubicacion.lat, vendor.ubicacion.lng)
+        ],
+        fitSelectedRoutes: true,
+        collapsible: true,
+        autoRoute: true,
+        waypointMode: 'snap',
+        showAlternatives: true,
+        altLineOptions: {
+          styles: [
+            {color: 'black', opacity: 0.15, weight: 9},
+            {color: 'white', opacity: 0.8, weight: 6},
+            {color: '#10b981', opacity: 0.5, weight: 2}
+          ]
+        },
+        lineOptions: {
+          styles: [{color: '#3b82f6', opacity: 0.8, weight: 6}]
+        },
+        createMarker: function(i, waypoint, n) {
+          let icon;
+          if (i === 0) {
+            // Marcador de inicio (usuario)
+            icon = window.L.divIcon({
+              className: 'custom-user-marker',
+              html: `
+                <div style="
+                  width: 20px;
+                  height: 20px;
+                  background-color: #3b82f6;
+                  border: 3px solid white;
+                  border-radius: 50%;
+                  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                "></div>
+              `,
+              iconSize: [20, 20],
+              iconAnchor: [10, 10]
+            });
+          } else {
+            // Marcador de destino (vendedor)
+            icon = window.L.divIcon({
+              className: 'custom-vendor-marker',
+              html: `
+                <div style="position: relative;">
+                  <div style="
+                    width: 40px;
+                    height: 40px;
+                    background-color: #10b981;
+                    border: 3px solid white;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 20px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                    animation: bounce 1s infinite;
+                  ">
+                    ${vendor.avatar}
+                  </div>
+                  <div style="
+                    position: absolute;
+                    top: -2px;
+                    right: -2px;
+                    width: 12px;
+                    height: 12px;
+                    background-color: #10b981;
+                    border: 2px solid white;
+                    border-radius: 50%;
+                  "></div>
+                </div>
+                <style>
+                  @keyframes bounce {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-10px); }
+                  }
+                </style>
+              `,
+              iconSize: [40, 40],
+              iconAnchor: [20, 40]
+            });
+          }
+          
+          const marker = window.L.marker(waypoint.latLng, {
+            icon: icon,
+            draggable: false
+          });
+          
+          if (i === n - 1) {
+            marker.bindPopup(`
+              <div style="font-family: system-ui, sans-serif; min-width: 150px;">
+                <strong style="font-size: 14px;">${vendor.nombre}</strong><br/>
+                <span style="color: #6b7280;">${vendor.producto}</span><br/>
+                <span style="color: #10b981; font-weight: 500;">${vendor.precio}</span>
+              </div>
+            `);
+          }
+          
+          return marker;
+        }
+      }).addTo(leafletMapRef.current);
+
+      routingControlRef.current = routingControl;
+
+      // Ajustar vista para mostrar toda la ruta
+      routingControl.on('routesfound', function(e) {
+        const routes = e.routes;
+        const summary = routes[0].summary;
+        console.log(`Distancia: ${(summary.totalDistance / 1000).toFixed(2)} km`);
+        console.log(`Tiempo estimado: ${Math.round(summary.totalTime / 60)} minutos`);
+      });
+    }
   };
 
   const stopTracking = () => {
     setTrackingVendor(null);
     setIsTracking(false);
-  };
-
-  useEffect(() => {
-    let interval;
-    if (isTracking && trackingVendor) {
-      interval = setInterval(() => {
-      }, 3000);
+    
+    // Remover la ruta del mapa
+    if (routingControlRef.current && leafletMapRef.current) {
+      leafletMapRef.current.removeControl(routingControlRef.current);
+      routingControlRef.current = null;
     }
-    return () => clearInterval(interval);
-  }, [isTracking, trackingVendor]);
+    
+    // Restaurar marcadores normales
+    if (leafletMapRef.current && window.L) {
+      updateVendorMarkers(leafletMapRef.current);
+    }
+  };
 
   // Inicializar Leaflet
   useEffect(() => {
     const loadLeaflet = () => {
       // Cargar CSS de Leaflet
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-      document.head.appendChild(link);
+      const linkLeaflet = document.createElement('link');
+      linkLeaflet.rel = 'stylesheet';
+      linkLeaflet.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(linkLeaflet);
+
+      // Cargar CSS de Leaflet Routing Machine
+      const linkRouting = document.createElement('link');
+      linkRouting.rel = 'stylesheet';
+      linkRouting.href = 'https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css';
+      document.head.appendChild(linkRouting);
 
       // Cargar JS de Leaflet
-      const script = document.createElement('script');
-      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-      script.async = true;
-      script.onload = initMap;
-      document.head.appendChild(script);
+      const scriptLeaflet = document.createElement('script');
+      scriptLeaflet.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      scriptLeaflet.async = true;
+      scriptLeaflet.onload = () => {
+        // Cargar JS de Leaflet Routing Machine después de Leaflet
+        const scriptRouting = document.createElement('script');
+        scriptRouting.src = 'https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js';
+        scriptRouting.async = true;
+        scriptRouting.onload = initMap;
+        document.head.appendChild(scriptRouting);
+      };
+      document.head.appendChild(scriptLeaflet);
     };
 
     const initMap = () => {
@@ -121,7 +255,7 @@ export default function VistaCliente ({ onBackToRoles }) {
 
       // Inicializar mapa con opciones personalizadas
       const map = window.L.map(mapRef.current, {
-        zoomControl: false,
+        zoomControl: true,
         tap: false,
         dragging: true,
         scrollWheelZoom: true,
@@ -141,7 +275,6 @@ export default function VistaCliente ({ onBackToRoles }) {
       container.style.cursor = 'default';
       container.style.pointerEvents = 'auto';
       
-      // Prevenir eventos de clic en el contenedor del mapa
       window.L.DomEvent.disableClickPropagation(container);
       window.L.DomEvent.disableScrollPropagation(container);
 
@@ -179,26 +312,29 @@ export default function VistaCliente ({ onBackToRoles }) {
       updateVendorMarkers(map);
     };
 
-    if (window.L) {
+    if (window.L && window.L.Routing) {
       initMap();
     } else {
       loadLeaflet();
     }
 
     return () => {
+      if (routingControlRef.current && leafletMapRef.current) {
+        leafletMapRef.current.removeControl(routingControlRef.current);
+      }
       if (leafletMapRef.current) {
         leafletMapRef.current.remove();
         leafletMapRef.current = null;
       }
     };
-  }, []); // Solo ejecutar una vez al montar
+  }, []);
 
-  // Actualizar marcadores cuando cambian los filtros o el tracking
+  // Actualizar marcadores cuando cambian los filtros
   useEffect(() => {
-    if (leafletMapRef.current && window.L) {
+    if (leafletMapRef.current && window.L && !isTracking) {
       updateVendorMarkers(leafletMapRef.current);
     }
-  }, [searchTerm, trackingVendor]);
+  }, [searchTerm]);
 
   const updateVendorMarkers = (map) => {
     // Limpiar marcadores y círculos anteriores
@@ -224,7 +360,6 @@ export default function VistaCliente ({ onBackToRoles }) {
               justify-content: center;
               font-size: 20px;
               box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-              ${trackingVendor?.id === vendor.id ? 'animation: bounce 1s infinite;' : ''}
             ">
               ${vendor.avatar}
             </div>
@@ -241,12 +376,6 @@ export default function VistaCliente ({ onBackToRoles }) {
               "></div>
             ` : ''}
           </div>
-          <style>
-            @keyframes bounce {
-              0%, 100% { transform: translateY(0); }
-              50% { transform: translateY(-10px); }
-            }
-          </style>
         `,
         iconSize: [40, 40],
         iconAnchor: [20, 40],
@@ -268,7 +397,6 @@ export default function VistaCliente ({ onBackToRoles }) {
           </div>
         `);
 
-      // Manejador de eventos personalizado para el marcador
       marker.on('click', (e) => {
         const event = e.originalEvent || e;
         if (event) {
@@ -276,18 +404,15 @@ export default function VistaCliente ({ onBackToRoles }) {
           event.preventDefault();
         }
         
-        // Actualizar el vendedor seleccionado
         setSelectedVendor(prevVendor => 
           prevVendor?.id === vendor.id ? null : vendor
         );
         
-        // Abrir el popup si no está abierto
         if (!marker.isPopupOpen()) {
           marker.openPopup();
         }
       });
       
-      // Prevenir cierre del popup al hacer clic en él
       marker.on('popupopen', () => {
         const popup = marker.getPopup();
         if (popup) {
@@ -302,231 +427,111 @@ export default function VistaCliente ({ onBackToRoles }) {
       });
 
       markersRef.current.push(marker);
-
-      // Círculo de radar si está siendo rastreado
-      if (trackingVendor?.id === vendor.id) {
-        const circle = window.L.circle([vendor.ubicacion.lat, vendor.ubicacion.lng], {
-          color: '#10b981',
-          fillColor: '#10b981',
-          fillOpacity: 0.1,
-          radius: 100
-        }).addTo(map);
-        circlesRef.current.push(circle);
-
-        // Centrar mapa en el vendedor rastreado
-        map.setView([vendor.ubicacion.lat, vendor.ubicacion.lng], 16);
-      }
     });
   };
 
-  const MapComponent = React.memo(({ onMarkerClick, trackingVendor, userLocation, filteredVendedores }) => {
-    const mapRef = useRef(null);
-    const leafletMapRef = useRef(null);
-    const markersRef = useRef([]);
-    const circlesRef = useRef([]);
-
-    useEffect(() => {
-      if (!mapRef.current || !window.L) return;
-
-      // Inicializar mapa
-      const map = window.L.map(mapRef.current, {
-        zoomControl: false,
-        tap: false,
-        dragging: true,
-        scrollWheelZoom: true,
-        doubleClickZoom: true,
-        boxZoom: true,
-        keyboard: true
-      }).setView([userLocation.lat, userLocation.lng], 15);
-
-      // Agregar capa de OpenStreetMap
-      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 19
-      }).addTo(map);
-
-      // Configuración de eventos del mapa
-      const container = map.getContainer();
-      container.style.cursor = 'default';
-      container.style.pointerEvents = 'auto';
-      
-      window.L.DomEvent.disableClickPropagation(container);
-      window.L.DomEvent.disableScrollPropagation(container);
-
-      leafletMapRef.current = map;
-
-      // Función para actualizar marcadores
-      const updateMarkers = () => {
-        // Limpiar marcadores y círculos anteriores
-        markersRef.current.forEach(marker => map.removeLayer(marker));
-        circlesRef.current.forEach(circle => map.removeLayer(circle));
-        markersRef.current = [];
-        circlesRef.current = [];
-
-        filteredVendedores.forEach((vendor) => {
-          const vendorIcon = window.L.divIcon({
-            className: 'custom-vendor-marker',
-            html: `
-              <div style="position: relative;">
-                <div style="
-                  width: 40px;
-                  height: 40px;
-                  background-color: ${vendor.activo ? '#10b981' : '#6b7280'};
-                  border: 3px solid white;
-                  border-radius: 50%;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                  font-size: 20px;
-                  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-                  ${trackingVendor?.id === vendor.id ? 'animation: bounce 1s infinite;' : ''}
-                ">
-                  ${vendor.avatar}
-                </div>
-                ${vendor.activo ? `
-                  <div style="
-                    position: absolute;
-                    top: -2px;
-                    right: -2px;
-                    width: 12px;
-                    height: 12px;
-                    background-color: #10b981;
-                    border: 2px solid white;
-                    border-radius: 50%;
-                  "></div>
-                ` : ''}
-              </div>
-              <style>
-                @keyframes bounce {
-                  0%, 100% { transform: translateY(0); }
-                  50% { transform: translateY(-10px); }
-                }
-              </style>
-            `,
-            iconSize: [40, 40],
-            iconAnchor: [20, 40],
-            popupAnchor: [0, -40]
-          });
-
-          const marker = window.L.marker([vendor.ubicacion.lat, vendor.ubicacion.lng], { 
-            icon: vendorIcon,
-            riseOnHover: true
-          });
-
-          marker
-            .addTo(map)
-            .bindPopup(`
-              <div style="font-family: system-ui, sans-serif; min-width: 150px;">
-                <strong style="font-size: 14px;">${vendor.nombre}</strong><br/>
-                <span style="color: #6b7280;">${vendor.producto}</span><br/>
-                <span style="color: #10b981; font-weight: 500;">${vendor.precio}</span>
-              </div>
-            `);
-
-          // Manejador de eventos del marcador
-          marker.on('click', (e) => {
-            if (e.originalEvent) {
-              e.originalEvent.stopPropagation();
-              e.originalEvent.preventDefault();
-            }
-            onMarkerClick(vendor);
-          });
-
-          markersRef.current.push(marker);
-
-          // Círculo de radar si está siendo rastreado
-          if (trackingVendor?.id === vendor.id) {
-            const circle = window.L.circle([vendor.ubicacion.lat, vendor.ubicacion.lng], {
-              color: '#10b981',
-              fillColor: '#10b981',
-              fillOpacity: 0.1,
-              radius: 100
-            }).addTo(map);
-            circlesRef.current.push(circle);
-            map.setView([vendor.ubicacion.lat, vendor.ubicacion.lng], 16);
-          }
-        });
-      };
-
-      // Inicializar marcadores
-      updateMarkers();
-
-      // Limpieza al desmontar
-      return () => {
-        if (leafletMapRef.current) {
-          leafletMapRef.current.remove();
-          leafletMapRef.current = null;
-        }
-      };
-    }, [filteredVendedores, trackingVendor, userLocation, onMarkerClick]);
-
-    return (
-      <div 
-        ref={mapRef} 
-        className="vista-cliente-map" 
-        style={{ width: '100%', height: '100%' }}
-      />
-    );
-  });
-
-  // Manejador de clic en marcador
-  const handleMarkerClick = (vendor) => {
-    setSelectedVendor(prevVendor => 
-      prevVendor?.id === vendor.id ? null : vendor
-    );
-  };
-
   return (
-    <div className="vista-cliente-container">
-
-      <div className="vista-cliente-main">
-        <div className="vista-cliente-grid">
+    <div style={{
+      width: '100vw',
+      height: '100vh',
+      display: 'flex',
+      fontFamily: 'system-ui, -apple-system, sans-serif',
+      background: '#f3f4f6'
+    }}>
+      <div style={{ display: 'flex', width: '100%', height: '100%' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', width: '100%', height: '100%', gap: '0' }}>
           
           {/* Mapa */}
-          <div className="vista-cliente-map-container">
-            <MapComponent 
-              onMarkerClick={handleMarkerClick}
-              trackingVendor={trackingVendor}
-              userLocation={userLocation}
-              filteredVendedores={filteredVendedores}
+          <div style={{ position: 'relative', height: '100%' }}>
+            <div 
+              ref={mapRef} 
+              style={{ width: '100%', height: '100%' }}
             />
             
             {/* Controles del mapa */}
             {isTracking && (
-              <div className="vista-cliente-tracking-control">
+              <div style={{
+                position: 'absolute',
+                top: '20px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                background: 'white',
+                padding: '12px 20px',
+                borderRadius: '12px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                zIndex: 1000
+              }}>
                 <Zap size={20} style={{ color: '#10b981' }} />
-                <span className="vista-cliente-tracking-text">
-                  Rastreando a {trackingVendor?.nombre}
+                <span style={{ fontWeight: '500', color: '#1f2937' }}>
+                  Rastreando ruta de {trackingVendor?.nombre} vendedor de {trackingVendor?.producto}
                 </span>
-                <button onClick={stopTracking} className="vista-cliente-stop-button">
-                  Detener
+                <button 
+                  onClick={stopTracking}
+                  style={{
+                    background: '#ef4444',
+                    color: 'white',
+                    border: 'none',
+                    padding: '6px 12px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: '500'
+                  }}
+                >
+                  Finalizar seguimiento
                 </button>
               </div>
             )}
           </div>
 
           {/* Panel lateral */}
-          <div className="vista-cliente-panel">
+          <div style={{
+            background: 'white',
+            borderLeft: '1px solid #e5e7eb',
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+            overflow: 'hidden'
+          }}>
             
             {/* Header del panel */}
-            <div className="vista-cliente-panel-header">
-              <h2 className="vista-cliente-panel-title">Lista de vendedores</h2>
+            <div style={{ padding: '20px', borderBottom: '1px solid #e5e7eb' }}>
+              <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '16px', color: '#1f2937' }}>
+                Lista de vendedores
+              </h2>
               
               {/* Buscador */}
-              <div className="vista-cliente-search-container">
-                <Search size={20} className="vista-cliente-search-icon" />
+              <div style={{ position: 'relative' }}>
+                <Search size={20} style={{ 
+                  position: 'absolute', 
+                  left: '12px', 
+                  top: '50%', 
+                  transform: 'translateY(-50%)',
+                  color: '#9ca3af'
+                }} />
                 <input
                   type="text"
                   placeholder="Busca por producto o nombre"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="vista-cliente-search-input"
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px 10px 40px',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    outline: 'none',
+                    transition: 'border-color 0.2s'
+                  }}
                 />
               </div>
             </div>
 
             {/* Lista de vendedores */}
-            <div className="vista-cliente-vendors-list">
+            <div style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
               {filteredVendedores.map((vendor) => (
                 <div
                   key={vendor.id}
@@ -536,41 +541,82 @@ export default function VistaCliente ({ onBackToRoles }) {
                       prevVendor?.id === vendor.id ? null : vendor
                     );
                   }}
-                  className={`vista-cliente-vendor-card ${
-                    selectedVendor?.id === vendor.id ? 'selected' : ''
-                  }`}
+                  style={{
+                    background: selectedVendor?.id === vendor.id ? '#f0fdf4' : 'white',
+                    border: `2px solid ${selectedVendor?.id === vendor.id ? '#10b981' : '#e5e7eb'}`,
+                    borderRadius: '12px',
+                    padding: '16px',
+                    marginBottom: '12px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
                 >
-                  <div className="vista-cliente-vendor-info">
+                  <div style={{ display: 'flex', gap: '12px' }}>
                     {/* Avatar */}
-                    <div className="vista-cliente-vendor-avatar">
-                      {vendor.avatar}
-                      {vendor.activo && <div className="vista-cliente-vendor-status" />}
+                    <div style={{ position: 'relative', flexShrink: 0 }}>
+                      <div style={{
+                        width: '50px',
+                        height: '50px',
+                        background: vendor.activo ? '#10b981' : '#6b7280',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '24px'
+                      }}>
+                        {vendor.avatar}
+                      </div>
+                      {vendor.activo && (
+                        <div style={{
+                          position: 'absolute',
+                          top: 0,
+                          right: 0,
+                          width: '14px',
+                          height: '14px',
+                          background: '#10b981',
+                          border: '2px solid white',
+                          borderRadius: '50%'
+                        }} />
+                      )}
                     </div>
 
                     {/* Información */}
-                    <div className="vista-cliente-vendor-details">
-                      <div className="vista-cliente-vendor-header">
-                        <h3 className="vista-cliente-vendor-name">{vendor.nombre}</h3>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                        <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#1f2937' }}>
+                          {vendor.nombre}
+                        </h3>
                         {vendor.activo && (
-                          <span className="vista-cliente-vendor-online">EN LÍNEA</span>
+                          <span style={{
+                            fontSize: '10px',
+                            fontWeight: '600',
+                            color: '#10b981',
+                            background: '#d1fae5',
+                            padding: '2px 8px',
+                            borderRadius: '12px'
+                          }}>
+                            EN LÍNEA
+                          </span>
                         )}
                       </div>
                       
-                      <p className="vista-cliente-vendor-product">{vendor.producto}</p>
+                      <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
+                        {vendor.producto}
+                      </p>
                       
                       {/* Rating y distancia */}
-                      <div className="vista-cliente-vendor-stats">
-                        <div className="vista-cliente-vendor-stat">
+                      <div style={{ display: 'flex', gap: '12px', fontSize: '13px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                           <Star size={14} style={{ color: '#fbbf24', fill: '#fbbf24' }} />
-                          <span className="vista-cliente-vendor-rating">{vendor.rating}</span>
+                          <span style={{ color: '#1f2937', fontWeight: '500' }}>{vendor.rating}</span>
                         </div>
-                        <div className="vista-cliente-vendor-stat">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                           <Navigation size={14} style={{ color: '#6b7280' }} />
-                          <span className="vista-cliente-vendor-distance">{vendor.distancia}</span>
+                          <span style={{ color: '#6b7280' }}>{vendor.distancia}</span>
                         </div>
-                        <div className="vista-cliente-vendor-stat">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                           <Clock size={14} style={{ color: '#6b7280' }} />
-                          <span className="vista-cliente-vendor-time">{vendor.tiempoEstimado}</span>
+                          <span style={{ color: '#6b7280' }}>{vendor.tiempoEstimado}</span>
                         </div>
                       </div>
                     </div>
@@ -578,36 +624,47 @@ export default function VistaCliente ({ onBackToRoles }) {
 
                   {/* Acciones */}
                   {selectedVendor?.id === vendor.id && (
-                    <div className="vista-cliente-vendor-actions">
+                    <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #e5e7eb' }}>
                       {/* Productos */}
-                      <div className="vista-cliente-products-section">
-                        <h4 className="vista-cliente-products-title">
+                      <div style={{ marginBottom: '12px' }}>
+                        <h4 style={{ fontSize: '13px', fontWeight: '600', color: '#1f2937', marginBottom: '6px' }}>
                           Productos disponibles:
                         </h4>
-                        <div className="vista-cliente-products-list">
+                        <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '6px' }}>
                           {vendor.productos.join(' • ')}
                         </div>
-                        <div className="vista-cliente-products-price">
+                        <div style={{ fontSize: '14px', fontWeight: '600', color: '#10b981' }}>
                           {vendor.precio}
                         </div>
                       </div>
 
-                      {/* Botones de acción */}
-                      <div className="vista-cliente-action-buttons">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            startTracking(vendor);
-                          }}
-                          disabled={!vendor.activo}
-                          className={`vista-cliente-action-button ${
-                            vendor.activo ? 'track' : 'track-disabled'
-                          }`}
-                        >
-                          <Zap size={14} />
-                          {trackingVendor?.id === vendor.id ? 'Rastreando...' : 'Rastrear'}
-                        </button>
-                      </div>
+                      {/* Botón de rastrear */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          startTracking(vendor);
+                        }}
+                        disabled={!vendor.activo}
+                        style={{
+                          width: '100%',
+                          background: vendor.activo ? '#10b981' : '#d1d5db',
+                          color: 'white',
+                          border: 'none',
+                          padding: '10px',
+                          borderRadius: '8px',
+                          cursor: vendor.activo ? 'pointer' : 'not-allowed',
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          transition: 'background 0.2s'
+                        }}
+                      >
+                        <Zap size={14} />
+                        {trackingVendor?.id === vendor.id ? 'Rastreando...' : 'Rastrear'}
+                      </button>
                     </div>
                   )}
                 </div>
@@ -618,4 +675,4 @@ export default function VistaCliente ({ onBackToRoles }) {
       </div>
     </div>
   );
-};
+}
