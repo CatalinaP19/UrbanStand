@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   MapPin,
@@ -10,6 +10,8 @@ import {
   BarChart3,
   Edit3,
   Package,
+  Navigation,
+  Zap,
 } from 'lucide-react'
 import apiService from '../services/apiService'
 import Breadcrumbs from '../Componentes/Breadcrumbs';
@@ -17,6 +19,10 @@ import Breadcrumbs from '../Componentes/Breadcrumbs';
 
 const VistaVendedor = ({ vendedorData = null }) => {
   const navigate = useNavigate()
+  const mapRef = useRef(null)
+  const leafletMapRef = useRef(null)
+  const routingControlRef = useRef(null)
+  
   // Cargar usuario actual desde localStorage si no llega por props
   const storedUser = (() => {
     try {
@@ -40,7 +46,6 @@ const VistaVendedor = ({ vendedorData = null }) => {
   }
 
   const [vendedor, setVendedor] = useState(initialVendedor)
-
   const [isChatOpen, setChatOpen] = useState(false)
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState([
@@ -57,27 +62,69 @@ const VistaVendedor = ({ vendedorData = null }) => {
       isOwn: true,
     },
   ])
+  const [isTracking, setIsTracking] = useState(false)
+  const [trackingDestination, setTrackingDestination] = useState(null)
+  const [vendorLocation] = useState([4.6097, -74.0817])
 
-  // Inicializar mapa
+  // Inicializar mapa con Leaflet Routing Machine
   useEffect(() => {
-    // Cargar Leaflet CSS si no está cargado
-    if (!document.querySelector('link[href*="leaflet.css"]')) {
-      const leafletCSS = document.createElement('link')
-      leafletCSS.rel = 'stylesheet'
-      leafletCSS.href = 'https://unpkg.com/leaflet/dist/leaflet.css'
-      document.head.appendChild(leafletCSS)
+    const loadLeaflet = () => {
+      // Cargar CSS de Leaflet
+      if (!document.querySelector('link[href*="leaflet.css"]')) {
+        const leafletCSS = document.createElement('link')
+        leafletCSS.rel = 'stylesheet'
+        leafletCSS.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
+        document.head.appendChild(leafletCSS)
+      }
+
+      // Cargar CSS de Leaflet Routing Machine
+      if (!document.querySelector('link[href*="leaflet-routing-machine.css"]')) {
+        const linkRouting = document.createElement('link')
+        linkRouting.rel = 'stylesheet'
+        linkRouting.href = 'https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css'
+        document.head.appendChild(linkRouting)
+      }
+
+      // Cargar JS de Leaflet
+      if (!window.L) {
+        const scriptLeaflet = document.createElement('script')
+        scriptLeaflet.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
+        scriptLeaflet.async = true
+        scriptLeaflet.onload = () => {
+          // Cargar JS de Leaflet Routing Machine después de Leaflet
+          const scriptRouting = document.createElement('script')
+          scriptRouting.src = 'https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js'
+          scriptRouting.async = true
+          scriptRouting.onload = () => {
+            setTimeout(initMap, 100)
+          }
+          document.head.appendChild(scriptRouting)
+        }
+        document.head.appendChild(scriptLeaflet)
+      } else if (window.L.Routing) {
+        setTimeout(initMap, 100)
+      } else {
+        // Leaflet existe pero no Routing
+        const scriptRouting = document.createElement('script')
+        scriptRouting.src = 'https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js'
+        scriptRouting.async = true
+        scriptRouting.onload = () => {
+          setTimeout(initMap, 100)
+        }
+        document.head.appendChild(scriptRouting)
+      }
     }
 
-    // Cargar Leaflet JS si no está cargado
-    if (!window.L) {
-      const leafletJS = document.createElement('script')
-      leafletJS.src = 'https://unpkg.com/leaflet/dist/leaflet.js'
-      leafletJS.onload = () => {
-        setTimeout(initMap, 100)
+    loadLeaflet()
+
+    return () => {
+      if (routingControlRef.current && leafletMapRef.current) {
+        leafletMapRef.current.removeControl(routingControlRef.current)
       }
-      document.head.appendChild(leafletJS)
-    } else {
-      setTimeout(initMap, 100)
+      if (leafletMapRef.current) {
+        leafletMapRef.current.remove()
+        leafletMapRef.current = null
+      }
     }
   }, [])
 
@@ -187,12 +234,12 @@ const VistaVendedor = ({ vendedorData = null }) => {
   }, [])
 
   const initMap = () => {
-    if (typeof window !== 'undefined' && window.L) {
+    if (typeof window !== 'undefined' && window.L && !leafletMapRef.current) {
       const mapElement = document.getElementById('vendor-map')
       if (!mapElement) return
 
       const map = window.L.map('vendor-map', {
-        center: [4.6097, -74.0817], // Bogotá
+        center: vendorLocation,
         zoom: 13,
         zoomControl: true,
         scrollWheelZoom: true,
@@ -203,11 +250,13 @@ const VistaVendedor = ({ vendedorData = null }) => {
 
       window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 18,
-        attribution: ' OpenStreetMap contributors',
+        attribution: '© OpenStreetMap contributors',
       }).addTo(map)
 
+      leafletMapRef.current = map
+
       // Mi ubicación (vendedor)
-      const myLocation = window.L.marker([4.6097, -74.0817], {
+      const myLocation = window.L.marker(vendorLocation, {
         icon: window.L.divIcon({
           className: 'custom-marker my-location',
           html: '<div style="background: var(--primary); width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>',
@@ -220,7 +269,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
         <div style="text-align: center; padding: 5px;">
           <h4 style="color: var(--primary); margin-bottom: 8px;">${vendedor.nombre}</h4>
           <p style="margin-bottom: 8px; color: #666; font-size: 12px;">${vendedor.descripcion}</p>
-          <div style="font-size: 11px; color: #999;"> Mi ubicación actual</div>
+          <div style="font-size: 11px; color: #999;">📍 Mi ubicación actual</div>
         </div>
       `)
 
@@ -247,8 +296,10 @@ const VistaVendedor = ({ vendedorData = null }) => {
           <div style="text-align: center; padding: 5px;">
             <h4 style="color: var(--secondary); margin-bottom: 8px;">${name}</h4>
             <p style="margin-bottom: 10px; color: #666; font-size: 12px;">${description}</p>
-            <button style="background: var(--accent); color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">
-              Enviar mensaje
+            <button 
+              onclick="window.createRouteToVendor(${lat}, ${lng}, '${name}')"
+              style="background: var(--accent); color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">
+              Ver ruta
             </button>
           </div>
         `)
@@ -274,12 +325,136 @@ const VistaVendedor = ({ vendedorData = null }) => {
           <div style="text-align: center; padding: 5px;">
             <h4 style="color: var(--primary); margin-bottom: 8px;">${name}</h4>
             <p style="margin-bottom: 8px; color: #666; font-size: 12px;">${description}</p>
-            <div style="font-size: 11px; color: var(--accent); font-weight: bold;"> Oportunidad de ventas</div>
+            <div style="font-size: 11px; color: var(--accent); font-weight: bold;">💡 Oportunidad de ventas</div>
+            <button 
+              onclick="window.createRouteToArea(${lat}, ${lng}, '${name}')"
+              style="background: var(--primary); color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; margin-top: 8px;">
+              Ir a esta zona
+            </button>
           </div>
         `)
       })
     }
   }
+
+  // Función para crear ruta a un vendedor
+  const createRouteToVendor = (lat, lng, name) => {
+    if (leafletMapRef.current && window.L && window.L.Routing) {
+      // Remover ruta anterior si existe
+      if (routingControlRef.current) {
+        leafletMapRef.current.removeControl(routingControlRef.current)
+      }
+
+      const routingControl = window.L.Routing.control({
+        waypoints: [
+          window.L.latLng(vendorLocation[0], vendorLocation[1]),
+          window.L.latLng(lat, lng)
+        ],
+        fitSelectedRoutes: true,
+        collapsible: true,
+        autoRoute: true,
+        waypointMode: 'snap',
+        showAlternatives: true,
+        altLineOptions: {
+          styles: [
+            {color: 'black', opacity: 0.15, weight: 9},
+            {color: 'white', opacity: 0.8, weight: 6},
+            {color: '#085c52', opacity: 0.5, weight: 2}
+          ]
+        },
+        lineOptions: {
+          styles: [{color: 'var(--accent)', opacity: 0.8, weight: 6}]
+        },
+        createMarker: function(i, waypoint, n) {
+          let icon;
+          if (i === 0) {
+            icon = window.L.divIcon({
+              className: 'custom-user-marker',
+              html: `
+                <div style="
+                  width: 20px;
+                  height: 20px;
+                  background-color: var(--primary);
+                  border: 3px solid white;
+                  border-radius: 50%;
+                  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                "></div>
+              `,
+              iconSize: [20, 20],
+              iconAnchor: [10, 10]
+            });
+          } else {
+            icon = window.L.divIcon({
+              className: 'custom-vendor-marker',
+              html: `
+                <div style="
+                  width: 30px;
+                  height: 30px;
+                  background-color: var(--secondary);
+                  border: 3px solid white;
+                  border-radius: 50%;
+                  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                  animation: bounce 1s infinite;
+                "></div>
+                <style>
+                  @keyframes bounce {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-10px); }
+                  }
+                </style>
+              `,
+              iconSize: [30, 30],
+              iconAnchor: [15, 15]
+            });
+          }
+          
+          return window.L.marker(waypoint.latLng, {
+            icon: icon,
+            draggable: false
+          });
+        }
+      }).addTo(leafletMapRef.current);
+
+      routingControlRef.current = routingControl;
+      setIsTracking(true);
+      setTrackingDestination(name);
+
+      // Mostrar información de la ruta
+      routingControl.on('routesfound', function(e) {
+        const routes = e.routes;
+        const summary = routes[0].summary;
+        console.log(`Ruta a ${name}:`);
+        console.log(`Distancia: ${(summary.totalDistance / 1000).toFixed(2)} km`);
+        console.log(`Tiempo estimado: ${Math.round(summary.totalTime / 60)} minutos`);
+      });
+    }
+  }
+
+  // Función para crear ruta a un área de clientes
+  const createRouteToArea = (lat, lng, name) => {
+    createRouteToVendor(lat, lng, name);
+  }
+
+  // Función para detener el seguimiento
+  const stopTracking = () => {
+    if (routingControlRef.current && leafletMapRef.current) {
+      leafletMapRef.current.removeControl(routingControlRef.current);
+      routingControlRef.current = null;
+    }
+    setIsTracking(false);
+    setTrackingDestination(null);
+  }
+
+  // Hacer las funciones accesibles globalmente para los popups
+  useEffect(() => {
+    window.createRouteToVendor = createRouteToVendor;
+    window.createRouteToArea = createRouteToArea;
+    
+    return () => {
+      delete window.createRouteToVendor;
+      delete window.createRouteToArea;
+    }
+  }, []);
 
   const sendMessage = () => {
     if (message.trim()) {
@@ -307,11 +482,9 @@ const VistaVendedor = ({ vendedorData = null }) => {
     if (g.includes('fem')) return '/img/PerfilFemale.png'
     if (g.includes('mas')) return '/img/PerfilMale.png'
     if (g.includes('otr')) return '/img/PerfilOther.png'
-    // Por defecto Other si no hay género
     return '/img/PerfilOther.png'
   }
 
-  // Imagen del perfil basada en género
   const vendorProfileImage = getProfileImage(vendedor.genero)
 
   return (
@@ -364,11 +537,12 @@ const VistaVendedor = ({ vendedorData = null }) => {
               display: 'flex',
               flexDirection: 'column',
               gap: '1rem',
+              position: 'relative',
             }}
           >
             <div
               style={{
-                backgroundColor: 'var(--surface)', // White background
+                backgroundColor: 'var(--surface)',
                 padding: 'var(--spacing-md)',
                 borderRadius: 'var(--radius-lg)',
                 boxShadow: '0 2px 10px var(--shadow)',
@@ -412,12 +586,50 @@ const VistaVendedor = ({ vendedorData = null }) => {
                   borderRadius: 'var(--radius-xl)',
                 }}
               ></div>
+
+              {/* Controles del mapa */}
+              {isTracking && (
+                <div style={{
+                  position: 'absolute',
+                  top: '20px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  background: 'white',
+                  padding: '12px 20px',
+                  borderRadius: '12px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  zIndex: 1000
+                }}>
+                  <Navigation size={20} style={{ color: 'var(--accent)' }} />
+                  <span style={{ fontWeight: '500', color: '#1f2937' }}>
+                    Navegando hacia: {trackingDestination}
+                  </span>
+                  <button 
+                    onClick={stopTracking}
+                    style={{
+                      background: 'var(--accent)',
+                      color: 'white',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '500'
+                    }}
+                  >
+                    Detener
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Leyenda del mapa */}
             <div
               style={{
-                backgroundColor: 'var(--surface)', // White background
+                backgroundColor: 'var(--surface)',
                 padding: 'var(--spacing-md)',
                 borderRadius: 'var(--radius-lg)',
                 boxShadow: '0 2px 10px var(--shadow)',
@@ -954,7 +1166,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
         }}
       >
         <p style={{ margin: 0 }}>
-          2025 UrbanStand. Todos los derechos reservados.
+          © 2025 UrbanStand. Todos los derechos reservados.
         </p>
       </footer>
     </>
