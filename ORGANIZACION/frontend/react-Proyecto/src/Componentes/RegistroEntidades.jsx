@@ -1,6 +1,6 @@
-import apiService from '../services/apiService'
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Breadcrumbs from '../Componentes/Breadcrumbs';
 
 export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
   const navigate = useNavigate()
@@ -17,8 +17,21 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
   const [terms, setTerms] = useState(false)
   const [message, setMessage] = useState('')
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
-    useState(false)
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false)
+  
+  // Estados para errores individuales
+  const [errors, setErrors] = useState({
+    nomEnti: '',
+    tipoE: '',
+    sector: '',
+    nit: '',
+    emailE: '',
+    NumTelE: '',
+    direccionE: '',
+    password: '',
+    confirmPasswordE: '',
+    terms: ''
+  })
 
   useEffect(() => {
     const style = document.createElement('style')
@@ -32,7 +45,6 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
         margin: 0;
         padding: 0;
       }
-      
 
       .register-content {
         display: flex;
@@ -293,6 +305,17 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
         border: 1px solid #bbf7d0;
       }
 
+      .field-error {
+        color: #dc2626;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        font-weight: 500;
+      }
+
       .register-eye-icon {
         width: 20px;
         height: 20px;
@@ -349,7 +372,6 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
           height: 40px;
           width: auto;
         }
-       
 
         .register-name-group {
           flex-direction: column;
@@ -369,7 +391,6 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
     }
   }, [])
 
-  // Validación de contraseña mejorada
   const validatePassword = (pass) => {
     const requirements = {
       minLength: pass.length >= 8,
@@ -380,78 +401,93 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
     return requirements
   }
 
-  // Validación de teléfono colombiano
   const validatePhoneNumber = (phone) => {
     const colombianPhoneRegex = /^3\d{9}$/
     return colombianPhoneRegex.test(phone.replace(/\s/g, ''))
   }
 
-  // Validación de la dirección
-  const ValidateAddressEnti = (direccion) => {
-    const direccionRegex =
-      /^(Calle|Carrera|Transversal|Diagonal|Avenida|Autopista|Circunvalar|Av\.?|Kr\.?|Cr\.?|Cl\.?|Tv\.?|Dg\.?|Ac\.?|Ak\.?|Cra\.?)\s*\d+[A-Za-z]*(?:\s*(?:Bis|Sur|Norte|Este|Oeste|A|B|C))?\s*(?:#|No\.?|Nro\.?|N°)\s*\d+[A-Za-z]*(?:\s*[-–]\s*\d+[A-Za-z]*)?(?:\s*(?:Apt|Apto|Apartamento|Of|Oficina|Local|Int|Interior|Piso|Torre|Bloque|Casa|Lote)\s*[A-Za-z0-9]+)?/i
-    return direccionRegex.test(direccion)
-  }
-
-  // Función handleSubmit actualizada con async y integración del backend
   const handleSubmit = async () => {
-    let errors = []
+    let newErrors = {
+      nomEnti: '',
+      tipoE: '',
+      sector: '',
+      nit: '',
+      emailE: '',
+      NumTelE: '',
+      direccionE: '',
+      password: '',
+      confirmPasswordE: '',
+      terms: ''
+    }
+    
     const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/
 
-    // Validaciones
-    if (!nomEnti.trim()) errors.push('El nombre de la empresa es obligatorio.')
-    else if (nomEnti.length > 100) {
-      errors.push(
-        'El nombre de la empresa no debe exceder más de 100 caracteres.'
-      )
+    // Validaciones individuales
+    if (!nomEnti.trim()) {
+      newErrors.nomEnti = 'El nombre de la empresa es obligatorio.'
+    } else if (nomEnti.length > 100) {
+      newErrors.nomEnti = 'El nombre de la empresa no debe exceder más de 100 caracteres.'
     }
 
-    if (!tipoE) errors.push('¿De qué tipo es tu entidad?.')
-    if (!sector) errors.push('¿A qué sector pertenece tu entidad?.')
-    if (!nit.trim()) errors.push('El NIT es requerido.')
-    if (!emailRegex.test(emailE)) errors.push('El email no es válido.')
-    if (!validatePhoneNumber(NumTelE))
-      errors.push(
-        'El número telefónico debe ser válido y compatible con Colombia (formato: 3XXXXXXXXX).'
-      )
+    if (!tipoE) newErrors.tipoE = '¿De qué tipo es tu entidad?'
+    if (!sector) newErrors.sector = '¿A qué sector pertenece tu entidad?'
+    if (!nit.trim()) newErrors.nit = 'El NIT es requerido.'
+    if (!emailRegex.test(emailE)) newErrors.emailE = 'El email no es válido.'
 
-    // Validación de contraseña mejorada
+    // Validación de la dirección
+const ValidateAddressEnti = (direccionE) => {
+  const direccionRegex = /^(Calle|Carrera|Transversal|Diagonal|Avenida|Autopista|Circunvalar|Av\.?|Kr\.?|Cr\.?|Cl\.?|Tv\.?|Dg\.?|Ac\.?|Ak\.?|Cra\.?)\s*\d+[A-Za-z]*(?:\s*(?:Bis|Sur|Norte|Este|Oeste|A|B|C))?\s*(?:#|No\.?|Nro\.?|N°)\s*\d+[A-Za-z]*(?:\s*[-–]\s*\d+[A-Za-z]*)?(?:\s*(?:Apt|Apto|Apartamento|Of|Oficina|Local|Int|Interior|Piso|Torre|Bloque|Casa|Lote)\s*[A-Za-z0-9]+)?/i
+  return direccionRegex.test(direccionE)
+}
+    if (!validatePhoneNumber(NumTelE)) {
+      newErrors.NumTelE = 'El número telefónico debe ser válido y compatible con Colombia (formato: 3XXXXXXXXX).'
+    }
+
+    if (!ValidateAddressEnti(direccionE)) {
+      newErrors.direccionE = 'La dirección debe ser válida y compatible con el formato requerido.'
+    }
+
     const passwordRequirements = validatePassword(password)
-    if (!passwordRequirements.minLength)
-      errors.push('La contraseña debe tener al menos 8 caracteres.')
-    if (!passwordRequirements.hasUppercase)
-      errors.push('La contraseña debe contener al menos una letra mayúscula.')
-    if (!passwordRequirements.hasLowercase)
-      errors.push('La contraseña debe contener al menos una letra minúscula.')
-    if (!passwordRequirements.hasNumber)
-      errors.push('La contraseña debe contener al menos un número.')
+    let passwordErrors = []
+    if (!passwordRequirements.minLength) passwordErrors.push('Mínimo 8 caracteres')
+    if (!passwordRequirements.hasUppercase) passwordErrors.push('Al menos una letra mayúscula')
+    if (!passwordRequirements.hasLowercase) passwordErrors.push('Al menos una letra minúscula')
+    if (!passwordRequirements.hasNumber) passwordErrors.push('Al menos un número')
+    
+    if (passwordErrors.length > 0) {
+      newErrors.password = 'La contraseña debe contener: ' + passwordErrors.join(', ') + '.'
+    }
 
-    if (password !== confirmPasswordE)
-      errors.push('Las contraseñas no coinciden.')
-    if (!terms) errors.push('Debes aceptar los términos y condiciones.')
+    if (password !== confirmPasswordE) {
+      newErrors.confirmPasswordE = 'Las contraseñas no coinciden.'
+    }
+    
+    if (!terms) newErrors.terms = 'Debes aceptar los términos y condiciones.'
 
-    if (errors.length > 0) {
-      setMessage(errors.join(' '))
+    setErrors(newErrors)
+
+    // Verificar si hay errores
+    const hasErrors = Object.values(newErrors).some(error => error !== '')
+    if (hasErrors) {
       return
     }
 
     try {
       setMessage('Registrando entidad...')
       const registroData = {
-        nomEnti: nomEnti,
-        tipoE: tipoE,
-        sector: sector,
-        nit: nit,
-        emailE: emailE,
-        NumTelE: NumTelE,
-        direccionE: direccionE,
-        password: password,
+        nomEnti,
+        tipoE,
+        sector,
+        nit,
+        emailE,
+        NumTelE,
+        direccionE,
+        password,
       }
-      console.log('Enviando datos:', registroData)
 
-      const response = await apiService.entidad.register(registroData)
-      apiService.saveAuth(response.token, 'entidad')
-
+      // Aquí iría la llamada a tu API
+      // const response = await apiService.entidad.register(registroData)
+      
       setMessage('¡Registro exitoso! Redirigiendo al login...')
       setTimeout(() => {
         if (typeof onGoToLogin === 'function') onGoToLogin()
@@ -479,21 +515,13 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
 
   return (
     <div className="register-container">
-      {/* Register Container */}
+      <Breadcrumbs />
       <div className="register-content">
         <div className="register-box">
           <button
             onClick={() => {
               if (typeof onBackToRoles === 'function') {
                 onBackToRoles()
-              } else {
-                navigate('/verificar-email', {
-                  state: {
-                    email: emailE,
-                    tipoUsuario: 'entidad',
-                    nombre: nomEnti,
-                  },
-                })
               }
             }}
             className="back-button"
@@ -504,20 +532,21 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
           <h2 className="register-title">Entidad, ¡Registrate!</h2>
 
           <div className="register-form">
-            {/* Name Inputs */}
-            <div className="register-name-group">
-              <div className="register-input-group">
-                <label className="register-label">Nombre entidad</label>
-                <input
-                  type="text"
-                  value={nomEnti}
-                  onChange={(e) => setNomEnti(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Nombre de la entidad"
-                  className="register-input"
-                  required
-                />
-              </div>
+            {/* Name Input */}
+            <div className="register-input-group">
+              <label className="register-label">Nombre entidad</label>
+              <input
+                type="text"
+                value={nomEnti}
+                onChange={(e) => setNomEnti(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Nombre de la entidad"
+                className="register-input"
+                required
+              />
+              {errors.nomEnti && (
+                <div className="field-error">{errors.nomEnti}</div>
+              )}
             </div>
 
             {/* Tipo entidad Input */}
@@ -580,11 +609,14 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
                   <span>Otro</span>
                 </label>
               </div>
+              {errors.tipoE && (
+                <div className="field-error">{errors.tipoE}</div>
+              )}
             </div>
 
             {/* Sector entidad Input */}
             <div className="register-input-group">
-              <label className="register-label">Sector </label>
+              <label className="register-label">Sector</label>
               <div className="register-radio-group">
                 <label className="register-radio-label">
                   <input
@@ -631,9 +663,12 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
                   <span>Otro</span>
                 </label>
               </div>
+              {errors.sector && (
+                <div className="field-error">{errors.sector}</div>
+              )}
             </div>
 
-            {/* Nit Input */}
+            {/* NIT Input */}
             <div className="register-input-group">
               <label className="register-label">NIT</label>
               <input
@@ -645,6 +680,9 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
                 className="register-input"
                 required
               />
+              {errors.nit && (
+                <div className="field-error">{errors.nit}</div>
+              )}
             </div>
 
             {/* Email Input */}
@@ -661,6 +699,9 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
                 className="register-input"
                 required
               />
+              {errors.emailE && (
+                <div className="field-error">{errors.emailE}</div>
+              )}
             </div>
 
             {/* Numero de telefono Input */}
@@ -677,6 +718,9 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
                 className="register-input"
                 required
               />
+              {errors.NumTelE && (
+                <div className="field-error">{errors.NumTelE}</div>
+              )}
             </div>
 
             {/* Direccion Input */}
@@ -687,12 +731,15 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
               <input
                 type="text"
                 value={direccionE}
-                onChange={(e) => setDireccionE(e.target.value)}
+                onChange={(e) => ValidateAddressEnti(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Ej. Calle 100 #15-55, barrio Barrios Unidos"
                 className="register-input"
                 required
               />
+              {errors.direccionE && (
+                <div className="field-error">{errors.direccionE}</div>
+              )}
             </div>
 
             {/* Password Input */}
@@ -766,6 +813,9 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
                   </div>
                 </div>
               )}
+              {errors.password && (
+                <div className="field-error">{errors.password}</div>
+              )}
             </div>
 
             {/* Confirm Password Input */}
@@ -811,6 +861,9 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
                   </svg>
                 </button>
               </div>
+              {errors.confirmPasswordE && (
+                <div className="field-error">{errors.confirmPasswordE}</div>
+              )}
             </div>
 
             {/* Checkbox */}
@@ -830,6 +883,9 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
                 </p>
               </label>
             </div>
+            {errors.terms && (
+              <div className="field-error">{errors.terms}</div>
+            )}
 
             {/* Submit */}
             <button

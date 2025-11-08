@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { User, Mail, Phone, MapPin, Package, Edit3, ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import Breadcrumbs from '../Componentes/Breadcrumbs';
+
 
 export default function PerfilVendedor() {
   const [vendedor, setVendedor] = useState(null);
@@ -109,6 +111,7 @@ export default function PerfilVendedor() {
 
   return (
     <div style={styles.container}>
+      <Breadcrumbs />
       <div style={styles.content}>
         {/* Header */}
         <div style={styles.header}>

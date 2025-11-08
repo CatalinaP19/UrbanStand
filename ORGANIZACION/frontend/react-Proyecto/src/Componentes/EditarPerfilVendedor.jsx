@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Mail, Phone, MapPin, Camera, Save, X, AlertCircle } from 'lucide-react';
+import Breadcrumbs from '../Componentes/Breadcrumbs';
+
 
 const EditarPerfilVendedor = () => {
   const navigate = useNavigate(); // ✅ 1. Movido al inicio (hooks primero)
@@ -163,6 +165,7 @@ const EditarPerfilVendedor = () => {
 
   return (
     <div style={styles.container}>
+      <Breadcrumbs />
       <div style={styles.card}>
         {/* Header */}
         <div style={styles.header}>
@@ -271,19 +274,15 @@ const EditarPerfilVendedor = () => {
                   type="email"
                   name="email"
                   value={formData.email}
-                  onChange={handleChange}
-                  onKeyPress={handleKeyPress}
+                  readOnly={true} // o disabled={true}
                   style={{
                     ...styles.input,
-                    border: errors.email ? '2px solid #dc3545' : '1px solid #ddd'
+                    backgroundColor: '#f5f5f5', // opcional: para dar feedback visual
+                    cursor: 'not-allowed', // opcional: cambia el cursor
+                    opacity: 0.7
                   }}
-                  onFocus={(e) => e.currentTarget.style.borderColor = '#FF7901'}
-                  onBlur={(e) => e.currentTarget.style.borderColor = errors.email ? '#dc3545' : '#ddd'}
                 />
               </div>
-              {errors.email && (
-                <span style={styles.errorText}>{errors.email}</span>
-              )}
             </div>
 
             <div>
@@ -482,8 +481,9 @@ const styles = {
     background: '#faf3e0',
     padding: '2rem',
     display: 'flex',
+    flexDirection: 'column', // Añadido para organizar el Breadcrumb
     alignItems: 'center',
-    justifyContent: 'center'
+    gap: '1rem' // Añadido para espaciar el Breadcrumb del card
   },
   card: {
     backgroundColor: 'white',

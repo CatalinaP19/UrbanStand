@@ -12,6 +12,8 @@ import {
   Package,
 } from 'lucide-react'
 import apiService from '../services/apiService'
+import Breadcrumbs from '../Componentes/Breadcrumbs';
+
 
 const VistaVendedor = ({ vendedorData = null }) => {
   const navigate = useNavigate()
@@ -141,7 +143,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
         // 3) Fallback: cargar desde API
         ;(async () => {
           try {
-            // ✅ Obtener el token con validación
+            // Obtener el token con validación
             const token = localStorage.getItem('token')
 
             if (!token) {
@@ -318,6 +320,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
         className="container-fluid"
         style={{ padding: '0 var(--spacing-3xl)' }}
       >
+        <Breadcrumbs />
         {/* Hero Section */}
         <section
           className="hero"

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Breadcrumbs from '../Componentes/Breadcrumbs';
+
 
 const UrbanStand = ({ onGoToLogin, onGoToRegister, onGoToVendorRegister, onGoToEntityRegister, onGoToClientView, onGoToEntityView }) => {
   const [showMapModal, setShowMapModal] = useState(false);
@@ -166,6 +168,7 @@ const UrbanStand = ({ onGoToLogin, onGoToRegister, onGoToVendorRegister, onGoToE
     <>
 
       <main className="container">
+        <Breadcrumbs />
         {/* Hero Section */}
         <section className="hero" id="inicio">
           <div className="hero-content">

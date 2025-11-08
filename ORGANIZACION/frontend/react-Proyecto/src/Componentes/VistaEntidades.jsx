@@ -12,6 +12,8 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
+import Breadcrumbs from '../Componentes/Breadcrumbs';
+
 
 export default function UrbanStandDashboard() {
   // Referencias para las gráficas
@@ -537,6 +539,7 @@ export default function UrbanStandDashboard() {
 
   return (
     <div className="dashboard-container">
+      <Breadcrumbs />
       <div className="dashboard-content">
         <div className="dashboard-hero">
           <div>

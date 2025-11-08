@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import Swal from 'sweetalert2'
 import { useNavigate } from 'react-router-dom'
+import Breadcrumbs from '../Componentes/Breadcrumbs';
+
 
 export default function Register({ onBackToRoles, onGoToLogin }) {
   const navigate = useNavigate()
@@ -23,6 +25,22 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
     useState(false)
   const [selectedProducts, setSelectedProducts] = useState([])
+  const [errors, setErrors] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    numDoc: '',
+    direccion: '',
+    localidad: '',
+    genero: '',
+    rivi: '',
+    vigencia: '',
+    NumTel: '',
+    selectedProducts: '',
+    terms: ''
+  })
 
   const productsList = [
     'Comidas preparadas',
@@ -125,10 +143,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
         padding: 2rem;
         min-height: 100vh;
       }
-
-        
-            
-      
++
       .register-box {
         width: 100%;
         max-width: 32rem;
@@ -434,18 +449,19 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
 
       .password-requirements {
         margin-top: 0.5rem;
-        padding: 0.5rem;
-        background: #f9f9f9;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
-        color: #666;
+        padding: 0.75rem;
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
       }
 
       .password-requirement {
         display: flex;
         align-items: center;
-        gap: 0.25rem;
-        margin: 0.25rem 0;
+        gap: 0.5rem;
+        padding: 0.25rem 0;
+        transition: all 0.2s ease;
       }
 
       .password-requirement.valid {
@@ -453,7 +469,12 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
       }
 
       .password-requirement.invalid {
-        color: #dc2626;
+        color: #666;
+      }
+
+      .password-requirement.valid:before {
+        content: '✓';
+        color: #16a34a;
       }
 
       .back-button {
@@ -503,6 +524,11 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
           padding: 0.75rem 0.5rem;
         }
       }
+
+      .register-input-group .register-message {
+        margin-top: 0.5rem;
+        margin-bottom: 0;
+      }
     `
 
     document.head.appendChild(style)
@@ -528,7 +554,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
     return colombianPhoneRegex.test(phone.replace(/\s/g, ''))
   }
 
-  // Validación de la dirección corregida
+  // Validación de la dirección
   const ValidateAddress = (address) => {
     const direccionRegex =
       /^(Calle|Carrera|Transversal|Diagonal|Avenida|Av\.?|Cr|Cl)\s?\d+[A-Za-z]{0,2}(?:\s?Bis)?(?:\s?(Sur|Este|Oeste))?\s?#\d+[A-Za-z]?-?\d*(?:,\s?.+)?$/i
@@ -536,86 +562,84 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
   }
 
   const handleSubmit = async () => {
-    let errors = []
+    const newErrors = {}
     const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/
 
-    // Validaciones
+    // Validaciones individuales
     if (!firstName.trim()) {
-      errors.push('El nombre es obligatorio.')
+      newErrors.firstName = 'El nombre es obligatorio.'
     } else if (firstName.length > 30) {
-      errors.push('Su nombre no debe tener más de 30 caracteres.')
+      newErrors.firstName = 'Su nombre no debe tener más de 30 caracteres.'
     }
 
     if (!lastName.trim()) {
-      errors.push('El apellido es obligatorio.')
+      newErrors.lastName = 'El apellido es obligatorio.'
     } else if (lastName.length > 30) {
-      errors.push('Su apellido no debe tener más de 30 caracteres.')
-    }
-
-    if (numDoc.length < 6 || numDoc.length > 10) {
-      errors.push('El número de documento debe tener entre 6 y 10 dígitos.')
-    }
-
-    if (!rivi) {
-      errors.push('La imagen del RIVI Y HEMI es requerida.')
-    }
-
-    if (!emailRegex.test(email)) {
-      errors.push('El email no es válido.')
-    }
-
-    if (!ValidateAddress(direccion)) {
-      errors.push('La dirección debe ser válida y compatible con Bogotá.')
-    }
-    if (!localidad) {
-      errors.push('Debes seleccionar la localidad donde trabajas.')
-    }
-    if (!vigencia) {
-      errors.push('Debes elegir una opción de vigencia.')
+      newErrors.lastName = 'Su apellido no debe tener más de 30 caracteres.'
     }
 
     if (!genero) {
-      errors.push('Debes elegir una opción de género.')
+      newErrors.genero = 'Debes elegir una opción de género.'
+    }
+
+    if (numDoc.length < 6 || numDoc.length > 10) {
+      newErrors.numDoc = 'El número de documento debe tener entre 6 y 10 dígitos.'
+    }
+
+    if (!rivi) {
+      newErrors.rivi = 'La imagen del RIVI Y HEMI es requerida.'
+    }
+
+    if (!ValidateAddress(direccion)) {
+      newErrors.direccion = 'La dirección debe ser válida y compatible con Bogotá.'
+    }
+
+    if (!localidad) {
+      newErrors.localidad = 'Debes seleccionar la localidad donde trabajas.'
+    }
+
+    if (!vigencia) {
+      newErrors.vigencia = 'Debes elegir una opción de vigencia.'
     }
 
     if (selectedProducts.length === 0) {
-      errors.push(
-        'Debes seleccionar al menos una categoría de productos que ofreces.'
-      )
+      newErrors.selectedProducts = 'Debes seleccionar al menos una categoría de productos.'
     }
 
     if (!validatePhoneNumber(NumTel)) {
-      errors.push(
-        'El número telefónico debe ser válido y compatible con Colombia (formato: 3XXXXXXXXX).'
-      )
+      newErrors.NumTel = 'El número debe tener 10 dígitos y empezar con 3.'
+    }
+
+    if (!emailRegex.test(email)) {
+      newErrors.email = 'El email no es válido.'
+    }
+
+    if (!terms) {
+      newErrors.terms = 'Debes aceptar los términos y condiciones.'
     }
 
     // Validación de contraseña mejorada
     const passwordRequirements = validatePassword(password)
     if (!passwordRequirements.minLength) {
-      errors.push('La contraseña debe tener al menos 8 caracteres.')
+      newErrors.password = 'La contraseña debe tener al menos 8 caracteres.'
     }
     if (!passwordRequirements.hasUppercase) {
-      errors.push('La contraseña debe contener al menos una letra mayúscula.')
+      newErrors.password = 'La contraseña debe contener al menos una letra mayúscula.'
     }
     if (!passwordRequirements.hasLowercase) {
-      errors.push('La contraseña debe contener al menos una letra minúscula.')
+      newErrors.password = 'La contraseña debe contener al menos una letra minúscula.'
     }
     if (!passwordRequirements.hasNumber) {
-      errors.push('La contraseña debe contener al menos un número.')
+      newErrors.password = 'La contraseña debe contener al menos un número.'
     }
 
     if (password !== confirmPassword) {
-      errors.push('Las contraseñas no coinciden.')
+      newErrors.confirmPassword = 'Las contraseñas no coinciden.'
     }
 
-    if (!terms) {
-      errors.push('Debes aceptar los términos y condiciones.')
-    }
+    setErrors(newErrors)
 
-    if (errors.length > 0) {
-      setMessage(errors.join(' '))
-    } else {
+    if (Object.keys(newErrors).length === 0) {
       try {
         const response = await fetch(
           'http://localhost:3005/api/auth/register',
@@ -741,6 +765,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
 
   return (
     <div className="register-container">
+      <Breadcrumbs />
       <div className="register-content">
         <div className="register-box">
           {/* Botón de regreso */}
@@ -767,24 +792,40 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                 <input
                   type="text"
                   value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
+                  onChange={(e) => {
+                    setFirstName(e.target.value)
+                    setErrors(prev => ({ ...prev, firstName: '' }))
+                  }}
                   onKeyPress={handleKeyPress}
                   placeholder="Primer nombre"
                   className="register-input"
                   required
                 />
+                {errors.firstName && (
+                  <div className="register-message register-message-error">
+                    {errors.firstName}
+                  </div>
+                )}
               </div>
               <div className="register-input-group">
                 <label className="register-label">Apellido</label>
                 <input
                   type="text"
                   value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
+                  onChange={(e) => {
+                    setLastName(e.target.value)
+                    setErrors(prev => ({ ...prev, lastName: '' }))
+                  }}
                   onKeyPress={handleKeyPress}
                   placeholder="Primer apellido"
                   className="register-input"
                   required
                 />
+                {errors.lastName && (
+                  <div className="register-message register-message-error">
+                    {errors.lastName}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -826,6 +867,11 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                   <span>Otro</span>
                 </label>
               </div>
+              {errors.genero && (
+                <div className="register-message register-message-error">
+                  {errors.genero}
+                </div>
+              )}
             </div>
 
             {/* Type-Doc select */}
@@ -850,12 +896,20 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
               <input
                 type="text"
                 value={numDoc}
-                onChange={(e) => setNumDoc(e.target.value)}
+                onChange={(e) => {
+                  setNumDoc(e.target.value)
+                  setErrors(prev => ({ ...prev, numDoc: '' }))
+                }}
                 onKeyPress={handleKeyPress}
                 placeholder="Número de identificación"
                 className="register-input"
                 required
               />
+              {errors.numDoc && (
+                <div className="register-message register-message-error">
+                  {errors.numDoc}
+                </div>
+              )}
             </div>
 
             {/* File-(RIVI) Input */}
@@ -870,6 +924,11 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                 accept="image/*,.pdf"
                 required
               />
+              {errors.rivi && (
+                <div className="register-message register-message-error">
+                  {errors.rivi}
+                </div>
+              )}
             </div>
 
             {/* Address Input */}
@@ -880,12 +939,20 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
               <input
                 type="text"
                 value={direccion}
-                onChange={(e) => setDireccion(e.target.value)}
+                onChange={(e) => {
+                  setDireccion(e.target.value)
+                  setErrors(prev => ({ ...prev, direccion: '' }))
+                }}
                 onKeyPress={handleKeyPress}
                 placeholder="Ej. Calle 100 #15-55, barrio Barrios Unidos"
                 className="register-input"
                 required
               />
+              {errors.direccion && (
+                <div className="register-message register-message-error">
+                  {errors.direccion}
+                </div>
+              )}
             </div>
 
             {/* Localidad Select */}
@@ -893,7 +960,10 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
               <label className="register-label">Localidad donde trabaja</label>
               <select
                 value={localidad}
-                onChange={(e) => setLocalidad(e.target.value)}
+                onChange={(e) => {
+                  setLocalidad(e.target.value)
+                  setErrors(prev => ({ ...prev, localidad: '' }))
+                }}
                 onKeyPress={handleKeyPress}
                 className="register-input"
                 required
@@ -905,6 +975,11 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                   </option>
                 ))}
               </select>
+              {errors.localidad && (
+                <div className="register-message register-message-error">
+                  {errors.localidad}
+                </div>
+              )}
             </div>
 
             {/* Validity Input */}
@@ -934,6 +1009,11 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                   <span>Vencido</span>
                 </label>
               </div>
+              {errors.vigencia && (
+                <div className="register-message register-message-error">
+                  {errors.vigencia}
+                </div>
+              )}
             </div>
 
             {/* Products Input */}
@@ -965,6 +1045,11 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                 {selectedProducts.length !== 1 ? 's' : ''} seleccionado
                 {selectedProducts.length !== 1 ? 's' : ''}
               </div>
+              {errors.selectedProducts && (
+                <div className="register-message register-message-error">
+                  {errors.selectedProducts}
+                </div>
+              )}
             </div>
 
             {/* Phone Number Input */}
@@ -973,12 +1058,20 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
               <input
                 type="text"
                 value={NumTel}
-                onChange={(e) => setNumTel(e.target.value)}
+                onChange={(e) => {
+                  setNumTel(e.target.value)
+                  setErrors(prev => ({ ...prev, NumTel: '' }))
+                }}
                 onKeyPress={handleKeyPress}
                 placeholder="Ej. 3123456789"
                 className="register-input"
                 required
               />
+              {errors.NumTel && (
+                <div className="register-message register-message-error">
+                  {errors.NumTel}
+                </div>
+              )}
             </div>
 
             {/* Email Input */}
@@ -987,12 +1080,20 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value)
+                  setErrors(prev => ({ ...prev, email: '' }))
+                }}
                 onKeyPress={handleKeyPress}
                 placeholder="email@correo.com"
                 className="register-input"
                 required
               />
+              {errors.email && (
+                <div className="register-message register-message-error">
+                  {errors.email}
+                </div>
+              )}
             </div>
 
             {/* Password Input */}
@@ -1038,34 +1139,22 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                   </svg>
                 </button>
               </div>
-              {password && (
-                <div className="password-requirements">
-                  <div
-                    className={`password-requirement ${passwordRequirements.minLength ? 'valid' : 'invalid'}`}
-                  >
-                    {passwordRequirements.minLength ? '✓' : '✗'} Mínimo 8
-                    caracteres
-                  </div>
-                  <div
-                    className={`password-requirement ${passwordRequirements.hasUppercase ? 'valid' : 'invalid'}`}
-                  >
-                    {passwordRequirements.hasUppercase ? '✓' : '✗'} Al menos una
-                    letra mayúscula
-                  </div>
-                  <div
-                    className={`password-requirement ${passwordRequirements.hasLowercase ? 'valid' : 'invalid'}`}
-                  >
-                    {passwordRequirements.hasLowercase ? '✓' : '✗'} Al menos una
-                    letra minúscula
-                  </div>
-                  <div
-                    className={`password-requirement ${passwordRequirements.hasNumber ? 'valid' : 'invalid'}`}
-                  >
-                    {passwordRequirements.hasNumber ? '✓' : '✗'} Al menos un
-                    número
-                  </div>
+              
+              {/* Mostrar siempre los requisitos, no solo cuando hay password */}
+              <div className="password-requirements">
+                <div className={`password-requirement ${passwordRequirements.minLength ? 'valid' : 'invalid'}`}>
+                  {passwordRequirements.minLength ? '✓' : '•'} Mínimo 8 caracteres
                 </div>
-              )}
+                <div className={`password-requirement ${passwordRequirements.hasUppercase ? 'valid' : 'invalid'}`}>
+                  {passwordRequirements.hasUppercase ? '✓' : '•'} Al menos una letra mayúscula
+                </div>
+                <div className={`password-requirement ${passwordRequirements.hasLowercase ? 'valid' : 'invalid'}`}>
+                  {passwordRequirements.hasLowercase ? '✓' : '•'} Al menos una letra minúscula
+                </div>
+                <div className={`password-requirement ${passwordRequirements.hasNumber ? 'valid' : 'invalid'}`}>
+                  {passwordRequirements.hasNumber ? '✓' : '•'} Al menos un número
+                </div>
+              </div>
             </div>
 
             {/* Confirm Password Input */}
@@ -1111,6 +1200,11 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                   </svg>
                 </button>
               </div>
+              {errors.confirmPassword && (
+                <div className="register-message register-message-error">
+                  {errors.confirmPassword}
+                </div>
+              )}
             </div>
 
             {/* Checkbox */}
@@ -1143,6 +1237,13 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
               type="button"
               onClick={handleSubmit}
               className="register-submit-button"
+              disabled={!terms}
+              style={{
+                backgroundColor: !terms ? '#ea580c' : '#ea580c',
+                color: 'white',
+                cursor: !terms ? 'not-allowed' : 'pointer',
+                opacity: !terms ? 0.7 : 1
+              }}
             >
               Registrarse
             </button>

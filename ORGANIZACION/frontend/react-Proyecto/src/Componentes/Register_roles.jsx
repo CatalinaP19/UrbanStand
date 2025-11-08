@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Breadcrumbs from '../Componentes/Breadcrumbs';
+
 
 export default function Register_roles({ 
   onRoleSelect,
@@ -48,12 +50,15 @@ export default function Register_roles({
         font-family: system-ui, -apple-system, sans-serif;
         overflow-x: hidden;
         margin: 0;
-        padding: 0;
+        padding: 20px;  /* Añadido padding para el Breadcrumb */
+        display: flex;
+        flex-direction: column;
       }
 
       
 
       .register-content {
+        flex: 1;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -148,6 +153,7 @@ export default function Register_roles({
 
   return (
     <div className="register-container">
+      <Breadcrumbs />
       {/* Contenido de selección de roles */}
       <div className="register-content">
         <div className="register-box">

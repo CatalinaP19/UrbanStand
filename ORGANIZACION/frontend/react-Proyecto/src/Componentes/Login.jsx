@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import apiService from '../services/apiService.js'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContex.jsx'
+import Breadcrumbs from '../Componentes/Breadcrumbs';
+
 
 export default function Login({ onSuccessfulLogin, onGoToRegister }) {
   const navigate = useNavigate()
@@ -402,6 +404,7 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
 
   return (
     <div className="login-container">
+      <Breadcrumbs />
       {/* Login Container */}
       <div className="login-content">
         <div className="login-box">
