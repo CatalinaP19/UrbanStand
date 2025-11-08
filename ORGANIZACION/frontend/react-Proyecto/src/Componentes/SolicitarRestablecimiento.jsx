@@ -51,7 +51,7 @@ export default function SolicitarRestablecimiento() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+      background: '#faf3e0',
       padding: '20px'
     }}>
       <div style={{
@@ -122,7 +122,7 @@ export default function SolicitarRestablecimiento() {
             style={{
               width: '100%',
               padding: '15px',
-              background: isSubmitting ? '#ccc' : '#f5576c',
+              background: isSubmitting ? '#faf3e0' : '#9a1e22',
               color: 'white',
               border: 'none',
               borderRadius: '5px',
@@ -144,8 +144,8 @@ export default function SolicitarRestablecimiento() {
               width: '100%',
               padding: '15px',
               background: 'transparent',
-              color: '#f5576c',
-              border: '2px solid #f5576c',
+              color: '#9a1e22',
+              border: '2px solid #9a1e22',
               borderRadius: '5px',
               fontSize: '16px',
               fontWeight: '600',
@@ -154,13 +154,13 @@ export default function SolicitarRestablecimiento() {
             }}
             onMouseOver={(e) => {
               if (!isSubmitting) {
-                e.target.style.background = '#f5576c';
+                e.target.style.background = '#9a1e22';
                 e.target.style.color = 'white';
               }
             }}
             onMouseOut={(e) => {
               e.target.style.background = 'transparent';
-              e.target.style.color = '#f5576c';
+              e.target.style.color = '#9a1e22';
             }}
           >
             Volver al Login

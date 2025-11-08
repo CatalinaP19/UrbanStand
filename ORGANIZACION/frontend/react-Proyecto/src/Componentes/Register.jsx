@@ -22,25 +22,9 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
   const [terms, setTerms] = useState(false)
   const [message, setMessage] = useState('')
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
-    useState(false)
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false)
   const [selectedProducts, setSelectedProducts] = useState([])
-  const [errors, setErrors] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    numDoc: '',
-    direccion: '',
-    localidad: '',
-    genero: '',
-    rivi: '',
-    vigencia: '',
-    NumTel: '',
-    selectedProducts: '',
-    terms: ''
-  })
+  const [errors, setErrors] = useState({})
 
   const productsList = [
     'Comidas preparadas',
@@ -115,10 +99,8 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
     }).then((result) => {
       if (result.isConfirmed) {
         Swal.fire('¡Consentimiento aceptado!', '', 'success')
-        // Aquí puedes guardar el consentimiento en tu backend o localStorage
       } else if (result.dismiss === Swal.DismissReason.cancel) {
         Swal.fire('No aceptaste el consentimiento', '', 'error')
-        // Aquí puedes redirigir o bloquear el registro
       }
     })
   }
@@ -143,12 +125,12 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
         padding: 2rem;
         min-height: 100vh;
       }
-+
+
       .register-box {
         width: 100%;
-        max-width: 32rem;
+        max-width: 600px;
         background: white;
-        padding: 2rem;
+        padding: 2rem 1.5rem;
         border-radius: 1rem;
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
       }
@@ -164,7 +146,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
       .register-form {
         display: flex;
         flex-direction: column;
-        gap: 1.5rem;
+        gap: 1.2rem;
       }
 
       .register-input-group {
@@ -187,7 +169,6 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
         font-weight: 600;
         color: #374151;
         font-size: 0.9rem;
-        position: relative;
       }
 
       .register-label::after {
@@ -332,10 +313,15 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
         color: white;
       }
 
-      .register-submit-button:hover {
+      .register-submit-button:hover:not(:disabled) {
         background: transparent;
         color: #ea580c;
         border-color: #f97316;
+      }
+
+      .register-submit-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
       }
 
       .register-toggle-container {
@@ -357,7 +343,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
       }
 
       .register-message {
-        margin-top: 1rem;
+        margin-top: 0.5rem;
         text-align: center;
         font-weight: 600;
         padding: 0.75rem;
@@ -472,11 +458,6 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
         color: #666;
       }
 
-      .password-requirement.valid:before {
-        content: '✓';
-        color: #16a34a;
-      }
-
       .back-button {
         background: #6b7280;
         border: 2px solid #6b7280;
@@ -498,7 +479,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
 
       @media (max-width: 768px) {
         .register-content {
-          padding: 1rem;
+          padding: 1.5rem;
         }
         
         .register-box {
@@ -524,11 +505,6 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
           padding: 0.75rem 0.5rem;
         }
       }
-
-      .register-input-group .register-message {
-        margin-top: 0.5rem;
-        margin-bottom: 0;
-      }
     `
 
     document.head.appendChild(style)
@@ -537,24 +513,20 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
     }
   }, [])
 
-  // Validación de contraseña mejorada
   const validatePassword = (pass) => {
-    const requirements = {
+    return {
       minLength: pass.length >= 8,
       hasUppercase: /[A-Z]/.test(pass),
       hasLowercase: /[a-z]/.test(pass),
       hasNumber: /\d/.test(pass),
     }
-    return requirements
   }
 
-  // Validación de teléfono colombiano
   const validatePhoneNumber = (phone) => {
     const colombianPhoneRegex = /^3\d{9}$/
     return colombianPhoneRegex.test(phone.replace(/\s/g, ''))
   }
 
-  // Validación de la dirección
   const ValidateAddress = (address) => {
     const direccionRegex =
       /^(Calle|Carrera|Transversal|Diagonal|Avenida|Av\.?|Cr|Cl)\s?\d+[A-Za-z]{0,2}(?:\s?Bis)?(?:\s?(Sur|Este|Oeste))?\s?#\d+[A-Za-z]?-?\d*(?:,\s?.+)?$/i
@@ -565,7 +537,6 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
     const newErrors = {}
     const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/
 
-    // Validaciones individuales
     if (!firstName.trim()) {
       newErrors.firstName = 'El nombre es obligatorio.'
     } else if (firstName.length > 30) {
@@ -618,19 +589,10 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
       newErrors.terms = 'Debes aceptar los términos y condiciones.'
     }
 
-    // Validación de contraseña mejorada
     const passwordRequirements = validatePassword(password)
-    if (!passwordRequirements.minLength) {
-      newErrors.password = 'La contraseña debe tener al menos 8 caracteres.'
-    }
-    if (!passwordRequirements.hasUppercase) {
-      newErrors.password = 'La contraseña debe contener al menos una letra mayúscula.'
-    }
-    if (!passwordRequirements.hasLowercase) {
-      newErrors.password = 'La contraseña debe contener al menos una letra minúscula.'
-    }
-    if (!passwordRequirements.hasNumber) {
-      newErrors.password = 'La contraseña debe contener al menos un número.'
+    if (!passwordRequirements.minLength || !passwordRequirements.hasUppercase || 
+        !passwordRequirements.hasLowercase || !passwordRequirements.hasNumber) {
+      newErrors.password = 'La contraseña no cumple todos los requisitos.'
     }
 
     if (password !== confirmPassword) {
@@ -659,16 +621,15 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
               direccion,
               localidad,
               rivi,
+              vigencia,
             }),
           }
         )
         const data = await response.json()
 
         if (response.ok) {
-          // Éxito
           setMessage('¡Registro exitoso! Redirigiendo al login...')
 
-          // Guardar perfil mínimo en localStorage para personalizar luego del login
           try {
             const existing = JSON.parse(
               localStorage.getItem('urbanstand_users') || '{}'
@@ -685,7 +646,6 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
             console.error('Error guardando perfil en localStorage:', e)
           }
 
-          // Limpiar formulario y redirigir después de 2 segundos
           setTimeout(() => {
             if (onGoToLogin) {
               setFirstName('')
@@ -716,7 +676,6 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
             }
           }, 2000)
         } else {
-          // Error del servidor
           setMessage(data.message || data.error || 'Error en el registro')
         }
       } catch (error) {
@@ -735,7 +694,8 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
   const handleFileChange = (e) => {
     const file = e.target.files[0]
     if (file) {
-      setRivi(file.name) // Solo guarda el nombre como string
+      setRivi(file.name)
+      setErrors(prev => ({ ...prev, rivi: '' }))
     }
   }
 
@@ -759,6 +719,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
     } else {
       setSelectedProducts((prev) => prev.filter((p) => p !== product))
     }
+    setErrors(prev => ({ ...prev, selectedProducts: '' }))
   }
 
   const passwordRequirements = validatePassword(password)
@@ -768,7 +729,6 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
       <Breadcrumbs />
       <div className="register-content">
         <div className="register-box">
-          {/* Botón de regreso */}
           <button
             onClick={() => {
               if (typeof onBackToRoles === 'function') {
@@ -785,7 +745,6 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
           <h2 className="register-title">Vendedor, ¡Regístrate!</h2>
 
           <div className="register-form">
-            {/* Name Inputs */}
             <div className="register-name-group">
               <div className="register-input-group">
                 <label className="register-label">Nombre</label>
@@ -829,7 +788,6 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
               </div>
             </div>
 
-            {/* Gender Input */}
             <div className="register-input-group">
               <label className="register-label">Género</label>
               <div className="register-radio-group">
@@ -839,7 +797,10 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                     name="genero"
                     value="masculino"
                     checked={genero === 'masculino'}
-                    onChange={(e) => setGenero(e.target.value)}
+                    onChange={(e) => {
+                      setGenero(e.target.value)
+                      setErrors(prev => ({ ...prev, genero: '' }))
+                    }}
                     className="register-radio"
                   />
                   <span>Masculino</span>
@@ -850,7 +811,10 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                     name="genero"
                     value="femenino"
                     checked={genero === 'femenino'}
-                    onChange={(e) => setGenero(e.target.value)}
+                    onChange={(e) => {
+                      setGenero(e.target.value)
+                      setErrors(prev => ({ ...prev, genero: '' }))
+                    }}
                     className="register-radio"
                   />
                   <span>Femenino</span>
@@ -861,7 +825,10 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                     name="genero"
                     value="otro"
                     checked={genero === 'otro'}
-                    onChange={(e) => setGenero(e.target.value)}
+                    onChange={(e) => {
+                      setGenero(e.target.value)
+                      setErrors(prev => ({ ...prev, genero: '' }))
+                    }}
                     className="register-radio"
                   />
                   <span>Otro</span>
@@ -874,7 +841,6 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
               )}
             </div>
 
-            {/* Type-Doc select */}
             <div className="register-input-group">
               <label className="register-label">Tipo de documento</label>
               <select
@@ -890,7 +856,6 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
               </select>
             </div>
 
-            {/* Num-Doc Input */}
             <div className="register-input-group">
               <label className="register-label">Número de documento</label>
               <input
@@ -912,7 +877,6 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
               )}
             </div>
 
-            {/* File-(RIVI) Input */}
             <div className="register-input-group">
               <label className="register-label">
                 Adjunte la captura del RIVI Y HEMI
@@ -931,7 +895,6 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
               )}
             </div>
 
-            {/* Address Input */}
             <div className="register-input-group">
               <label className="register-label">
                 Dirección de su puesto de trabajo
@@ -955,7 +918,6 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
               )}
             </div>
 
-            {/* Localidad Select */}
             <div className="register-input-group">
               <label className="register-label">Localidad donde trabaja</label>
               <select
@@ -982,7 +944,6 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
               )}
             </div>
 
-            {/* Validity Input */}
             <div className="register-input-group">
               <label className="register-label">Vigencia</label>
               <div className="register-radio-group">
@@ -992,10 +953,13 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                     name="vigencia"
                     value="activo"
                     checked={vigencia === 'activo'}
-                    onChange={(e) => setVigencia(e.target.value)}
+                    onChange={(e) => {
+                      setVigencia(e.target.value)
+                      setErrors(prev => ({ ...prev, vigencia: '' }))
+                    }}
                     className="register-radio"
                   />
-                  <span> Vigente</span>
+                  <span>Vigente</span>
                 </label>
                 <label className="register-radio-label">
                   <input
@@ -1003,7 +967,10 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                     name="vigencia"
                     value="inactivo"
                     checked={vigencia === 'inactivo'}
-                    onChange={(e) => setVigencia(e.target.value)}
+                    onChange={(e) => {
+                      setVigencia(e.target.value)
+                      setErrors(prev => ({ ...prev, vigencia: '' }))
+                    }}
                     className="register-radio"
                   />
                   <span>Vencido</span>
@@ -1016,7 +983,6 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
               )}
             </div>
 
-            {/* Products Input */}
             <div className="register-input-group">
               <label className="register-label">Productos que ofrece</label>
               <div className="register-products-grid">
@@ -1052,7 +1018,6 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
               )}
             </div>
 
-            {/* Phone Number Input */}
             <div className="register-input-group">
               <label className="register-label">Número de teléfono</label>
               <input
@@ -1074,7 +1039,6 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
               )}
             </div>
 
-            {/* Email Input */}
             <div className="register-input-group">
               <label className="register-label">Correo electrónico</label>
               <input
@@ -1096,14 +1060,16 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
               )}
             </div>
 
-            {/* Password Input */}
             <div className="register-input-group">
               <label className="register-label">Contraseña</label>
               <div className="register-password-container">
                 <input
                   type={isPasswordVisible ? 'text' : 'password'}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value)
+                    setErrors(prev => ({ ...prev, password: '' }))
+                  }}
                   onKeyPress={handleKeyPress}
                   placeholder="Ej. MiContra123"
                   className="register-password-input"
@@ -1140,31 +1106,37 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                 </button>
               </div>
               
-              {/* Mostrar siempre los requisitos, no solo cuando hay password */}
               <div className="password-requirements">
                 <div className={`password-requirement ${passwordRequirements.minLength ? 'valid' : 'invalid'}`}>
-                  {passwordRequirements.minLength ? '✓' : '•'} Mínimo 8 caracteres
+                  Mínimo 8 caracteres
                 </div>
                 <div className={`password-requirement ${passwordRequirements.hasUppercase ? 'valid' : 'invalid'}`}>
-                  {passwordRequirements.hasUppercase ? '✓' : '•'} Al menos una letra mayúscula
+                  Al menos una letra mayúscula
                 </div>
                 <div className={`password-requirement ${passwordRequirements.hasLowercase ? 'valid' : 'invalid'}`}>
-                  {passwordRequirements.hasLowercase ? '✓' : '•'} Al menos una letra minúscula
+                  Al menos una letra minúscula
                 </div>
                 <div className={`password-requirement ${passwordRequirements.hasNumber ? 'valid' : 'invalid'}`}>
-                  {passwordRequirements.hasNumber ? '✓' : '•'} Al menos un número
+                  Al menos un número
                 </div>
               </div>
+              {errors.password && (
+                <div className="register-message register-message-error">
+                  {errors.password}
+                </div>
+              )}
             </div>
 
-            {/* Confirm Password Input */}
             <div className="register-input-group">
               <label className="register-label">Confirmar contraseña</label>
               <div className="register-password-container">
                 <input
                   type={isConfirmPasswordVisible ? 'text' : 'password'}
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value)
+                    setErrors(prev => ({ ...prev, confirmPassword: '' }))
+                  }}
                   onKeyPress={handleKeyPress}
                   placeholder="Confirmar contraseña"
                   className="register-password-input"
@@ -1207,13 +1179,15 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
               )}
             </div>
 
-            {/* Checkbox */}
             <div className="register-checkbox-container">
               <label className="register-checkbox-label">
                 <input
                   type="checkbox"
                   checked={terms}
-                  onChange={(e) => setTerms(e.target.checked)}
+                  onChange={(e) => {
+                    setTerms(e.target.checked)
+                    setErrors(prev => ({ ...prev, terms: '' }))
+                  }}
                   className="register-checkbox"
                   required
                 />
@@ -1226,29 +1200,27 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                 </p>
               </label>
             </div>
+            {errors.terms && (
+              <div className="register-message register-message-error">
+                {errors.terms}
+              </div>
+            )}
+
             <div>
-              <button onClick={mostrarModal} className="btn btn-primary">
-                Ver Consentimiento
+              <button onClick={mostrarModal} className="back-button" style={{marginBottom: '0'}}>
+                Ver Consentimiento de Datos
               </button>
             </div>
 
-            {/* Submit */}
             <button
               type="button"
               onClick={handleSubmit}
               className="register-submit-button"
               disabled={!terms}
-              style={{
-                backgroundColor: !terms ? '#ea580c' : '#ea580c',
-                color: 'white',
-                cursor: !terms ? 'not-allowed' : 'pointer',
-                opacity: !terms ? 0.7 : 1
-              }}
             >
               Registrarse
             </button>
 
-            {/* Go to Login */}
             <div className="register-toggle-container">
               <button
                 type="button"
@@ -1259,7 +1231,6 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
               </button>
             </div>
 
-            {/* Message */}
             {message && (
               <div
                 className={`register-message ${

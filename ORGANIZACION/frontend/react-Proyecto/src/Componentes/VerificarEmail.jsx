@@ -44,7 +44,7 @@ export default function VerificarEmail() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: '#f3f3f3',
       padding: '20px'
     }}>
       <div style={{
@@ -61,7 +61,7 @@ export default function VerificarEmail() {
           width: '100px',
           height: '100px',
           margin: '0 auto 30px',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: '#9a1e22',
           borderRadius: '50%',
           display: 'flex',
           alignItems: 'center',
@@ -105,7 +105,7 @@ export default function VerificarEmail() {
         <p style={{
           fontSize: '18px',
           fontWeight: '600',
-          color: '#667eea',
+          color: '#ea580c',
           marginBottom: '25px',
           wordBreak: 'break-all'
         }}>
@@ -145,7 +145,7 @@ export default function VerificarEmail() {
         {/* Advertencia */}
         <div style={{
           background: '#fff3cd',
-          border: '1px solid #ffc107',
+          border: '1px solid #ea580c',
           borderRadius: '8px',
           padding: '15px',
           marginBottom: '25px',
@@ -184,7 +184,7 @@ export default function VerificarEmail() {
             style={{
               width: '100%',
               padding: '14px',
-              background: isResending ? '#ccc' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              background: isResending ? '#f3f3f3' : '#dc3545',
               color: 'white',
               border: 'none',
               borderRadius: '8px',
@@ -216,8 +216,8 @@ export default function VerificarEmail() {
               width: '100%',
               padding: '14px',
               background: 'transparent',
-              color: '#667eea',
-              border: '2px solid #667eea',
+              color: '#9a1e22',
+              border: '2px solid #9a1e22',
               borderRadius: '8px',
               fontSize: '16px',
               fontWeight: '600',
@@ -225,12 +225,12 @@ export default function VerificarEmail() {
               transition: 'all 0.3s'
             }}
             onMouseOver={(e) => {
-              e.target.style.background = '#667eea';
+              e.target.style.background = '#9a1e22';
               e.target.style.color = 'white';
             }}
             onMouseOut={(e) => {
               e.target.style.background = 'transparent';
-              e.target.style.color = '#667eea';
+              e.target.style.color = '#9a1e22';
             }}
           >
             Ir a Iniciar Sesión

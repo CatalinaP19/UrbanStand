@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Breadcrumbs from '../Componentes/Breadcrumbs';
+import Breadcrumbs from '../Componentes/Breadcrumbs'
 
 export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
   const navigate = useNavigate()
@@ -17,8 +17,9 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
   const [terms, setTerms] = useState(false)
   const [message, setMessage] = useState('')
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false)
-  
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
+    useState(false)
+
   // Estados para errores individuales
   const [errors, setErrors] = useState({
     nomEnti: '',
@@ -30,7 +31,7 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
     direccionE: '',
     password: '',
     confirmPasswordE: '',
-    terms: ''
+    terms: '',
   })
 
   useEffect(() => {
@@ -417,16 +418,17 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
       direccionE: '',
       password: '',
       confirmPasswordE: '',
-      terms: ''
+      terms: '',
     }
-    
+
     const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/
 
     // Validaciones individuales
     if (!nomEnti.trim()) {
       newErrors.nomEnti = 'El nombre de la empresa es obligatorio.'
     } else if (nomEnti.length > 100) {
-      newErrors.nomEnti = 'El nombre de la empresa no debe exceder más de 100 caracteres.'
+      newErrors.nomEnti =
+        'El nombre de la empresa no debe exceder más de 100 caracteres.'
     }
 
     if (!tipoE) newErrors.tipoE = '¿De qué tipo es tu entidad?'
@@ -435,39 +437,47 @@ export default function RegistroEntidades({ onBackToRoles, onGoToLogin }) {
     if (!emailRegex.test(emailE)) newErrors.emailE = 'El email no es válido.'
 
     // Validación de la dirección
-const ValidateAddressEnti = (direccionE) => {
-  const direccionRegex = /^(Calle|Carrera|Transversal|Diagonal|Avenida|Autopista|Circunvalar|Av\.?|Kr\.?|Cr\.?|Cl\.?|Tv\.?|Dg\.?|Ac\.?|Ak\.?|Cra\.?)\s*\d+[A-Za-z]*(?:\s*(?:Bis|Sur|Norte|Este|Oeste|A|B|C))?\s*(?:#|No\.?|Nro\.?|N°)\s*\d+[A-Za-z]*(?:\s*[-–]\s*\d+[A-Za-z]*)?(?:\s*(?:Apt|Apto|Apartamento|Of|Oficina|Local|Int|Interior|Piso|Torre|Bloque|Casa|Lote)\s*[A-Za-z0-9]+)?/i
-  return direccionRegex.test(direccionE)
-}
+    const ValidateAddressEnti = (direccionE) => {
+      const direccionRegex =
+        /^(Calle|Carrera|Transversal|Diagonal|Avenida|Autopista|Circunvalar|Av\.?|Kr\.?|Cr\.?|Cl\.?|Tv\.?|Dg\.?|Ac\.?|Ak\.?|Cra\.?)\s*\d+[A-Za-z]*(?:\s*(?:Bis|Sur|Norte|Este|Oeste|A|B|C))?\s*(?:#|No\.?|Nro\.?|N°)\s*\d+[A-Za-z]*(?:\s*[-–]\s*\d+[A-Za-z]*)?(?:\s*(?:Apt|Apto|Apartamento|Of|Oficina|Local|Int|Interior|Piso|Torre|Bloque|Casa|Lote)\s*[A-Za-z0-9]+)?/i
+      return direccionRegex.test(direccionE)
+    }
     if (!validatePhoneNumber(NumTelE)) {
-      newErrors.NumTelE = 'El número telefónico debe ser válido y compatible con Colombia (formato: 3XXXXXXXXX).'
+      newErrors.NumTelE =
+        'El número telefónico debe ser válido y compatible con Colombia (formato: 3XXXXXXXXX).'
     }
 
     if (!ValidateAddressEnti(direccionE)) {
-      newErrors.direccionE = 'La dirección debe ser válida y compatible con el formato requerido.'
+      newErrors.direccionE =
+        'La dirección debe ser válida y compatible con el formato requerido.'
     }
 
     const passwordRequirements = validatePassword(password)
     let passwordErrors = []
-    if (!passwordRequirements.minLength) passwordErrors.push('Mínimo 8 caracteres')
-    if (!passwordRequirements.hasUppercase) passwordErrors.push('Al menos una letra mayúscula')
-    if (!passwordRequirements.hasLowercase) passwordErrors.push('Al menos una letra minúscula')
-    if (!passwordRequirements.hasNumber) passwordErrors.push('Al menos un número')
-    
+    if (!passwordRequirements.minLength)
+      passwordErrors.push('Mínimo 8 caracteres')
+    if (!passwordRequirements.hasUppercase)
+      passwordErrors.push('Al menos una letra mayúscula')
+    if (!passwordRequirements.hasLowercase)
+      passwordErrors.push('Al menos una letra minúscula')
+    if (!passwordRequirements.hasNumber)
+      passwordErrors.push('Al menos un número')
+
     if (passwordErrors.length > 0) {
-      newErrors.password = 'La contraseña debe contener: ' + passwordErrors.join(', ') + '.'
+      newErrors.password =
+        'La contraseña debe contener: ' + passwordErrors.join(', ') + '.'
     }
 
     if (password !== confirmPasswordE) {
       newErrors.confirmPasswordE = 'Las contraseñas no coinciden.'
     }
-    
+
     if (!terms) newErrors.terms = 'Debes aceptar los términos y condiciones.'
 
     setErrors(newErrors)
 
     // Verificar si hay errores
-    const hasErrors = Object.values(newErrors).some(error => error !== '')
+    const hasErrors = Object.values(newErrors).some((error) => error !== '')
     if (hasErrors) {
       return
     }
@@ -487,7 +497,7 @@ const ValidateAddressEnti = (direccionE) => {
 
       // Aquí iría la llamada a tu API
       // const response = await apiService.entidad.register(registroData)
-      
+
       setMessage('¡Registro exitoso! Redirigiendo al login...')
       setTimeout(() => {
         if (typeof onGoToLogin === 'function') onGoToLogin()
@@ -522,6 +532,8 @@ const ValidateAddressEnti = (direccionE) => {
             onClick={() => {
               if (typeof onBackToRoles === 'function') {
                 onBackToRoles()
+              } else {
+                navigate('/register-roles')
               }
             }}
             className="back-button"
@@ -680,9 +692,7 @@ const ValidateAddressEnti = (direccionE) => {
                 className="register-input"
                 required
               />
-              {errors.nit && (
-                <div className="field-error">{errors.nit}</div>
-              )}
+              {errors.nit && <div className="field-error">{errors.nit}</div>}
             </div>
 
             {/* Email Input */}
@@ -883,9 +893,7 @@ const ValidateAddressEnti = (direccionE) => {
                 </p>
               </label>
             </div>
-            {errors.terms && (
-              <div className="field-error">{errors.terms}</div>
-            )}
+            {errors.terms && <div className="field-error">{errors.terms}</div>}
 
             {/* Submit */}
             <button
@@ -895,6 +903,16 @@ const ValidateAddressEnti = (direccionE) => {
             >
               Registrarse
             </button>
+
+            <div className="register-toggle-container">
+              <button
+                type="button"
+                onClick={goToLogin}
+                className="register-toggle-button"
+              >
+                ¿Ya tienes cuenta? Inicia sesión
+              </button>
+            </div>
 
             {/* Message */}
             {message && (

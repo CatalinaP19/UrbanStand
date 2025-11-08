@@ -53,7 +53,7 @@ export default function RestablecerPassword() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+      background: '#ea580c',
       padding: '20px'
     }}>
       <div style={{
@@ -136,7 +136,7 @@ export default function RestablecerPassword() {
             style={{
               width: '100%',
               padding: '15px',
-              background: isSubmitting ? '#ccc' : '#f5576c',
+              background: isSubmitting ? '#fff3cd' : '#ea580c',
               color: 'white',
               border: 'none',
               borderRadius: '5px',

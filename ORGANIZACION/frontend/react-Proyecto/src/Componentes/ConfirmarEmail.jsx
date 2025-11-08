@@ -41,7 +41,7 @@ export default function ConfirmarEmail() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: '#faf3e0',
       padding: '20px'
     }}>
       <div style={{
@@ -59,7 +59,7 @@ export default function ConfirmarEmail() {
               width: '60px',
               height: '60px',
               border: '4px solid #f3f3f3',
-              borderTop: '4px solid #667eea',
+              borderTop: '4px solid #9a1e22',
               borderRadius: '50%',
               margin: '0 auto 20px',
               animation: 'spin 1s linear infinite'
@@ -100,7 +100,7 @@ export default function ConfirmarEmail() {
             <button
               onClick={() => navigate('/login')}
               style={{
-                background: '#667eea',
+                background: '#ea580c',
                 color: 'white',
                 border: 'none',
                 padding: '12px 30px',

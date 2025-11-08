@@ -2,12 +2,7 @@ import React, { useEffect, useState, useRef } from 'react'
 
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContex'
-export default function Navbar({
-  isLoggedIn,
-  userRole,
-  userData,
-  onLogout
-}) {
+export default function Navbar({ isLoggedIn, userRole, userData, onLogout }) {
   const navigate = useNavigate()
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -310,37 +305,46 @@ export default function Navbar({
 
   // Usar el contexto de autenticación directamente
   const { user: authUser, isAuthenticated } = useAuth()
-  
+
   // Fallback de sesión local si no llegan props o están vacías
   const getSessionFromLocal = () => {
     try {
       const token = localStorage.getItem('token')
       const role = localStorage.getItem('userType') || undefined
-      const current = JSON.parse(localStorage.getItem('urbanstand_current_user') || 'null')
+      const current = JSON.parse(
+        localStorage.getItem('urbanstand_current_user') || 'null'
+      )
       return {
         isLoggedIn: Boolean(token) || Boolean(current),
         role: current?.role || role,
         data: current || null,
       }
-    } catch (_) { return { isLoggedIn: false, role: undefined, data: null } }
+    } catch (_) {
+      return { isLoggedIn: false, role: undefined, data: null }
+    }
   }
 
   const session = getSessionFromLocal()
-  
+
   // Priorizar el contexto de autenticación sobre props y localStorage
-  const effectiveLogged = authUser ? isAuthenticated() : Boolean(isLoggedIn ?? session.isLoggedIn)
+  const effectiveLogged = authUser
+    ? isAuthenticated()
+    : Boolean(isLoggedIn ?? session.isLoggedIn)
   const effectiveRole = authUser?.role ?? userRole ?? session.role
   const effectiveData = authUser ?? userData ?? session.data
 
   // Obtener inicial del usuario para avatar
   const getUserInitial = () => {
-    if (effectiveData?.firstName) return effectiveData.firstName.charAt(0).toUpperCase()
-    if (effectiveData?.nomEnti) return effectiveData.nomEnti.charAt(0).toUpperCase()
+    if (effectiveData?.firstName)
+      return effectiveData.firstName.charAt(0).toUpperCase()
+    if (effectiveData?.nomEnti)
+      return effectiveData.nomEnti.charAt(0).toUpperCase()
     return effectiveRole ? effectiveRole.charAt(0).toUpperCase() : 'U'
   }
 
   const getUserName = () => {
-    if (effectiveData?.firstName && effectiveData?.lastName) return `${effectiveData.firstName} ${effectiveData.lastName}`
+    if (effectiveData?.firstName && effectiveData?.lastName)
+      return `${effectiveData.firstName} ${effectiveData.lastName}`
     if (effectiveData?.nomEnti) return effectiveData.nomEnti
     if (effectiveData?.email) return effectiveData.email.split('@')[0]
     return 'Usuario'
@@ -369,7 +373,10 @@ export default function Navbar({
         {/* Logo */}
         <div
           className="navbar-logo"
-          onClick={() => { setMenuOpen(false); navigate('/') }}
+          onClick={() => {
+            setMenuOpen(false)
+            navigate('/')
+          }}
         >
           <img src="../img/logo.png" alt="logo" />
           UrbanStand
@@ -447,11 +454,11 @@ export default function Navbar({
               <button
                 className={`navbar-link ${location.pathname === '/vendedor' || location.pathname === '/entidades' ? 'active' : ''}`}
                 onClick={() => {
-                  setMenuOpen(false);
+                  setMenuOpen(false)
                   if (effectiveRole === 'vendedor') {
-                    navigate('/vendedor');
+                    navigate('/vendedor')
                   } else if (effectiveRole === 'entidad') {
-                    navigate('/entidades');
+                    navigate('/entidades')
                   }
                 }}
               >
@@ -463,11 +470,14 @@ export default function Navbar({
                   <button
                     className={`navbar-link ${location.pathname === '/vendedor/mapa' ? 'active' : ''}`}
                     onClick={() => {
-                      setMenuOpen(false);
+                      setMenuOpen(false)
                       // Por ahora scroll al mapa en la misma página
-                      const mapSection = document.getElementById('vendor-map');
+                      const mapSection = document.getElementById('vendor-map')
                       if (mapSection) {
-                        mapSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        mapSection.scrollIntoView({
+                          behavior: 'smooth',
+                          block: 'start',
+                        })
                       }
                     }}
                   >
@@ -477,8 +487,8 @@ export default function Navbar({
                   <button
                     className={`navbar-link ${location.pathname === '/vendedor/perfil' ? 'active' : ''}`}
                     onClick={() => {
-                      setMenuOpen(false);
-                      navigate('/vendedor/perfil');
+                      setMenuOpen(false)
+                      navigate('/vendedor/perfil')
                     }}
                   >
                     Perfil
@@ -488,27 +498,26 @@ export default function Navbar({
 
               <div className="navbar-user">
                 {getAvatarImage() ? (
-                  <img src={getAvatarImage()} alt="avatar" className="navbar-user-avatar" style={{ objectFit: 'cover' }} />
+                  <img
+                    src={getAvatarImage()}
+                    alt="avatar"
+                    className="navbar-user-avatar"
+                    style={{ objectFit: 'cover' }}
+                  />
                 ) : (
-                  <div className="navbar-user-avatar">
-                    {getUserInitial()}
-                  </div>
+                  <div className="navbar-user-avatar">{getUserInitial()}</div>
                 )}
                 <div className="navbar-user-info">
-                  <div className="navbar-user-name">
-                    {getUserName()}
-                  </div>
-                  <div className="navbar-user-role">
-                    {effectiveRole}
-                  </div>
+                  <div className="navbar-user-name">{getUserName()}</div>
+                  <div className="navbar-user-role">{effectiveRole}</div>
                 </div>
               </div>
 
               <button
                 className="navbar-logout"
                 onClick={() => {
-                  logout();
-                  navigate('/login');
+                  logout()
+                  navigate('/login')
                 }}
               >
                 Cerrar Sesión
