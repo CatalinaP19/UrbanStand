@@ -12,109 +12,181 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
-import Breadcrumbs from '../Componentes/Breadcrumbs';
-
 
 export default function UrbanStandDashboard() {
-  // Referencias para las gráficas
   const barChartRef = useRef(null);
   const pieChartRef = useRef(null);
 
-  // Estados para los filtros
   const [selectedLocation, setSelectedLocation] = useState('Todas');
   const [selectedGender, setSelectedGender] = useState('Todos');
-  const [selectedStatus, setSelectedStatus] = useState('Activos');
+  const [selectedStatus, setSelectedStatus] = useState('Todos');
   const [selectedDate, setSelectedDate] = useState('');
 
-  // Estados para datos dinámicos
   const [statsData, setStatsData] = useState({ activos: 0, inactivos: 0, crecimiento: 0 });
   const [tableData, setTableData] = useState([]);
+  const [tableDataOriginal, setTableDataOriginal] = useState([]);
   const [barChartData, setBarChartData] = useState([]);
   const [pieChartData, setPieChartData] = useState([]);
   const [localidades, setLocalidades] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  // Cargar localidades al montar el componente
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
   useEffect(() => {
     fetch('http://localhost:3005/api/dashboard/localidades')
       .then(res => res.json())
       .then(data => {
         if (data.success) {
           setLocalidades(data.data);
+          
+          const datosTabla = [];
+          const generos = ['Masculino', 'Femenino', 'Otro'];
+          const estados = ['Activo', 'Inactivo'];
+          
+          for (let i = 0; i < 50; i++) {
+            const activos = Math.floor(Math.random() * 50) + 10;
+            const inactivos = Math.floor(Math.random() * 20) + 5;
+            datosTabla.push({
+              localidad: data.data[i % data.data.length].nombre,
+              genero: generos[i % generos.length],
+              estado: estados[i % estados.length],
+              activos: activos,
+              inactivos: inactivos,
+              total: activos + inactivos
+            });
+          }
+          
+          setTableDataOriginal(datosTabla);
+          setTableData(datosTabla);
+          calcularEstadisticas(datosTabla);
         }
       })
       .catch(error => console.error('Error cargando localidades:', error));
   }, []);
 
-  // Cargar estadísticas cuando cambien los filtros
   useEffect(() => {
-    if (localidades.length > 0) {
-      cargarEstadisticas();
+    filtrarDatos();
+  }, [selectedLocation, selectedGender, selectedStatus, tableDataOriginal]);
+
+  const filtrarDatos = () => {
+    let datosFiltrados = [...tableDataOriginal];
+
+    if (selectedLocation !== 'Todas') {
+      datosFiltrados = datosFiltrados.filter(item => item.localidad === selectedLocation);
     }
-  }, [selectedLocation, selectedGender, selectedStatus, selectedDate, localidades]);
 
-  const cargarEstadisticas = async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      
-      // Agregar filtros solo si no son valores por defecto
-      if (selectedLocation !== 'Todas') {
-        // Buscar el ID de la localidad por nombre
-        const localidadEncontrada = localidades.find(loc => loc.nombre === selectedLocation);
-        if (localidadEncontrada) {
-          params.append('localidad', localidadEncontrada._id);
-        }
-      }
-      
-      if (selectedGender !== 'Todos') {
-        params.append('genero', selectedGender);
-      }
-      
-      if (selectedStatus) {
-        params.append('estado', selectedStatus);
-      }
-      
-      if (selectedDate) {
-        params.append('fechaInicio', selectedDate);
-      }
+    if (selectedGender !== 'Todos') {
+      const generoCapitalizado = selectedGender.charAt(0).toUpperCase() + selectedGender.slice(1);
+      datosFiltrados = datosFiltrados.filter(item => item.genero === generoCapitalizado);
+    }
 
-      const response = await fetch(`http://localhost:3005/api/dashboard/estadisticas?${params}`);
-      const result = await response.json();
+    if (selectedStatus !== 'Todos') {
+      datosFiltrados = datosFiltrados.filter(item => item.estado === selectedStatus);
+    }
 
-      if (result.success) {
-        const { conteos, distribucionGenero, vendedoresPorLocalidad, tablaDetallada } = result.data;
-        
-        // Actualizar estadísticas principales
-        setStatsData({
-          activos: conteos.activos,
-          inactivos: conteos.inactivos,
-          crecimiento: conteos.crecimiento
-        });
-        
-        // Actualizar gráfica de barras
-        setBarChartData(vendedoresPorLocalidad);
-        
-        // Actualizar gráfica de pastel con colores
-        const pieData = distribucionGenero.map(item => ({
-          name: item.name.charAt(0).toUpperCase() + item.name.slice(1),
-          value: item.value,
-          color: item.name === 'masculino' ? '#ea580c' : 
-                 item.name === 'femenino' ? '#f97316' : '#6b7280'
-        }));
-        setPieChartData(pieData);
-        
-        // Actualizar tabla
-        setTableData(tablaDetallada);
+    setTableData(datosFiltrados);
+    setCurrentPage(1);
+    calcularEstadisticas(datosFiltrados);
+  };
+
+  const calcularEstadisticas = (datos) => {
+    const totalActivos = datos.reduce((sum, item) => sum + item.activos, 0);
+    const totalInactivos = datos.reduce((sum, item) => sum + item.inactivos, 0);
+    
+    const crecimiento = totalActivos > 0 
+      ? Math.round(((totalActivos - totalInactivos) / totalActivos) * 100) 
+      : 0;
+
+    setStatsData({
+      activos: totalActivos,
+      inactivos: totalInactivos,
+      crecimiento: crecimiento
+    });
+
+    const vendedoresPorLocalidad = {};
+    datos.forEach(item => {
+      if (!vendedoresPorLocalidad[item.localidad]) {
+        vendedoresPorLocalidad[item.localidad] = 0;
       }
-    } catch (error) {
-      console.error('Error cargando estadísticas:', error);
-    } finally {
-      setLoading(false);
+      vendedoresPorLocalidad[item.localidad] += item.activos;
+    });
+
+    const barData = Object.keys(vendedoresPorLocalidad).map(localidad => ({
+      localidad: localidad,
+      vendedores: vendedoresPorLocalidad[localidad]
+    }));
+    setBarChartData(barData);
+
+    const generoCounts = {};
+    datos.forEach(item => {
+      if (!generoCounts[item.genero]) {
+        generoCounts[item.genero] = 0;
+      }
+      generoCounts[item.genero] += item.activos;
+    });
+
+    const colores = {
+      'Masculino': '#ea580c',
+      'Femenino': '#f97316',
+      'Otro': '#6b7280'
+    };
+
+    const pieData = Object.keys(generoCounts).map(genero => ({
+      name: genero,
+      value: generoCounts[genero],
+      color: colores[genero]
+    }));
+    setPieChartData(pieData);
+  };
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = tableData.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(tableData.length / itemsPerPage);
+
+  const nextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
     }
   };
 
-  // Función para descargar gráfica específica
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const goToPage = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handleItemsPerPageChange = (e) => {
+    setItemsPerPage(Number(e.target.value));
+    setCurrentPage(1);
+  };
+
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxPagesToShow = 5;
+
+    if (totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        pageNumbers.push(1, 2, 3, 4, '...', totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pageNumbers.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        pageNumbers.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+      }
+    }
+
+    return pageNumbers;
+  };
+
   const downloadChart = async (chartRef, filename) => {
     if (!chartRef.current || !window.html2canvas) {
       alert('Espera un momento mientras cargamos los recursos necesarios...');
@@ -137,7 +209,6 @@ export default function UrbanStandDashboard() {
     }
   };
 
-  // Crear estilos CSS
   useEffect(() => {
     const script = document.createElement('script');
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
@@ -332,6 +403,92 @@ export default function UrbanStandDashboard() {
         font-weight: 600;
       }
 
+      .pagination-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid #f3f4f6;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .pagination-info {
+        color: #6b7280;
+        font-size: 0.95rem;
+      }
+
+      .pagination-controls {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .pagination-button {
+        padding: 0.5rem 1rem;
+        border: 2px solid #ea580c;
+        background: white;
+        color: #ea580c;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        font-size: 0.9rem;
+      }
+
+      .pagination-button:hover:not(:disabled) {
+        background: #ea580c;
+        color: white;
+      }
+
+      .pagination-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        border-color: #d1d5db;
+        color: #9ca3af;
+      }
+
+      .pagination-button.active {
+        background: #ea580c;
+        color: white;
+      }
+
+      .pagination-ellipsis {
+        padding: 0.5rem;
+        color: #6b7280;
+      }
+
+      .items-per-page {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .items-per-page-label {
+        color: #6b7280;
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+
+      .items-per-page-select {
+        border: 2px solid #ea580c;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+        outline: none;
+        cursor: pointer;
+        background: white;
+        color: #374151;
+        font-weight: 500;
+      }
+
+      .items-per-page-select:focus {
+        border-color: #9a1e22;
+        box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+      }
+
       .dashboard-download-container {
         text-align: center;
         margin-top: 2rem;
@@ -385,7 +542,7 @@ export default function UrbanStandDashboard() {
         font-size: 1.1rem;
       }
 
-    @media (max-width: 768px) {
+      @media (max-width: 768px) {
         .dashboard-container {
           padding: 0 0.5rem;
           width: 100%;
@@ -413,116 +570,32 @@ export default function UrbanStandDashboard() {
           gap: 0.75rem;
         }
 
-        .dashboard-filter-label {
+        .dashboard-stats-grid {
+          grid-template-columns: 1fr;
+          gap: 1rem;
+        }
+
+        .dashboard-charts-grid {
+          grid-template-columns: 1fr;
+          gap: 1rem;
+        }
+
+        .pagination-container {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .pagination-controls {
+          justify-content: center;
+        }
+
+        .pagination-button {
+          padding: 0.4rem 0.7rem;
           font-size: 0.85rem;
         }
 
-        .dashboard-filter-select,
-        .dashboard-filter-input {
-          padding: 0.6rem;
-          font-size: 0.9rem;
-        }
-
-        .dashboard-stats-grid {
-          grid-template-columns: 1fr;
-          gap: 1rem;
-        }
-
-        .dashboard-stat-card {
-          padding: 1rem;
-        }
-
-        .dashboard-stat-number {
-          font-size: 2rem;
-        }
-
-        .dashboard-stat-label {
-          font-size: 0.95rem;
-        }
-
-        .dashboard-charts-grid {
-          grid-template-columns: 1fr;
-          gap: 1rem;
-        }
-
-        .dashboard-chart-card {
-          padding: 1rem;
-        }
-
-        .dashboard-chart-title {
-          font-size: 1rem;
-          margin-bottom: 0.75rem;
-        }
-
-        .dashboard-table-container {
-          padding: 0.5rem;
-          overflow-x: auto;
-          -webkit-overflow-scrolling: touch;
-        }
-
-        .dashboard-table {
-          font-size: 0.8rem;
-          min-width: 500px;
-        }
-
-        .dashboard-table th,
-        .dashboard-table td {
-          padding: 0.5rem;
-        }
-
-        .dashboard-download-container {
-          flex-direction: column;
-          align-items: stretch;
-          padding: 0 0.5rem;
-        }
-
-        .dashboard-download-button {
-          width: 100%;
-          padding: 0.75rem;
-          font-size: 0.9rem;
-        }
-
-        .dashboard-loading,
-        .dashboard-no-data {
-          padding: 1rem;
-          margin: 1rem 0;
-        }
-
-        .dashboard-loading-text,
-        .dashboard-no-data-text {
-          font-size: 0.95rem;
-        }
-
-        /* Mejoras para gráficas en móvil */
-        .recharts-wrapper {
-          font-size: 0.75rem !important;
-        }
-
-        .recharts-legend-wrapper {
-          font-size: 0.7rem !important;
-        }
-      }
-
-      /* Tablets y pantallas medianas */
-      @media (min-width: 769px) and (max-width: 1024px) {
-        .dashboard-container {
-          padding: 0 2rem;
-        }
-
-        .dashboard-content {
-          padding: 1.5rem;
-        }
-
-        .dashboard-hero-title {
-          font-size: 2rem;
-        }
-
-        .dashboard-charts-grid {
-          grid-template-columns: 1fr;
-        }
-
-        .dashboard-stats-grid {
-          grid-template-columns: repeat(3, 1fr);
+        .items-per-page {
+          justify-content: center;
         }
       }
     `;
@@ -539,7 +612,6 @@ export default function UrbanStandDashboard() {
 
   return (
     <div className="dashboard-container">
-      <Breadcrumbs />
       <div className="dashboard-content">
         <div className="dashboard-hero">
           <div>
@@ -590,8 +662,9 @@ export default function UrbanStandDashboard() {
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
             >
-              <option value="Activos">Activos</option>
-              <option value="Inactivos">Inactivos</option>
+              <option value="Todos">Todos</option>
+              <option value="Activo">Activos</option>
+              <option value="Inactivo">Inactivos</option>
             </select>
           </div>
 
@@ -605,18 +678,6 @@ export default function UrbanStandDashboard() {
               placeholder="DD/MM/AAAA"
             />
           </div>
-
-          <div className="dashboard-filter-group">
-            <label className="dashboard-filter-label">Acciones</label>
-            <button 
-              className="dashboard-filter-select"
-              onClick={() => cargarEstadisticas()}
-              style={{ cursor: 'pointer', fontWeight: '600' }}
-            >
-              🔄 Actualizar datos
-            </button>
-          </div>
-          
         </div>
 
         {loading && (
@@ -627,7 +688,7 @@ export default function UrbanStandDashboard() {
           </div>
         )}
 
-        {!loading && barChartData.length === 0 && (
+        {tableData.length === 0 && !loading && (
           <div className="dashboard-no-data">
             <p className="dashboard-no-data-text">
               No hay datos disponibles con los filtros seleccionados
@@ -659,7 +720,6 @@ export default function UrbanStandDashboard() {
         </div>
 
         <div className="dashboard-charts-grid">
-          {/* Gráfica de barras con Recharts */}
           <div className="dashboard-chart-card" ref={barChartRef}>
             <h3 className="dashboard-chart-title">Vendedores por localidad</h3>
             <ResponsiveContainer width="100%" height={300}>
@@ -685,7 +745,6 @@ export default function UrbanStandDashboard() {
             </ResponsiveContainer>
           </div>
 
-          {/* Gráfica circular con Recharts */}
           <div className="dashboard-chart-card" ref={pieChartRef}>
             <h3 className="dashboard-chart-title">Distribución por género</h3>
             <ResponsiveContainer width="100%" height={300}>
@@ -733,7 +792,7 @@ export default function UrbanStandDashboard() {
               </tr>
             </thead>
             <tbody>
-              {tableData.map((row, index) => (
+              {currentItems.map((row, index) => (
                 <tr key={index}>
                   <td>{row.localidad}</td>
                   <td>{row.genero}</td>
@@ -744,6 +803,59 @@ export default function UrbanStandDashboard() {
               ))}
             </tbody>
           </table>
+
+          <div className="pagination-container">
+            <div className="pagination-info">
+              Mostrando {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, tableData.length)} de {tableData.length} registros
+            </div>
+
+            <div className="pagination-controls">
+              <button 
+                className="pagination-button"
+                onClick={prevPage}
+                disabled={currentPage === 1}
+              >
+                ← Anterior
+              </button>
+
+              {getPageNumbers().map((number, index) => (
+                number === '...' ? (
+                  <span key={`ellipsis-${index}`} className="pagination-ellipsis">...</span>
+                ) : (
+                  <button
+                    key={number}
+                    className={`pagination-button ${currentPage === number ? 'active' : ''}`}
+                    onClick={() => goToPage(number)}
+                  >
+                    {number}
+                  </button>
+                )
+              ))}
+
+              <button 
+                className="pagination-button"
+                onClick={nextPage}
+                disabled={currentPage === totalPages}
+              >
+                Siguiente →
+              </button>
+            </div>
+
+            <div className="items-per-page">
+              <label className="items-per-page-label">Mostrar:</label>
+              <select 
+                className="items-per-page-select"
+                value={itemsPerPage}
+                onChange={handleItemsPerPageChange}
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={15}>15</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         <div className="dashboard-download-container">

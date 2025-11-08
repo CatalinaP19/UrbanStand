@@ -731,7 +731,7 @@ const ValidateAddressEnti = (direccionE) => {
               <input
                 type="text"
                 value={direccionE}
-                onChange={(e) => ValidateAddressEnti(e.target.value)}
+                onChange={(e) => setDireccionE(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Ej. Calle 100 #15-55, barrio Barrios Unidos"
                 className="register-input"
