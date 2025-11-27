@@ -10,6 +10,9 @@ export default function VistaCliente ({ alVolverARoles }) {
   const [calificacionesVendedor, setCalificacionesVendedor] = useState({});
   const [calificacionHover, setCalificacionHover] = useState({});
   const [anchoVentana, setAnchoVentana] = useState(window.innerWidth);
+  const [paginaActual, setPaginaActual] = useState(1);
+  const [vendedoresPorPagina] = useState(3);
+  const [mostrarVendedores, setMostrarVendedores] = useState(true);
   const refMapa = useRef(null);
   const refMapaLeaflet = useRef(null);
   const refMarcadores = useRef([]);
@@ -88,6 +91,22 @@ export default function VistaCliente ({ alVolverARoles }) {
     v.nombre.toLowerCase().includes(terminoBusqueda.toLowerCase()) ||
     v.producto.toLowerCase().includes(terminoBusqueda.toLowerCase())
   );
+
+
+const indiceUltimoVendedor = paginaActual * vendedoresPorPagina;
+const indicePrimerVendedor = indiceUltimoVendedor - vendedoresPorPagina;
+const vendedoresActuales = vendedoresFiltrados.slice(indicePrimerVendedor, indiceUltimoVendedor);
+const totalPaginas = Math.ceil(vendedoresFiltrados.length / vendedoresPorPagina);
+
+const cambiarPagina = (numeroPagina) => {
+  setPaginaActual(numeroPagina);
+  window.scrollTo(0, 0);
+};
+
+  // Resetear a la primera página cuando se realiza una búsqueda
+  useEffect(() => {
+    setPaginaActual(1);
+  }, [terminoBusqueda]);
 
   const manejarCalificacion = (idVendedor, calificacion) => {
     setCalificacionesVendedor(previo => ({
@@ -544,7 +563,7 @@ export default function VistaCliente ({ alVolverARoles }) {
             </div>
 
             <div style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
-              {vendedoresFiltrados.map((vendedor) => (
+              {vendedoresActuales.map((vendedor) => (
                 <div
                   key={vendedor.id}
                   onClick={(e) => {
@@ -707,8 +726,81 @@ export default function VistaCliente ({ alVolverARoles }) {
                 </div>
               ))}
             </div>
+                {totalPaginas > 1 && (
+  <div style={{ 
+    display: 'flex', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    gap: '10px', 
+    marginTop: '20px',
+    padding: '10px'
+  }}>
+    <button
+      onClick={() => cambiarPagina(paginaActual - 1)}
+      disabled={paginaActual === 1}
+      style={{
+        padding: '8px 16px',
+        border: '1px solid #e5e7eb',
+        background: paginaActual === 1 ? '#f3f4f6' : 'white',
+        color: paginaActual === 1 ? '#9ca3af' : '#1f2937',
+        borderRadius: '6px',
+        cursor: paginaActual === 1 ? 'not-allowed' : 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px'
+      }}
+    >
+      Anterior
+    </button>
+    
+    <div style={{ display: 'flex', gap: '4px' }}>
+      {Array.from({ length: totalPaginas }, (_, i) => i + 1).map(numero => (
+        <button
+          key={numero}
+          onClick={() => cambiarPagina(numero)}
+          style={{
+            width: '36px',
+            height: '36px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: '1px solid',
+            borderColor: paginaActual === numero ? '#93230dff' : '#e5e7eb',
+            background: paginaActual === numero ? '#93230dff' : 'white',
+            color: paginaActual === numero ? 'white' : '#1f2937',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontWeight: paginaActual === numero ? '600' : '400'
+          }}
+        >
+          {numero}
+        </button>
+      ))}
+    </div>
+    
+    <button
+      onClick={() => cambiarPagina(paginaActual + 1)}
+      disabled={paginaActual === totalPaginas}
+      style={{
+        padding: '8px 16px',
+        border: '1px solid #e5e7eb',
+        background: paginaActual === 2 ? '#f3f4f6' : 'white',
+        color: paginaActual === 2 ? '#9ca3af' : '#1f2937',
+        borderRadius: '6px',
+        cursor: paginaActual === 2 ? 'not-allowed' : 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px'
+          }}>
+      Siguiente
+    </button>
+    
+  </div>
+)}
           </div>
+          
         </div>
+        
       </div>
     </div>
   );
