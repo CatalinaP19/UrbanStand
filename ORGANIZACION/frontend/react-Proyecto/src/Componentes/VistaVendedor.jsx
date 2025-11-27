@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   MapPin,
+  Star,
   Bell,
   MessageCircle,
   X,
@@ -16,7 +17,7 @@ import {
 import apiService from '../services/apiService'
 import Breadcrumbs from '../Componentes/Breadcrumbs'
 
-const VistaVendedor = ({ vendedorData = null }) => {
+export default function VistaVendedor({ vendedorData = null }) {
   const navigate = useNavigate()
   const mapRef = useRef(null)
   const leafletMapRef = useRef(null)
@@ -47,6 +48,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
   const [vendedor, setVendedor] = useState(initialVendedor)
   const [isChatOpen, setChatOpen] = useState(false)
   const [message, setMessage] = useState('')
+  const [messageNoti, setMessageNoti] = useState('')
   const [messages, setMessages] = useState([])
   const [isTracking, setIsTracking] = useState(false)
   const [trackingDestination, setTrackingDestination] = useState(null)
@@ -55,6 +57,133 @@ const VistaVendedor = ({ vendedorData = null }) => {
   const [isLoadingMessages, setIsLoadingMessages] = useState(false)
   const [chatError, setChatError] = useState(null)
   const messagesEndRef = useRef(null)
+  const [notificaciones, setNotificaciones] = useState([])
+  const [animandoSalida, setAnimandoSalida] = useState([])
+  const [showNotifications, setShowNotifications] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  // Datos de notificaciones
+  const notificacionesData = [
+    {
+      id: 1,
+      titulo: 'Nuevo cliente cercano',
+      subtitulo: 'María González',
+      mensaje: 'Un cliente está buscando arepas a 150m de tu ubicación',
+      tiempo: 'ahora',
+      icono: MapPin,
+      color: '#ff7901',
+      leida: false,
+    },
+    {
+      id: 2,
+      titulo: 'Nueva calificación',
+      subtitulo: 'María González',
+      mensaje: 'Te han puntuado con 5 estrellas, ¡felicidades!',
+      tiempo: '2 min',
+      icono: Star,
+      color: '#FFD700',
+      leida: false,
+    },
+    {
+      id: 3,
+      titulo: 'Zona con alta demanda',
+      subtitulo: 'Calle 72 con Carrera 15',
+      mensaje: 'Hay 8 clientes activos buscando productos en esta área',
+      tiempo: '3 min',
+      icono: MapPin,
+      color: '#085c52',
+      leida: false,
+    },
+    {
+      id: 4,
+      titulo: 'Nuevo mensaje',
+      subtitulo: 'Pedro Sánchez',
+      mensaje: 'Hoy habrá una feria de comida, ¿Quién asistirá?',
+      tiempo: '4 min',
+      icono: MessageCircle,
+      color: '#9a1e22',
+      leida: false,
+    },
+    {
+      id: 5,
+      titulo: 'Nuevo mensaje',
+      subtitulo: 'Pedro Sánchez',
+      mensaje: 'Espero y todos asistan, pues al mejor puesto le darán un premio',
+      tiempo: '5 min',
+      icono: MessageCircle,
+      color: '#9a1e22',
+      leida: false,
+    },
+  ]
+
+  // Efecto para mostrar notificaciones progresivamente
+  useEffect(() => {
+    notificacionesData.forEach((notif, index) => {
+      setTimeout(() => {
+        setNotificaciones(prev => [...prev, notif])
+        setUnreadCount(prev => prev + 1)
+        
+        // Vibrar cuando aparece la notificación
+        if (navigator.vibrate) {
+          navigator.vibrate(50)
+        }
+      }, index * 2000)
+    })
+  }, [])
+
+  // Eliminar notificación
+  const eliminarNotificacion = (id) => {
+    setAnimandoSalida(prev => [...prev, id])
+    
+    // Reducir contador de no leídas si era no leída
+    const notif = notificaciones.find(n => n.id === id)
+    if (notif && !notif.leida) {
+      setUnreadCount(prev => Math.max(0, prev - 1))
+    }
+    
+    setTimeout(() => {
+      setNotificaciones(prev => prev.filter(n => n.id !== id))
+      setAnimandoSalida(prev => prev.filter(nId => nId !== id))
+    }, 300)
+  }
+
+  // Marcar notificación como leída
+  const marcarComoLeida = (id) => {
+    setNotificaciones(prev => 
+      prev.map(n => {
+        if (n.id === id && !n.leida) {
+          setUnreadCount(prevCount => Math.max(0, prevCount - 1))
+          return { ...n, leida: true }
+        }
+        return n
+      })
+    )
+  }
+
+  // Marcar todas como leídas
+  const marcarTodasLeidas = () => {
+    setNotificaciones(prev => prev.map(n => ({ ...n, leida: true })))
+    setUnreadCount(0)
+  }
+
+  // Toggle panel de notificaciones
+  const toggleNotifications = () => {
+    setShowNotifications(!showNotifications)
+  }
+
+  const sendMessageNoti = () => {
+    if (messageNoti.trim()) {
+      const newMsg = {
+        id: Date.now(),
+        userId: 'current',
+        userName: vendedor.nombre,
+        text: messageNoti.trim(),
+        timestamp: new Date().toISOString(),
+      }
+      setMessages(prev => [...prev, newMsg])
+      setMessageNoti('')
+    }
+  }
 
   // Inicializar mapa con Leaflet Routing Machine
   useEffect(() => {
@@ -540,15 +669,15 @@ const VistaVendedor = ({ vendedorData = null }) => {
     }
   }
 
-  const getProfileImage = (genero) => {
-    const g = (genero || '').toString().toLowerCase()
-    if (g.includes('fem')) return '/img/PerfilFemale.png'
-    if (g.includes('mas')) return '/img/PerfilMale.png'
-    if (g.includes('otr')) return '/img/PerfilOther.png'
-    return '/img/PerfilOther.png'
-  }
+const getProfileImage = (genero) => {
+  const g = (genero || '').toString().toLowerCase()
+  if (g.includes('fem')) return '/img/PerfilFemale.png'
+  if (g.includes('mas')) return '/img/PerfilMale.png'
+  if (g.includes('otr')) return '/img/PerfilOther.png'
+  return '/img/PerfilOther.png'
+}
 
-  const vendorProfileImage = getProfileImage(vendedor.genero)
+const vendorProfileImage = getProfileImage(vendedor.genero)
 
   return (
     <>
@@ -556,6 +685,273 @@ const VistaVendedor = ({ vendedorData = null }) => {
         className="container-fluid"
         style={{ padding: '0 var(--spacing-3xl)' }}
       >
+        
+        {/* Botón de notificaciones */}
+        <button
+          onClick={toggleNotifications}
+          style={{
+            position: 'fixed',
+            top: '826px',
+            right: '100px',
+            zIndex: 1100,
+            background: 'rgba(192, 43, 43)',
+            border: 'none',
+            borderRadius: '50%',
+            width: '70px',
+            height: '70px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'all 0.3s',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'rgba(192, 43, 43, 0.73)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'rgba(192, 43, 43)'
+          }}
+        >
+          <Bell size={24} color="#ffffffff" />
+          {unreadCount > 0 && (
+            <span style={{
+              position: 'absolute',
+              top: '0',
+              right: '0',
+              background: '#ff7901',
+              color: '#ffffffff',
+              borderRadius: '50%',
+              width: '20px',
+              height: '20px',
+              fontSize: '11px',
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '2px solid #085c52',
+              animation: 'pulse 2s infinite',
+            }}>
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
+        </button>
+  
+
+      {showNotifications && (
+        <div style={{
+          position: 'fixed',
+          top: '80px',
+          right: '20px',
+          width: '420px',
+          maxHeight: '600px',
+          backgroundColor: '#fff',
+          borderRadius: '16px',
+          boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+          zIndex: 1000,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          animation: 'slideInRight 0.3s ease-out',
+        }}>
+          {/* Header del panel */}
+          <div style={{
+            padding: '20px',
+            borderBottom: '1px solid #e0e0e0',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            backgroundColor: '#085c52',
+            color: '#fff',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <Bell size={24} />
+              <h3 style={{ margin: 0, fontSize: '18px' }}>Notificaciones</h3>
+            </div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {unreadCount > 0 && (
+                <button
+                  onClick={marcarTodasLeidas}
+                  style={{
+                    background: 'rgba(255,255,255,0.2)',
+                    border: 'none',
+                    color: '#fff',
+                    padding: '6px 12px',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.3)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.2)'
+                  }}
+                >
+                  Marcar todas
+                </button>
+              )}
+              <button
+                onClick={toggleNotifications}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  padding: '4px',
+                }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+          </div>
+
+          {/* Lista de notificaciones */}
+          <div style={{
+            flex: 1,
+            overflowY: 'auto',
+            padding: '12px',
+          }}>
+            {notificaciones.length === 0 ? (
+              <div style={{
+                textAlign: 'center',
+                padding: '40px 20px',
+                color: '#999',
+              }}>
+                <Bell size={48} style={{ opacity: 0.3, marginBottom: '16px' }} />
+                <p>No hay notificaciones nuevas</p>
+              </div>
+            ) : (
+              notificaciones.map((notif) => {
+                const Icono = notif.icono
+                const estaAnimandoSalida = animandoSalida.includes(notif.id)
+                
+                return (
+                  <div
+                    key={notif.id}
+                    onClick={() => marcarComoLeida(notif.id)}
+                    style={{
+                      backgroundColor: notif.leida ? '#fff' : 'rgba(255, 121, 1, 0.05)',
+                      borderRadius: '12px',
+                      padding: '12px',
+                      marginBottom: '8px',
+                      border: `1px solid ${notif.leida ? '#e0e0e0' : '#ff7901'}`,
+                      cursor: 'pointer',
+                      animation: estaAnimandoSalida ? 'slideOut 0.3s ease-out forwards' : 'slideIn 0.4s ease-out',
+                      transition: 'all 0.2s',
+                      position: 'relative',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.02)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)'
+                    }}
+                  >
+                    {/* Barra de color */}
+                    <div style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '4px',
+                      height: '100%',
+                      backgroundColor: notif.color,
+                      borderRadius: '12px 0 0 12px',
+                    }} />
+
+                    <div style={{ display: 'flex', gap: '12px', paddingLeft: '8px' }}>
+                      {/* Icono */}
+                      <div style={{ position: 'relative', flexShrink: 0 }}>
+                        <div style={{
+                          width: '40px',
+                          height: '40px',
+                          background: `linear-gradient(135deg, ${notif.color} 0%, ${notif.color}dd 100%)`,
+                          borderRadius: '10px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#fff',
+                        }}>
+                          <Icono size={20} />
+                        </div>
+                      </div>
+
+                      {/* Contenido */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ 
+                          display: 'flex', 
+                          justifyContent: 'space-between',
+                          marginBottom: '4px',
+                        }}>
+                          <h4 style={{ 
+                            fontSize: '14px', 
+                            fontWeight: '600',
+                            margin: 0,
+                            color: '#1f2937',
+                          }}>
+                            {notif.titulo}
+                          </h4>
+                          <span style={{ 
+                            fontSize: '11px', 
+                            color: '#9ca3af',
+                            whiteSpace: 'nowrap',
+                          }}>
+                            {notif.tiempo}
+                          </span>
+                        </div>
+                        <p style={{ 
+                          fontSize: '12px', 
+                          color: '#6b7280',
+                          margin: '0 0 4px 0',
+                        }}>
+                          {notif.subtitulo}
+                        </p>
+                        <p style={{ 
+                          fontSize: '13px', 
+                          color: '#374151',
+                          margin: 0,
+                          lineHeight: '1.4',
+                        }}>
+                          {notif.mensaje}
+                        </p>
+                      </div>
+
+                      {/* Botón eliminar */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          eliminarNotificacion(notif.id)
+                        }}
+                        style={{
+                          background: 'rgba(239,68,68,0.1)',
+                          border: 'none',
+                          borderRadius: '50%',
+                          width: '24px',
+                          height: '24px',
+                          flexShrink: 0,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'background 0.2s',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'rgba(239,68,68,0.2)'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'rgba(239,68,68,0.1)'
+                        }}
+                      >
+                        <X size={14} color="#ef4444" />
+                      </button>
+                    </div>
+                  </div>
+                )
+              })
+            )}
+          </div>
+        </div>
+      )}
+
         <Breadcrumbs />
         {/* Hero Section */}
         <section
@@ -1040,30 +1436,35 @@ const VistaVendedor = ({ vendedorData = null }) => {
         </main>
       </div>
       {/* Chat Toggle Button */}
-      <button
-        onClick={() => setChatOpen(!isChatOpen)}
-        style={{
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          background: 'var(--accent)',
-          color: '#fff',
-          border: 'none',
-          borderRadius: '50%',
-          width: '50px',
-          height: '50px',
-          fontSize: '24px',
-          cursor: 'pointer',
-          boxShadow: '0 4px 10px var(--shadow)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          transition: 'all var(--transition-fast)',
-          zIndex: 999,
-        }}
-      >
-        <MessageCircle size={24} />
-      </button>
+     <button
+  onClick={() => setChatOpen(!isChatOpen)}
+  style={{
+    position: 'fixed',
+    bottom: '20px',
+    right: '20px',
+    background: 'rgba(192, 43, 43)',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '50%',
+    width: '70px',
+    height: '70px',
+    cursor: 'pointer',
+    boxShadow: '0 4px 10px var(--shadow)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all var(--transition-fast)',
+    zIndex: 999,
+  }}
+  onMouseEnter={(e) => {
+    e.currentTarget.style.background = 'rgba(192, 43, 43, 0.73)'
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.background = 'rgba(192, 43, 43)'
+  }}
+>
+  <MessageCircle size={24} color="#fff" />
+</button>
 
       {/* Chat Box */}
       {isChatOpen && (
@@ -1284,5 +1685,3 @@ const VistaVendedor = ({ vendedorData = null }) => {
     </>
   )
 }
-
-export default VistaVendedor
