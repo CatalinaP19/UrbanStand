@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import Swal from 'sweetalert2'
 import { useNavigate } from 'react-router-dom'
-import Breadcrumbs from '../Componentes/Breadcrumbs';
-
+import Breadcrumbs from '../Componentes/Breadcrumbs'
 
 export default function Register({ onBackToRoles, onGoToLogin }) {
   const navigate = useNavigate()
@@ -22,7 +21,8 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
   const [terms, setTerms] = useState(false)
   const [message, setMessage] = useState('')
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false)
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
+    useState(false)
   const [selectedProducts, setSelectedProducts] = useState([])
   const [errors, setErrors] = useState({})
 
@@ -49,26 +49,26 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
   ]
 
   const localidadesBogota = [
-    'Antonio Nariño',
-    'Barrios Unidos',
-    'Bosa',
-    'Chapinero',
-    'Ciudad Bolívar',
-    'Engativá',
-    'Fontibón',
-    'Kennedy',
-    'La Candelaria',
-    'Los Mártires',
-    'Puente Aranda',
-    'Rafael Uribe Uribe',
-    'San Cristóbal',
-    'Santa Fe',
-    'Suba',
-    'Sumapaz',
-    'Teusaquillo',
-    'Tunjuelito',
-    'Usaquén',
-    'Usme',
+    { label: 'Usaquén', value: 'usaquén' },
+    { label: 'Chapinero', value: 'chapinero' },
+    { label: 'Santa Fe', value: 'santa fe' },
+    { label: 'San Cristóbal', value: 'san cristóbal' },
+    { label: 'Usme', value: 'usme' },
+    { label: 'Tunjuelito', value: 'tunjuelito' },
+    { label: 'Bosa', value: 'bosa' },
+    { label: 'Kennedy', value: 'kennedy' },
+    { label: 'Fontibón', value: 'fontibón' },
+    { label: 'Engativá', value: 'engativá' },
+    { label: 'Suba', value: 'suba' },
+    { label: 'Barrios Unidos', value: 'barrios unidos' },
+    { label: 'Teusaquillo', value: 'teusaquillo' },
+    { label: 'Los Mártires', value: 'los mártires' },
+    { label: 'Antonio Nariño', value: 'antonio nariño' },
+    { label: 'Puente Aranda', value: 'puente aranda' },
+    { label: 'La Candelaria', value: 'la candelaria' },
+    { label: 'Rafael Uribe Uribe', value: 'rafael uribe uribe' },
+    { label: 'Ciudad Bolívar', value: 'ciudad bolívar' },
+    { label: 'Sumapaz', value: 'sumapaz' },
   ]
 
   const mostrarModal = () => {
@@ -554,7 +554,8 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
     }
 
     if (numDoc.length < 6 || numDoc.length > 10) {
-      newErrors.numDoc = 'El número de documento debe tener entre 6 y 10 dígitos.'
+      newErrors.numDoc =
+        'El número de documento debe tener entre 6 y 10 dígitos.'
     }
 
     if (!rivi) {
@@ -562,7 +563,8 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
     }
 
     if (!ValidateAddress(direccion)) {
-      newErrors.direccion = 'La dirección debe ser válida y compatible con Bogotá.'
+      newErrors.direccion =
+        'La dirección debe ser válida y compatible con Bogotá.'
     }
 
     if (!localidad) {
@@ -574,7 +576,8 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
     }
 
     if (selectedProducts.length === 0) {
-      newErrors.selectedProducts = 'Debes seleccionar al menos una categoría de productos.'
+      newErrors.selectedProducts =
+        'Debes seleccionar al menos una categoría de productos.'
     }
 
     if (!validatePhoneNumber(NumTel)) {
@@ -590,8 +593,12 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
     }
 
     const passwordRequirements = validatePassword(password)
-    if (!passwordRequirements.minLength || !passwordRequirements.hasUppercase || 
-        !passwordRequirements.hasLowercase || !passwordRequirements.hasNumber) {
+    if (
+      !passwordRequirements.minLength ||
+      !passwordRequirements.hasUppercase ||
+      !passwordRequirements.hasLowercase ||
+      !passwordRequirements.hasNumber
+    ) {
       newErrors.password = 'La contraseña no cumple todos los requisitos.'
     }
 
@@ -603,6 +610,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
 
     if (Object.keys(newErrors).length === 0) {
       try {
+        const localidadNormalizada = localidad.trim().toLowerCase()
         const response = await fetch(
           'http://localhost:3005/api/auth/register',
           {
@@ -619,7 +627,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
               genero,
               selectedProducts,
               direccion,
-              localidad,
+              localidad: localidadNormalizada,
               rivi,
               vigencia,
             }),
@@ -640,6 +648,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
               firstName,
               lastName,
               genero,
+              localidad,
             }
             localStorage.setItem('urbanstand_users', JSON.stringify(existing))
           } catch (e) {
@@ -671,8 +680,8 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                   email: email,
                   tipoUsuario: 'vendedor',
                   nombre: firstName,
-                }
-              });
+                },
+              })
             }
           }, 2000)
         } else {
@@ -695,7 +704,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
     const file = e.target.files[0]
     if (file) {
       setRivi(file.name)
-      setErrors(prev => ({ ...prev, rivi: '' }))
+      setErrors((prev) => ({ ...prev, rivi: '' }))
     }
   }
 
@@ -719,7 +728,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
     } else {
       setSelectedProducts((prev) => prev.filter((p) => p !== product))
     }
-    setErrors(prev => ({ ...prev, selectedProducts: '' }))
+    setErrors((prev) => ({ ...prev, selectedProducts: '' }))
   }
 
   const passwordRequirements = validatePassword(password)
@@ -753,7 +762,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                   value={firstName}
                   onChange={(e) => {
                     setFirstName(e.target.value)
-                    setErrors(prev => ({ ...prev, firstName: '' }))
+                    setErrors((prev) => ({ ...prev, firstName: '' }))
                   }}
                   onKeyPress={handleKeyPress}
                   placeholder="Primer nombre"
@@ -773,7 +782,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                   value={lastName}
                   onChange={(e) => {
                     setLastName(e.target.value)
-                    setErrors(prev => ({ ...prev, lastName: '' }))
+                    setErrors((prev) => ({ ...prev, lastName: '' }))
                   }}
                   onKeyPress={handleKeyPress}
                   placeholder="Primer apellido"
@@ -799,7 +808,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                     checked={genero === 'masculino'}
                     onChange={(e) => {
                       setGenero(e.target.value)
-                      setErrors(prev => ({ ...prev, genero: '' }))
+                      setErrors((prev) => ({ ...prev, genero: '' }))
                     }}
                     className="register-radio"
                   />
@@ -813,7 +822,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                     checked={genero === 'femenino'}
                     onChange={(e) => {
                       setGenero(e.target.value)
-                      setErrors(prev => ({ ...prev, genero: '' }))
+                      setErrors((prev) => ({ ...prev, genero: '' }))
                     }}
                     className="register-radio"
                   />
@@ -827,7 +836,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                     checked={genero === 'otro'}
                     onChange={(e) => {
                       setGenero(e.target.value)
-                      setErrors(prev => ({ ...prev, genero: '' }))
+                      setErrors((prev) => ({ ...prev, genero: '' }))
                     }}
                     className="register-radio"
                   />
@@ -863,7 +872,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                 value={numDoc}
                 onChange={(e) => {
                   setNumDoc(e.target.value)
-                  setErrors(prev => ({ ...prev, numDoc: '' }))
+                  setErrors((prev) => ({ ...prev, numDoc: '' }))
                 }}
                 onKeyPress={handleKeyPress}
                 placeholder="Número de identificación"
@@ -904,7 +913,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                 value={direccion}
                 onChange={(e) => {
                   setDireccion(e.target.value)
-                  setErrors(prev => ({ ...prev, direccion: '' }))
+                  setErrors((prev) => ({ ...prev, direccion: '' }))
                 }}
                 onKeyPress={handleKeyPress}
                 placeholder="Ej. Calle 100 #15-55, barrio Barrios Unidos"
@@ -924,7 +933,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                 value={localidad}
                 onChange={(e) => {
                   setLocalidad(e.target.value)
-                  setErrors(prev => ({ ...prev, localidad: '' }))
+                  setErrors((prev) => ({ ...prev, localidad: '' }))
                 }}
                 onKeyPress={handleKeyPress}
                 className="register-input"
@@ -932,8 +941,8 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
               >
                 <option value="">Seleccione una localidad</option>
                 {localidadesBogota.map((loc, index) => (
-                  <option key={index} value={loc}>
-                    {loc}
+                  <option key={index} value={loc.value}>
+                    {loc.label}
                   </option>
                 ))}
               </select>
@@ -955,7 +964,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                     checked={vigencia === 'activo'}
                     onChange={(e) => {
                       setVigencia(e.target.value)
-                      setErrors(prev => ({ ...prev, vigencia: '' }))
+                      setErrors((prev) => ({ ...prev, vigencia: '' }))
                     }}
                     className="register-radio"
                   />
@@ -969,7 +978,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                     checked={vigencia === 'inactivo'}
                     onChange={(e) => {
                       setVigencia(e.target.value)
-                      setErrors(prev => ({ ...prev, vigencia: '' }))
+                      setErrors((prev) => ({ ...prev, vigencia: '' }))
                     }}
                     className="register-radio"
                   />
@@ -1025,7 +1034,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                 value={NumTel}
                 onChange={(e) => {
                   setNumTel(e.target.value)
-                  setErrors(prev => ({ ...prev, NumTel: '' }))
+                  setErrors((prev) => ({ ...prev, NumTel: '' }))
                 }}
                 onKeyPress={handleKeyPress}
                 placeholder="Ej. 3123456789"
@@ -1046,7 +1055,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value)
-                  setErrors(prev => ({ ...prev, email: '' }))
+                  setErrors((prev) => ({ ...prev, email: '' }))
                 }}
                 onKeyPress={handleKeyPress}
                 placeholder="email@correo.com"
@@ -1068,7 +1077,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value)
-                    setErrors(prev => ({ ...prev, password: '' }))
+                    setErrors((prev) => ({ ...prev, password: '' }))
                   }}
                   onKeyPress={handleKeyPress}
                   placeholder="Ej. MiContra123"
@@ -1105,18 +1114,26 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                   </svg>
                 </button>
               </div>
-              
+
               <div className="password-requirements">
-                <div className={`password-requirement ${passwordRequirements.minLength ? 'valid' : 'invalid'}`}>
+                <div
+                  className={`password-requirement ${passwordRequirements.minLength ? 'valid' : 'invalid'}`}
+                >
                   Mínimo 8 caracteres
                 </div>
-                <div className={`password-requirement ${passwordRequirements.hasUppercase ? 'valid' : 'invalid'}`}>
+                <div
+                  className={`password-requirement ${passwordRequirements.hasUppercase ? 'valid' : 'invalid'}`}
+                >
                   Al menos una letra mayúscula
                 </div>
-                <div className={`password-requirement ${passwordRequirements.hasLowercase ? 'valid' : 'invalid'}`}>
+                <div
+                  className={`password-requirement ${passwordRequirements.hasLowercase ? 'valid' : 'invalid'}`}
+                >
                   Al menos una letra minúscula
                 </div>
-                <div className={`password-requirement ${passwordRequirements.hasNumber ? 'valid' : 'invalid'}`}>
+                <div
+                  className={`password-requirement ${passwordRequirements.hasNumber ? 'valid' : 'invalid'}`}
+                >
                   Al menos un número
                 </div>
               </div>
@@ -1135,7 +1152,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                   value={confirmPassword}
                   onChange={(e) => {
                     setConfirmPassword(e.target.value)
-                    setErrors(prev => ({ ...prev, confirmPassword: '' }))
+                    setErrors((prev) => ({ ...prev, confirmPassword: '' }))
                   }}
                   onKeyPress={handleKeyPress}
                   placeholder="Confirmar contraseña"
@@ -1186,7 +1203,7 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
                   checked={terms}
                   onChange={(e) => {
                     setTerms(e.target.checked)
-                    setErrors(prev => ({ ...prev, terms: '' }))
+                    setErrors((prev) => ({ ...prev, terms: '' }))
                   }}
                   className="register-checkbox"
                   required
@@ -1207,7 +1224,11 @@ export default function Register({ onBackToRoles, onGoToLogin }) {
             )}
 
             <div>
-              <button onClick={mostrarModal} className="back-button" style={{marginBottom: '0'}}>
+              <button
+                onClick={mostrarModal}
+                className="back-button"
+                style={{ marginBottom: '0' }}
+              >
                 Ver Consentimiento de Datos
               </button>
             </div>

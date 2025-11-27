@@ -14,15 +14,14 @@ import {
   Zap,
 } from 'lucide-react'
 import apiService from '../services/apiService'
-import Breadcrumbs from '../Componentes/Breadcrumbs';
-
+import Breadcrumbs from '../Componentes/Breadcrumbs'
 
 const VistaVendedor = ({ vendedorData = null }) => {
   const navigate = useNavigate()
   const mapRef = useRef(null)
   const leafletMapRef = useRef(null)
   const routingControlRef = useRef(null)
-  
+
   // Cargar usuario actual desde localStorage si no llega por props
   const storedUser = (() => {
     try {
@@ -48,23 +47,14 @@ const VistaVendedor = ({ vendedorData = null }) => {
   const [vendedor, setVendedor] = useState(initialVendedor)
   const [isChatOpen, setChatOpen] = useState(false)
   const [message, setMessage] = useState('')
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      sender: 'Juan',
-      text: 'Hola, ¿cómo puedo ayudarte?',
-      isOwn: false,
-    },
-    {
-      id: 2,
-      sender: 'Cliente',
-      text: 'Hola, quiero ver tus productos',
-      isOwn: true,
-    },
-  ])
+  const [messages, setMessages] = useState([])
   const [isTracking, setIsTracking] = useState(false)
   const [trackingDestination, setTrackingDestination] = useState(null)
   const [vendorLocation] = useState([4.6097, -74.0817])
+  const [localidad, setLocalidad] = useState(null)
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false)
+  const [chatError, setChatError] = useState(null)
+  const messagesEndRef = useRef(null)
 
   // Inicializar mapa con Leaflet Routing Machine
   useEffect(() => {
@@ -78,10 +68,13 @@ const VistaVendedor = ({ vendedorData = null }) => {
       }
 
       // Cargar CSS de Leaflet Routing Machine
-      if (!document.querySelector('link[href*="leaflet-routing-machine.css"]')) {
+      if (
+        !document.querySelector('link[href*="leaflet-routing-machine.css"]')
+      ) {
         const linkRouting = document.createElement('link')
         linkRouting.rel = 'stylesheet'
-        linkRouting.href = 'https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css'
+        linkRouting.href =
+          'https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css'
         document.head.appendChild(linkRouting)
       }
 
@@ -93,7 +86,8 @@ const VistaVendedor = ({ vendedorData = null }) => {
         scriptLeaflet.onload = () => {
           // Cargar JS de Leaflet Routing Machine después de Leaflet
           const scriptRouting = document.createElement('script')
-          scriptRouting.src = 'https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js'
+          scriptRouting.src =
+            'https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js'
           scriptRouting.async = true
           scriptRouting.onload = () => {
             setTimeout(initMap, 100)
@@ -106,7 +100,8 @@ const VistaVendedor = ({ vendedorData = null }) => {
       } else {
         // Leaflet existe pero no Routing
         const scriptRouting = document.createElement('script')
-        scriptRouting.src = 'https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js'
+        scriptRouting.src =
+          'https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js'
         scriptRouting.async = true
         scriptRouting.onload = () => {
           setTimeout(initMap, 100)
@@ -348,7 +343,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
       const routingControl = window.L.Routing.control({
         waypoints: [
           window.L.latLng(vendorLocation[0], vendorLocation[1]),
-          window.L.latLng(lat, lng)
+          window.L.latLng(lat, lng),
         ],
         fitSelectedRoutes: true,
         collapsible: true,
@@ -357,16 +352,16 @@ const VistaVendedor = ({ vendedorData = null }) => {
         showAlternatives: true,
         altLineOptions: {
           styles: [
-            {color: 'black', opacity: 0.15, weight: 9},
-            {color: 'white', opacity: 0.8, weight: 6},
-            {color: '#085c52', opacity: 0.5, weight: 2}
-          ]
+            { color: 'black', opacity: 0.15, weight: 9 },
+            { color: 'white', opacity: 0.8, weight: 6 },
+            { color: '#085c52', opacity: 0.5, weight: 2 },
+          ],
         },
         lineOptions: {
-          styles: [{color: 'var(--accent)', opacity: 0.8, weight: 6}]
+          styles: [{ color: 'var(--accent)', opacity: 0.8, weight: 6 }],
         },
-        createMarker: function(i, waypoint, n) {
-          let icon;
+        createMarker: function (i, waypoint, n) {
+          let icon
           if (i === 0) {
             icon = window.L.divIcon({
               className: 'custom-user-marker',
@@ -381,8 +376,8 @@ const VistaVendedor = ({ vendedorData = null }) => {
                 "></div>
               `,
               iconSize: [20, 20],
-              iconAnchor: [10, 10]
-            });
+              iconAnchor: [10, 10],
+            })
           } else {
             icon = window.L.divIcon({
               className: 'custom-vendor-marker',
@@ -404,69 +399,137 @@ const VistaVendedor = ({ vendedorData = null }) => {
                 </style>
               `,
               iconSize: [30, 30],
-              iconAnchor: [15, 15]
-            });
+              iconAnchor: [15, 15],
+            })
           }
-          
+
           return window.L.marker(waypoint.latLng, {
             icon: icon,
-            draggable: false
-          });
-        }
-      }).addTo(leafletMapRef.current);
+            draggable: false,
+          })
+        },
+      }).addTo(leafletMapRef.current)
 
-      routingControlRef.current = routingControl;
-      setIsTracking(true);
-      setTrackingDestination(name);
+      routingControlRef.current = routingControl
+      setIsTracking(true)
+      setTrackingDestination(name)
 
       // Mostrar información de la ruta
-      routingControl.on('routesfound', function(e) {
-        const routes = e.routes;
-        const summary = routes[0].summary;
-        console.log(`Ruta a ${name}:`);
-        console.log(`Distancia: ${(summary.totalDistance / 1000).toFixed(2)} km`);
-        console.log(`Tiempo estimado: ${Math.round(summary.totalTime / 60)} minutos`);
-      });
+      routingControl.on('routesfound', function (e) {
+        const routes = e.routes
+        const summary = routes[0].summary
+        console.log(`Ruta a ${name}:`)
+        console.log(
+          `Distancia: ${(summary.totalDistance / 1000).toFixed(2)} km`
+        )
+        console.log(
+          `Tiempo estimado: ${Math.round(summary.totalTime / 60)} minutos`
+        )
+      })
     }
   }
 
   // Función para crear ruta a un área de clientes
   const createRouteToArea = (lat, lng, name) => {
-    createRouteToVendor(lat, lng, name);
+    createRouteToVendor(lat, lng, name)
   }
 
   // Función para detener el seguimiento
   const stopTracking = () => {
     if (routingControlRef.current && leafletMapRef.current) {
-      leafletMapRef.current.removeControl(routingControlRef.current);
-      routingControlRef.current = null;
+      leafletMapRef.current.removeControl(routingControlRef.current)
+      routingControlRef.current = null
     }
-    setIsTracking(false);
-    setTrackingDestination(null);
+    setIsTracking(false)
+    setTrackingDestination(null)
   }
 
   // Hacer las funciones accesibles globalmente para los popups
   useEffect(() => {
-    window.createRouteToVendor = createRouteToVendor;
-    window.createRouteToArea = createRouteToArea;
-    
+    window.createRouteToVendor = createRouteToVendor
+    window.createRouteToArea = createRouteToArea
+
     return () => {
-      delete window.createRouteToVendor;
-      delete window.createRouteToArea;
+      delete window.createRouteToVendor
+      delete window.createRouteToArea
     }
-  }, []);
+  }, [])
+
+  // Cargar localidad y conectar chat
+  useEffect(() => {
+    const initializeChat = async () => {
+      try {
+        const currentUser = JSON.parse(
+          localStorage.getItem('urbanstand_current_user') || 'null'
+        )
+
+        if (!currentUser || !currentUser.localidad) {
+          setChatError(
+            'No se pudo determinar tu localidad. Por favor actualiza tu perfil.'
+          )
+          return
+        }
+
+        const userLocalidad = currentUser.localidad.toLowerCase()
+        setLocalidad(userLocalidad)
+
+        socketService.connect('http://localhost:3006')
+
+        socketService.joinRoom(
+          userLocalidad,
+          currentUser.email || 'vendedor',
+          currentUser.firstName || 'Vendedor'
+        )
+
+        setIsLoadingMessages(true)
+        const response = await fetch(
+          `http://localhost:3006/api/messages/${userLocalidad}`
+        )
+        const historicalMessages = await response.json()
+        setMessages(historicalMessages)
+        setIsLoadingMessages(false)
+
+        socketService.onMessage((newMessage) => {
+          setMessages((prev) => [...prev, newMessage])
+        })
+
+        socketService.onError((error) => {
+          console.error('Error del chat:', error)
+          setChatError(error)
+        })
+      } catch (error) {
+        console.error('Error al inicializar chat:', error)
+        setChatError('Error al conectar con el chat')
+      }
+    }
+
+    initializeChat()
+
+    return () => {
+      socketService.disconnect()
+    }
+  }, [])
+
+  // Auto-scroll al último mensaje
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
 
   const sendMessage = () => {
-    if (message.trim()) {
-      setMessages([
-        ...messages,
-        {
-          id: Date.now(),
-          sender: 'Tú',
-          text: message,
-          isOwn: true,
-        },
-      ])
+    if (message.trim() && localidad) {
+      const currentUser = JSON.parse(
+        localStorage.getItem('urbanstand_current_user') || '{}'
+      )
+
+      socketService.sendMessage({
+        userId: currentUser.email || 'vendedor',
+        userName: currentUser.firstName || 'Vendedor',
+        avatar: '👤',
+        text: message.trim(),
+        localidad: localidad,
+        chatRoom: 'general',
+      })
+
       setMessage('')
     }
   }
@@ -589,25 +652,27 @@ const VistaVendedor = ({ vendedorData = null }) => {
 
               {/* Controles del mapa */}
               {isTracking && (
-                <div style={{
-                  position: 'absolute',
-                  top: '20px',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  background: 'white',
-                  padding: '12px 20px',
-                  borderRadius: '12px',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  zIndex: 1000
-                }}>
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '20px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    background: 'white',
+                    padding: '12px 20px',
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    zIndex: 1000,
+                  }}
+                >
                   <Navigation size={20} style={{ color: 'var(--accent)' }} />
                   <span style={{ fontWeight: '500', color: '#1f2937' }}>
                     Navegando hacia: {trackingDestination}
                   </span>
-                  <button 
+                  <button
                     onClick={stopTracking}
                     style={{
                       background: 'var(--accent)',
@@ -617,7 +682,7 @@ const VistaVendedor = ({ vendedorData = null }) => {
                       borderRadius: '6px',
                       cursor: 'pointer',
                       fontSize: '14px',
-                      fontWeight: '500'
+                      fontWeight: '500',
                     }}
                   >
                     Detener
@@ -1044,7 +1109,10 @@ const VistaVendedor = ({ vendedorData = null }) => {
                   opacity: '0.9',
                 }}
               >
-                Localidad Kennedy
+                Localidad:{' '}
+                {localidad
+                  ? localidad.charAt(0).toUpperCase() + localidad.slice(1)
+                  : 'Cargando...'}
               </div>
             </div>
             <button
@@ -1063,49 +1131,93 @@ const VistaVendedor = ({ vendedorData = null }) => {
             </button>
           </div>
 
-          {/* Chat Messages */}
-          <div
-            style={{
-              flex: 1,
-              padding: '15px',
-              overflowY: 'auto',
-              backgroundColor: 'var(--background)',
-            }}
-          >
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                style={{
-                  marginBottom: '12px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: msg.isOwn ? 'flex-end' : 'flex-start',
-                }}
-              >
-                <div
-                  style={{
-                    maxWidth: '80%',
-                    padding: '8px 12px',
-                    borderRadius: 'var(--radius-xl)',
-                    backgroundColor: msg.isOwn ? '#DCF8C6' : 'var(--surface)',
-                    border: '1px solid #e0e0e0',
-                    fontSize: '14px',
-                  }}
-                >
+          {isLoadingMessages ? (
+            <div
+              style={{
+                textAlign: 'center',
+                padding: '20px',
+                color: 'var(--text-secondary)',
+              }}
+            >
+              Cargando mensajes...
+            </div>
+          ) : chatError ? (
+            <div
+              style={{ textAlign: 'center', padding: '20px', color: '#dc2626' }}
+            >
+              {chatError}
+            </div>
+          ) : messages.length === 0 ? (
+            <div
+              style={{
+                textAlign: 'center',
+                padding: '20px',
+                color: 'var(--text-secondary)',
+              }}
+            >
+              No hay mensajes aún. ¡Sé el primero en escribir!
+            </div>
+          ) : (
+            <>
+              {messages.map((msg) => {
+                const currentUser = JSON.parse(
+                  localStorage.getItem('urbanstand_current_user') || '{}'
+                )
+                const isOwn = msg.userId === (currentUser.email || 'vendedor')
+
+                return (
                   <div
+                    key={msg.id}
                     style={{
-                      fontWeight: 'bold',
-                      marginBottom: '2px',
-                      fontSize: '12px',
+                      marginBottom: '12px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: isOwn ? 'flex-end' : 'flex-start',
                     }}
                   >
-                    {msg.sender}:
+                    <div
+                      style={{
+                        maxWidth: '80%',
+                        padding: '8px 12px',
+                        borderRadius: 'var(--radius-xl)',
+                        backgroundColor: isOwn ? '#DCF8C6' : 'var(--surface)',
+                        border: '1px solid #e0e0e0',
+                        fontSize: '14px',
+                      }}
+                    >
+                      {!isOwn && (
+                        <div
+                          style={{
+                            fontWeight: 'bold',
+                            marginBottom: '2px',
+                            fontSize: '12px',
+                            color: 'var(--primary)',
+                          }}
+                        >
+                          {msg.userName}
+                        </div>
+                      )}
+                      <div>{msg.text}</div>
+                      <div
+                        style={{
+                          fontSize: '10px',
+                          color: 'var(--text-secondary)',
+                          marginTop: '4px',
+                          textAlign: 'right',
+                        }}
+                      >
+                        {new Date(msg.timestamp).toLocaleTimeString('es-CO', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </div>
+                    </div>
                   </div>
-                  <div>{msg.text}</div>
-                </div>
-              </div>
-            ))}
-          </div>
+                )
+              })}
+              <div ref={messagesEndRef} />
+            </>
+          )}
 
           {/* Chat Input */}
           <div

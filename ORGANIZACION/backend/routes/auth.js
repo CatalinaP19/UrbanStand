@@ -4,12 +4,10 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const { body, validationResult } = require("express-validator");
 const Vendedor = require("../models/Vendedor");
-const Localidad = require("../models/Localidad");
-const { 
+const {
   enviarEmailConfirmacion,
-  enviarEmailRecuperacion  // ✅ Importar esta función
+  enviarEmailRecuperacion, // ✅ Importar esta función
 } = require("../services/emailService");
-
 
 const router = express.Router();
 
@@ -79,12 +77,14 @@ router.post(
     body("numDoc")
       .notEmpty()
       .withMessage("El número de documento es requerido")
-      .isLength({ min: 6, max: 20 })
-      .withMessage("El número de documento debe tener entre 6 y 20 caracteres"),
+      .isLength({ min: 6, max: 10 })
+      .withMessage("El número de documento debe tener entre 6 y 10 caracteres"),
 
     body("NumTel")
       .isMobilePhone("es-CO")
-      .withMessage("Debe ser un número de celular válido de Colombia"),
+      .withMessage("Debe ser un número de celular válido de Colombia")
+      .isLength({ max: 10 })
+      .withMessage("El número de celular no puede exceder 10 caracteres"),
 
     body("TypeDoc")
       .isIn(["CC", "CE", "TI", "PA"])
@@ -129,6 +129,40 @@ router.post(
     body("direccion")
       .notEmpty()
       .withMessage("La dirección del puesto de trabajo es requerida"),
+
+    body("localidad")
+      .notEmpty()
+      .withMessage("La localidad es requerida")
+      .trim()
+      .customSanitizer((value) => value.toLowerCase())
+      .custom((value) => {
+        const localidadesValidas = [
+          "usaquén",
+          "chapinero",
+          "santa fe",
+          "san cristóbal",
+          "usme",
+          "tunjuelito",
+          "bosa",
+          "kennedy",
+          "fontibón",
+          "engativá",
+          "suba",
+          "barrios unidos",
+          "teusaquillo",
+          "los mártires",
+          "antonio nariño",
+          "puente aranda",
+          "la candelaria",
+          "rafael uribe uribe",
+          "ciudad bolívar",
+          "sumapaz",
+        ];
+        if (!localidadesValidas.includes(value)) {
+          throw new Error("Localidad no válida");
+        }
+        return true;
+      }),
   ],
   handleValidationErrors,
   async (req, res) => {
@@ -164,15 +198,6 @@ router.post(
         });
       }
 
-      // Buscar el ID de la localidad por nombre
-      const localidadDoc = await Localidad.findOne({ nombre: localidad });
-      if (!localidadDoc) {
-        return res.status(400).json({
-          error: "Localidad inválida",
-          message: "La localidad seleccionada no existe",
-        });
-      }
-
       // Crear nuevo vendedor
       const nuevoVendedor = new Vendedor({
         firstName,
@@ -185,7 +210,7 @@ router.post(
         genero,
         selectedProducts,
         direccion,
-        id_localidad: localidadDoc._id,
+        localidad: localidad,
         rivi,
         vigencia,
       });
@@ -385,7 +410,6 @@ router.get("/profile", authenticateToken, async (req, res) => {
   try {
     const vendedor = await Vendedor.findById(req.vendedor.vendedorId)
       .select("-password")
-      .populate("id_localidad", "nombre_localidad")
       .populate("id_entidad", "nombre_entidad");
 
     if (!vendedor) {
@@ -417,8 +441,41 @@ router.put(
     body("lastName").optional().isLength({ min: 2, max: 100 }),
     body("NumTel").optional().isMobilePhone("es-CO"),
     body("direccion").optional().notEmpty(),
-    body("localidad").notEmpty().withMessage("La localidad es requerida"),
+    body("localidad")
+      .optional()
+      .trim()
+      .customSanitizer((value) => (value ? value.toLowerCase() : value))
+      .custom((value) => {
+        if (!value) return true; // Si es opcional y está vacío, es válido
+        const localidadesValidas = [
+          "usaquén",
+          "chapinero",
+          "santa fe",
+          "san cristóbal",
+          "usme",
+          "tunjuelito",
+          "bosa",
+          "kennedy",
+          "fontibón",
+          "engativá",
+          "suba",
+          "barrios unidos",
+          "teusaquillo",
+          "los mártires",
+          "antonio nariño",
+          "puente aranda",
+          "la candelaria",
+          "rafael uribe uribe",
+          "ciudad bolívar",
+          "sumapaz",
+        ];
+        if (!localidadesValidas.includes(value)) {
+          throw new Error("Localidad no válida");
+        }
+        return true;
+      }),
     body("selectedProducts")
+      .optional() // ✅ AGREGA .optional()
       .isArray()
       .custom((array) => {
         const validProducts = [

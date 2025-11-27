@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react'
 import apiService from '../services/apiService.js'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContex.jsx'
-import Breadcrumbs from '../Componentes/Breadcrumbs';
-
+import Breadcrumbs from '../Componentes/Breadcrumbs'
 
 export default function Login({ onSuccessfulLogin, onGoToRegister }) {
   const navigate = useNavigate()
@@ -293,6 +292,7 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
             firstName: profile?.firstName || profile?.nombre || undefined,
             lastName: profile?.lastName || profile?.apellido || undefined,
             genero: profile?.genero || undefined,
+            localidad: (profile?.localidad || 'kennedy').toLowerCase(),
           }
 
           console.log('Datos a guardar en localStorage:', vendorData)
@@ -315,6 +315,7 @@ export default function Login({ onSuccessfulLogin, onGoToRegister }) {
             firstName: vendorData?.firstName,
             lastName: vendorData?.lastName,
             genero: vendorData?.genero,
+            localidad: vendorData?.localidad,
           }
 
           // Llamar a authLogin que actualiza el estado y localStorage
